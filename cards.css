@@ -1,0 +1,9 @@
+.card-face {
+    width: 8rem;
+    height: 11rem;
+}
+
+.card-face>img {
+    width: 100%;
+    height: 100%;
+}
