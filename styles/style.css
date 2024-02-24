@@ -1,0 +1,163 @@
+* {
+  margin: 0;
+  font-size: 15px;
+}
+
+.main-wrapper {
+  width: 100vw;
+  height: 100vh;
+  background-color: gray;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.top-half,
+.bottom-half {
+  flex: 1;
+  display: flex;
+}
+
+.top-half {
+  align-items: flex-start;
+  background-color: lightcoral;
+}
+
+.middle-section {
+  width: 100%;
+  height: 12rem;
+  display: flex;
+  justify-content: center;
+}
+
+.play-zone {
+  display: flex;
+  width: 50rem;
+  height: 12rem;
+  background-color: green;
+}
+
+.bottom-half {
+  background-color: lightblue;
+  align-items: flex-end;
+}
+
+.top-card-loc,
+.bottom-card-loc {
+  width: 40rem;
+  height: 25rem;
+  background-color: red;
+  margin: 0 auto;
+}
+
+.bottom-card-loc {
+  display: flex;
+  flex-direction: column;
+}
+
+.player-cards,
+.comp-cards {
+  width: 100%;
+  height: 25rem;
+  display: flex;
+  justify-content: center;
+}
+
+.comp-cards {
+  align-items: flex-end;
+}
+
+.cards-container,
+.comp-container {
+  width: 20rem;
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-items: flex-end;
+  background-color: blue;
+}
+
+.cards-score {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pScore-count {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 5rem;
+  border: 1px black solid;
+  box-shadow: 2px 2px;
+  background-color: gray;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gamestage-message {
+  height: 2rem;
+  width: 5rem;
+  background-color: blueviolet;
+  color: black;
+  font-weight: bold;
+  border-radius: 5rem;
+  border: 1px black solid;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cards-score,
+.player-credits {
+  width: 7rem;
+  background-color: aqua;
+}
+
+.player-credits {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.total-credits,
+.current-bet {
+  width: 100%;
+  height: 2.5rem;
+  background-color: yellow;
+  border-radius: 5rem;
+  border: 1px black solid;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.total-credits>div,
+.current-bet>div {
+  width: 5rem;
+  height: 2rem;
+  font-size: 12px;
+  text-align: center;
+}
+
+.comp-container {
+  height: 20rem;
+}
+
+.player-buttons {
+  width: 100%;
+  height: 8rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pbtns {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 5rem;
+}

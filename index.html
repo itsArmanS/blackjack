@@ -5,26 +5,53 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cardy</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="cards.css">
-  <script src="script.js" type="text/javascript" defer></script>
+  <link rel="stylesheet" href="styles/cards.css">
+  <link rel="stylesheet" href="styles/style.css">
+  <script src="scripts/script.js" type="text/javascript" defer></script>
 </head>
 
 <body>
   <div class="main-wrapper">
     <div class="top-half">
       <div class="top-card-loc">
+        <div class="comp-cards">
+          <div class="comp-container">
 
+          </div>
+        </div>
       </div>
     </div>
     <div class="bottom-half">
       <div class="bottom-card-loc">
-        <div class="bottom-header">
+        <div class="player-cards">
+          <div class="cards-score">
+            <div class="pScore-count">
+              <span class="pScore">0</span>
+            </div>
+            <div class="gamestage-message">
+              <span class="message"></span>
+            </div>
+          </div>
+          <div class="cards-container">
 
+          </div>
+          <div class="player-credits">
+            <div class="total-credits">
+              <div></div>
+            </div>
+            <div class="current-bet">
+              <div></div>
+            </div>
+          </div>
         </div>
-        <div class="bottom-footer">
-          <button class="testBtn">newdeck</button>
-          <button class="draw">draw</button>
+        <div class="player-buttons">
+          <div class="bet-buttons">
+            <button id="start" class="pbtns">START</button>
+            <button id="hit" class="pbtns">HIT</button>
+            <button id="stand" class="pbtns">STAND</button>
+            <button id="DD" class="pbtns">DD</button>
+            <button id="split" class="pbtns">SPLIT</button>
+          </div>
         </div>
       </div>
     </div>
