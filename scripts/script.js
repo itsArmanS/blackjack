@@ -9,19 +9,26 @@ function init() {
   let cardsContainer = document.querySelector(".cards-container");
   let compContainer = document.querySelector(".comp-container");
 
+  let storeGameData = {
+    playerScore: 0,
+    compScore: 0,
+  }
+
   let deckID;
   let gameStatus = false;
 
   let playerGameState;
   let playerCardDist = 0;
   let playerCredits = 100000;
-  let playerScore = 0;
   const playerHand = [];
 
   let compGameState;
   let cardDist = 0;
-  let compScore = 0;
   const compHand = [];
+
+  doubleDown.onclick = function () {
+    console.log(storeGameData.playerScore, storeGameData.compScore)
+  }
 
   window.onload = () => {
     displayCredits();
@@ -57,6 +64,22 @@ function init() {
 
   }
 
+  function getValueByCardType(cardType) {
+    if (cardType > 1 && cardType < 10) {
+      return cardType;
+    }
+
+    switch (cardType) {
+      case "10":
+      case "JACK":
+      case "QUEEN":
+      case "KING":
+        return 10;
+      case "ACE":
+        return (storeGameData.playerScore + 11 > 21) ? 1 : 11;
+    }
+  }
+
   async function printPlayerCards() {
 
     let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${deckID}/draw/?count=1`);
@@ -65,35 +88,9 @@ function init() {
 
     playerCards.forEach(card => {
 
-      card.backImage = "https://deckofcardsapi.com/static/img/back.png"
+      card.backImage = "https://deckofcardsapi.com/static/img/back.png";
 
-      if (card.value > 1 && card.value < 10) {
-        card.bjVal = card.value;
-      }
-
-      switch (card.value) {
-        case "10":
-          card.bjVal = 10;
-          break;
-        case "JACK":
-          card.bjVal = 10;
-          break;
-        case "QUEEN":
-          card.bjVal = 10;
-          break;
-        case "KING":
-          card.bjVal = 10;
-          break;
-        case "ACE":
-          let result = confirm("OK: 1 | CANCEL: 11");
-
-          if (result) {
-            card.bjVal = 1
-          } else {
-            card.bjVal = 11
-          }
-          break
-      }
+      card.bjVal = getValueByCardType(card.value)
 
       playerHand.push(card)
       countScore("player");
@@ -111,7 +108,8 @@ function init() {
 
       cardsContainer.appendChild(cardElem);
       fadeIn(cardElem);
-      console.log(playerHand)
+      console.log(playerHand);
+      console.log(`Player ${storeGameData.playerScore}`);
     })
   }
 
@@ -124,30 +122,9 @@ function init() {
 
     compCards.forEach(card => {
 
-      card.backImage = "https://deckofcardsapi.com/static/img/back.png"
+      card.backImage = "https://deckofcardsapi.com/static/img/back.png";
 
-      if (card.value > 1 && card.value < 10) {
-        card.bjVal = card.value;
-      }
-
-      switch (card.value) {
-        case "10":
-          card.bjVal = 10;
-          break;
-        case "JACK":
-          card.bjVal = 10;
-          break;
-        case "QUEEN":
-          card.bjVal = 10;
-          break;
-        case "KING":
-          card.bjVal = 10;
-          break;
-        case "ACE":
-          card.bjVal1 = 1;
-          card.bjVal11 = 11;
-          break
-      }
+      card.bjVal = getValueByCardType(card.value);
 
       compHand.push(card);
       countScore("comp");
@@ -177,7 +154,8 @@ function init() {
         cardDist += 17;
 
         compContainer.appendChild(cardElem);
-        console.log(compHand)
+        console.log(compHand);
+        console.log(`comp ${storeGameData.compScore}`);
       }
     })
   }
@@ -187,17 +165,15 @@ function init() {
       let pScoreCount = document.querySelector(".pScore");
       let gamestageMsg = document.querySelector(".gamestage-message");
 
-      let countPlayer = 0;
-      playerScore = countPlayer;
-
+      storeGameData.playerScore = 0;
 
       playerHand.forEach(card => {
-        countPlayer += Number(card.bjVal);
-        pScoreCount.innerHTML = countPlayer;
+        storeGameData.playerScore += Number(card.bjVal);
+        pScoreCount.innerHTML = storeGameData.playerScore;
 
-        if (countPlayer > 21) {
+        if (storeGameData.playerScore > 21) {
           gamestageMsg.innerHTML = "BUST";
-        } else if (countPlayer === 21) {
+        } else if (storeGameData.playerScore === 21) {
           gamestageMsg.innerHTML = "WIN";
         }
       })
@@ -205,25 +181,25 @@ function init() {
       let cScore = document.querySelector(".cScore");
       let compGamestageMsg = document.querySelector(".message");
 
-      let countComp = 0;
-      compScore = countComp;
+      storeGameData.compScore = 0;
+
       compHand.forEach((card, index) => {
         if (index !== 1) {
           if (card.value !== "ACE") {
-            countComp += Number(card.bjVal);
+            storeGameData.compScore += Number(card.bjVal);
           } else {
-            if (countComp + Number(card.bjVal11) > 21) {
-              countComp += Number(card.bjVal1)
-            } else if (countComp + card.bjVal11 <= 21) {
-              countComp += Number(card.bjVal11)
+            if (storeGameData.compScore + Number(card.bjVal11) > 21) {
+              storeGameData.compScore += Number(card.bjVal1)
+            } else if (storeGameData.compScore + card.bjVal11 <= 21) {
+              storeGameData.compScore += Number(card.bjVal11)
             }
           }
 
-          cScore.innerHTML = countComp;
+          cScore.innerHTML = storeGameData.compScore;
 
-          if (countComp > 21) {
+          if (storeGameData.compScore > 21) {
             compGamestageMsg.innerHTML = "BUST";
-          } else if (countComp === 21) {
+          } else if (storeGameData.compScore === 21) {
             compGamestageMsg.innerHTML = "WIN";
           }
         }
@@ -258,7 +234,6 @@ function init() {
         btn.classList.add("unclick");
         btn.onclick = null;
       })
-
       showSecondCard();
     }
   }
@@ -267,11 +242,13 @@ function init() {
   function showSecondCard() {
     let compSecondCard = compContainer.children[1];
     let secondCardImage = compHand[1].image;
+    let cScore = document.querySelector(".cScore");
 
     compSecondCard.innerHTML = '';
     compSecondCard.innerHTML += `<img src=${secondCardImage} alt="">`
-
-    compScore += compHand[1].bjVal;
+    storeGameData.compScore += +compHand[1].bjVal;
+    cScore.innerHTML = storeGameData.compScore;
+    console.log(storeGameData.compScore)
   }
 
 }
