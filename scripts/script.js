@@ -8,6 +8,11 @@ function init() {
   let playerDisplay = document.querySelector(".player-cards");
   let cardsContainer = document.querySelector(".cards-container");
   let compContainer = document.querySelector(".comp-container");
+  let pScoreCount = document.querySelector(".pScore");
+  let gamestageMsg = document.querySelector(".gamestage-message");
+  let cScore = document.querySelector(".cScore");
+  let compGamestageMsg = document.querySelector(".comp-gamestage-message");
+  let playerBtns = document.querySelectorAll(".pbtns");
 
   let storeGameData = {
     playerScore: 0,
@@ -15,6 +20,11 @@ function init() {
   }
 
   let deckID;
+  let deckData = {
+    deckID: "",
+    data: '',
+
+  }
   let gameStatus = false;
 
   let playerGameState;
@@ -26,27 +36,30 @@ function init() {
   let cardDist = 0;
   const compHand = [];
 
-  doubleDown.onclick = function () {
-    console.log(storeGameData.playerScore, storeGameData.compScore)
-  }
-
   window.onload = () => {
     displayCredits();
+    getDeckData();
   };
+
+  async function getDeckData() {
+    try {
+      let response = await fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=3");
+      let data = await response.json();
+
+      deckData.deckID = data.deck_id;
+      console.log(deckData.deckID)
+    } catch (error) {
+      console.log("Error shuffling:", error);
+    }
+  }
 
   start.onclick = async function () {
     try {
-      let response = await fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=3")
-      let data = await response.json();
-      deckID = data.deck_id;
+      await printCompCards();
+      await printPlayerCards();
+      await printCompCards();
+      await printPlayerCards();
 
-      printCompCards();
-      printPlayerCards();
-      printCompCards();
-      printPlayerCards();
-
-
-      console.log(data)
     } catch (error) {
       console.log(error);
     }
@@ -81,8 +94,12 @@ function init() {
   }
 
   async function printPlayerCards() {
+    if (!deckData.deckID) {
+      console.error("Deck ID is not set.");
+      return;
+    }
 
-    let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${deckID}/draw/?count=1`);
+    let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${deckData.deckID}/draw/?count=1`);
     let drawData = await draw.json();
     let playerCards = drawData.cards;
 
@@ -116,9 +133,15 @@ function init() {
   async function printCompCards() {
     let compContainer = document.querySelector(".comp-container");
 
-    let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${deckID}/draw/?count=1`);
+    if (!deckData.deckID) {
+      console.error("Deck ID is not set.");
+      return;
+    }
+
+    let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${deckData.deckID}/draw/?count=1`);
     let drawData = await draw.json();
     let compCards = drawData.cards;
+
 
     compCards.forEach(card => {
 
@@ -162,9 +185,6 @@ function init() {
 
   function countScore(x) {
     if (x === "player") {
-      let pScoreCount = document.querySelector(".pScore");
-      let gamestageMsg = document.querySelector(".gamestage-message");
-
       storeGameData.playerScore = 0;
 
       playerHand.forEach(card => {
@@ -178,8 +198,6 @@ function init() {
         }
       })
     } else if (x === "comp") {
-      let cScore = document.querySelector(".cScore");
-      let compGamestageMsg = document.querySelector(".message");
 
       storeGameData.compScore = 0;
 
@@ -197,11 +215,6 @@ function init() {
 
           cScore.innerHTML = storeGameData.compScore;
 
-          if (storeGameData.compScore > 21) {
-            compGamestageMsg.innerHTML = "BUST";
-          } else if (storeGameData.compScore === 21) {
-            compGamestageMsg.innerHTML = "WIN";
-          }
         }
       })
     }
@@ -226,29 +239,61 @@ function init() {
     }, 50);
   }
 
-  function pressStand() {
-    let playerBtns = document.querySelectorAll(".pbtns");
+  stand.onclick = function () {
+    playerBtns.forEach(btn => {
+      btn.classList.add("unclick");
+      btn.onclick = null;
+    })
+    showSecondCard();
+    pressStand(storeGameData.playerScore, storeGameData.compScore);
+  }
 
-    stand.onclick = function () {
-      playerBtns.forEach(btn => {
-        btn.classList.add("unclick");
-        btn.onclick = null;
-      })
-      showSecondCard();
+  async function pressStand(playerScore, compScore) {
+
+    if (compScore <= 16) {
+      await drawCompCards(playerScore, compScore);
     }
   }
-  pressStand()
 
-  function showSecondCard() {
+  async function showSecondCard() {
     let compSecondCard = compContainer.children[1];
     let secondCardImage = compHand[1].image;
     let cScore = document.querySelector(".cScore");
 
     compSecondCard.innerHTML = '';
-    compSecondCard.innerHTML += `<img src=${secondCardImage} alt="">`
-    storeGameData.compScore += +compHand[1].bjVal;
-    cScore.innerHTML = storeGameData.compScore;
-    console.log(storeGameData.compScore)
+
+    await printCompCards().then(() => {
+
+      compSecondCard.innerHTML += `<img src=${secondCardImage} alt="">`;
+      storeGameData.compScore += +compHand[1].bjVal;
+      cScore.textContent = storeGameData.compScore;
+      console.log(storeGameData.compScore)
+    })
+  }
+
+  async function drawCompCards(playerS, compS) {
+    async function drawCard() {
+      await printCompCards();
+      compS = storeGameData.compScore;
+    }
+
+    await showSecondCard(0);
+
+    while (compS <= 16 && storeGameData.compScore < 21) {
+      await drawCard();
+
+      if (storeGameData.compScore >= 17 && storeGameData.compScore < 21) {
+        if (playerS > compS && compS < 21) {
+          compGamestageMsg.innerHTML = 'Lose';
+          gamestageMsg.innerHTML = 'Win';
+        } else if (playerS < compS) {
+          compGamestageMsg.innerHTML = 'Win';
+          gamestageMsg.innerHTML = 'Lose';
+        }
+      }
+    }
+
+
   }
 
 }
