@@ -83,13 +83,18 @@ async function printPlayerCards() {
         card.bjVal = 10;
         break;
       case "ACE":
-        card.bjVal1 = 1;
-        card.bjVal11 = 11;
+        let result = confirm("OK: 1 | CANCEL: 11");
+
+        if (result) {
+          card.bjVal = 1
+        } else {
+          card.bjVal = 11
+        }
         break
     }
 
     playerHand.push(card)
-    countPlayerScore()
+    countScore("player");
 
     let cardElem = document.createElement("div");
     cardElem.classList.add("card-face");
@@ -143,6 +148,7 @@ async function printCompCards() {
     }
 
     compHand.push(card);
+    countScore("comp");
 
     if (compHand.length < 2) {
       let cardElem = document.createElement("div");
@@ -171,40 +177,54 @@ async function printCompCards() {
 
       compContainer.appendChild(cardElem);
 
-      if (index === 0) {
-        fadeIn(cardElem);
-      }
+
     }
   })
 }
 
-function countPlayerScore() {
-  let pScoreCount = document.querySelector(".pScore");
-  let gameStageMsg = document.querySelector(".message");
+function countScore(x) {
+  if (x === "player") {
+    let pScoreCount = document.querySelector(".pScore");
+    let gamestageMsg = document.querySelector(".gamestage-message");
 
-  let count = 0;
+    let countPlayer = 0;
 
-  playerHand.forEach(card => {
-    if (!card.value === "ACE") {
-      count += Number(card.bjVal);
-    } else {
-      let result = confirm("OK: 1 | CANCEL: 11");
+    playerHand.forEach(card => {
+      countPlayer += Number(card.bjVal);
+      pScoreCount.innerHTML = countPlayer;
 
-      if (result) {
-        count += Number(card.bjVal1)
-      } else {
-        count += Number(card.bjVal11)
+      if (countPlayer > 21) {
+        gamestageMsg.innerHTML = "BUST";
+      } else if (countPlayer === 21) {
+        gamestageMsg.innerHTML = "WIN";
       }
-    }
+    })
+  } else if (x === "comp") {
+    let cScore = document.querySelector(".cScore");
+    let compGamestageMsg = document.querySelector(".message");
 
-    pScoreCount.innerHTML = count;
+    let countComp = 0;
 
-    if (count > 21) {
-      gameStageMsg.innerHTML = "BUST";
-    } else if (count === 21) {
-      gameStageMsg.innerHTML = "WIN";
-    }
-  })
+    compHand.forEach(card => {
+      if (card.value !== "ACE") {
+        countComp += Number(card.bjVal);
+      } else {
+        if (countComp + Number(card.bjVal11) > 21) {
+          countComp += Number(card.bjVal1)
+        } else if (countComp + card.bjVal11 <= 21) {
+          countComp += Number(card.bjVal11)
+        }
+      }
+
+      cScore.innerHTML = countComp;
+
+      if (countComp > 21) {
+        compGamestageMsg.innerHTML = "BUST";
+      } else if (countComp === 21) {
+        compGamestageMsg.innerHTML = "WIN";
+      }
+    })
+  }
 }
 
 function displayCredits() {

@@ -130,7 +130,8 @@
 }
 
 .total-credits,
-.current-bet {
+.current-bet,
+.bet-size {
   width: 100%;
   height: 2.5rem;
   background-color: yellow;
@@ -177,4 +178,23 @@
   background-color: gray;
   opacity: 0.8;
   border: none;
+}
+
+.bet-size {
+  display: flex;
+  justify-content: space-between;
+}
+
+.minus-bet,
+.plus-bet {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 5rem;
+  background-image: url("images/minus-circle.svg");
+}
+
+.bet-num {
+  width: 4rem;
+  height: 2.5rem;
+  background-color: orange;
 }
