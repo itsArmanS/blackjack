@@ -77,15 +77,19 @@
   background-color: blue;
 }
 
-.cards-score {
+.player-cards-score,
+.comp-cards-score {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 1rem;
+  background-color: aqua;
+  height: 20rem;
 }
 
-.pScore-count {
+.pScore-count,
+.cScore-count {
   width: 2rem;
   height: 2rem;
   border-radius: 5rem;
@@ -97,7 +101,8 @@
   align-items: center;
 }
 
-.gamestage-message {
+.gamestage-message,
+.comp-gamestage-message {
   height: 2rem;
   width: 5rem;
   background-color: blueviolet;
@@ -110,9 +115,10 @@
   align-items: center;
 }
 
-.cards-score,
+.comp-credits,
 .player-credits {
   width: 7rem;
+  height: 20rem;
   background-color: aqua;
 }
 
@@ -156,8 +162,19 @@
   align-items: center;
 }
 
+.bet-buttons {
+  display: flex;
+  align-items: center;
+}
+
 .pbtns {
   width: 5rem;
   height: 5rem;
   border-radius: 5rem;
+}
+
+.started {
+  background-color: gray;
+  opacity: 0.8;
+  border: none;
 }
