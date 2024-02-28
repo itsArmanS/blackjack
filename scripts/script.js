@@ -8,27 +8,31 @@ function init() {
   let playerDisplay = document.querySelector(".player-cards");
   let cardsContainer = document.querySelector(".cards-container");
   let compContainer = document.querySelector(".comp-container");
-  let pScoreCount = document.querySelector(".pScore");
-  let gamestageMsg = document.querySelector(".gamestage-message");
+  let pScore = document.querySelector(".pScore");
   let cScore = document.querySelector(".cScore");
+  let gamestageMsg = document.querySelector(".gamestage-message");
   let compGamestageMsg = document.querySelector(".comp-gamestage-message");
   let playerBtns = document.querySelectorAll(".pbtns");
 
   let storeGameData = {
     playerScore: 0,
+    playerScoreArray: [],
+    playerCardDist: 0,
+
+
     compScore: 0,
+    compScoreArray: [],
+    compCardDist: 0,
+
+    standClicked: false,
   }
 
-  let deckID;
   let deckData = {
     deckID: "",
     data: '',
-
   }
-  let gameStatus = false;
 
   let playerGameState;
-  let playerCardDist = 0;
   let playerCredits = 100000;
   const playerHand = [];
 
@@ -37,8 +41,8 @@ function init() {
   const compHand = [];
 
   window.onload = () => {
-    displayCredits();
     getDeckData();
+    displayCredits();
   };
 
   async function getDeckData() {
@@ -77,7 +81,7 @@ function init() {
 
   }
 
-  function getValueByCardType(cardType) {
+  function getValueByCardType(cardType, user) {
     if (cardType > 1 && cardType < 10) {
       return cardType;
     }
@@ -89,7 +93,12 @@ function init() {
       case "KING":
         return 10;
       case "ACE":
-        return (storeGameData.playerScore + 11 > 21) ? 1 : 11;
+        if (user === "player") {
+          return (storeGameData.playerScore + 11 > 21) ? 1 : 11;
+        } else {
+          return (storeGameData.compScore + 11 > 21) ? 1 : 11;
+        }
+
     }
   }
 
@@ -103,31 +112,30 @@ function init() {
     let drawData = await draw.json();
     let playerCards = drawData.cards;
 
-    playerCards.forEach(card => {
-
+    for (let card of playerCards) {
       card.backImage = "https://deckofcardsapi.com/static/img/back.png";
+      card.bjVal = getValueByCardType(card.value, "player");
 
-      card.bjVal = getValueByCardType(card.value)
+      storeGameData.playerScoreArray.push(+card.bjVal);
 
-      playerHand.push(card)
-      countScore("player");
+      playerHand.push(card);
+      countUserScore("player");
 
       let cardElem = document.createElement("div");
       cardElem.classList.add("card-face");
+      cardElem.style.opacity = 0;
       cardElem.innerHTML =
         `
       <img src=${card.image} alt="">
-    `;
+  `;
 
-      cardElem.style.left = playerCardDist + "px";
-      playerCardDist += 17;
-
+      cardElem.style.left = storeGameData.playerCardDist + "px";
+      storeGameData.playerCardDist += 17;
 
       cardsContainer.appendChild(cardElem);
+      await delay(100);
       fadeIn(cardElem);
-      console.log(playerHand);
-      console.log(`Player ${storeGameData.playerScore}`);
-    })
+    }
   }
 
   async function printCompCards() {
@@ -143,76 +151,81 @@ function init() {
     let compCards = drawData.cards;
 
 
-    compCards.forEach(card => {
+    for (let card of compCards) {
 
       card.backImage = "https://deckofcardsapi.com/static/img/back.png";
+      card.bjVal = getValueByCardType(card.value, "comp");
 
-      card.bjVal = getValueByCardType(card.value);
+      storeGameData.compScoreArray.push(+card.bjVal);
+      console.log(storeGameData.compScoreArray, "CScoreArr");
 
       compHand.push(card);
-      countScore("comp");
 
       if (compHand.length < 2 || compHand.length > 2) {
+
         let cardElem = document.createElement("div");
         cardElem.classList.add("card-face");
+        cardElem.style.opacity = 0;
         cardElem.innerHTML =
           `
       <img src=${card.image} alt="">
         `;
 
-        cardElem.style.left = cardDist + "px";
-        cardDist += 17;
+        cardElem.style.left = storeGameData.compCardDist + "px";
+        storeGameData.compCardDist += 17;
 
 
         compContainer.appendChild(cardElem);
+        await delay(100);
+        fadeIn(cardElem);
+
       } else if (compHand.length === 2) {
+
         let cardElem = document.createElement("div");
         cardElem.classList.add("card-face");
+        cardElem.style.opacity = 0;
         cardElem.innerHTML =
           `
            <img src=${card.backImage} alt="">
             `;
 
-        cardElem.style.left = cardDist + "px";
-        cardDist += 17;
+        cardElem.style.left = storeGameData.compCardDist + "px";
+        storeGameData.compCardDist += 17;
 
         compContainer.appendChild(cardElem);
+        await delay(100);
+        fadeIn(cardElem);
         console.log(compHand);
         console.log(`comp ${storeGameData.compScore}`);
       }
-    })
+      countUserScore("comp");
+    }
   }
 
-  function countScore(x) {
-    if (x === "player") {
-      storeGameData.playerScore = 0;
+  function countUserScore(user) {
+    if (user === "player") {
+      let pCount = 0;
+      storeGameData.playerScoreArray.forEach((item) => {
 
-      playerHand.forEach(card => {
-        storeGameData.playerScore += Number(card.bjVal);
-        pScoreCount.innerHTML = storeGameData.playerScore;
+        pCount += +item
+        storeGameData.playerScore = +pCount
+        pScore.innerHTML = storeGameData.playerScore;
 
-        if (storeGameData.playerScore > 21) {
-          gamestageMsg.innerHTML = "BUST";
-        } else if (storeGameData.playerScore === 21) {
-          gamestageMsg.innerHTML = "WIN";
-        }
       })
-    } else if (x === "comp") {
+    } else {
+      let cCount = 0;
+      storeGameData.compScoreArray.forEach((item, index) => {
+        if (storeGameData.standClicked === false) {
 
-      storeGameData.compScore = 0;
+          cScore.innerHTML = storeGameData.compScoreArray[0];
 
-      compHand.forEach((card, index) => {
-        if (index !== 1) {
-          if (card.value !== "ACE") {
-            storeGameData.compScore += Number(card.bjVal);
-          } else {
-            if (storeGameData.compScore + Number(card.bjVal11) > 21) {
-              storeGameData.compScore += Number(card.bjVal1)
-            } else if (storeGameData.compScore + card.bjVal11 <= 21) {
-              storeGameData.compScore += Number(card.bjVal11)
-            }
-          }
+        }
 
+
+        if (storeGameData.standClicked === true) {
+
+          cCount += +item;
+          storeGameData.compScore = +cCount;
           cScore.innerHTML = storeGameData.compScore;
 
         }
@@ -239,62 +252,31 @@ function init() {
     }, 50);
   }
 
-  stand.onclick = function () {
-    playerBtns.forEach(btn => {
-      btn.classList.add("unclick");
-      btn.onclick = null;
-    })
-    showSecondCard();
-    pressStand(storeGameData.playerScore, storeGameData.compScore);
-  }
-
-  async function pressStand(playerScore, compScore) {
-
-    if (compScore <= 16) {
-      await drawCompCards(playerScore, compScore);
-    }
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   async function showSecondCard() {
     let compSecondCard = compContainer.children[1];
-    let secondCardImage = compHand[1].image;
-    let cScore = document.querySelector(".cScore");
 
     compSecondCard.innerHTML = '';
 
-    await printCompCards().then(() => {
+    let cardElem = document.createElement("img");
+    cardElem.src = compHand[0].image;
+    cardElem.style.opacity = 0;
 
-      compSecondCard.innerHTML += `<img src=${secondCardImage} alt="">`;
-      storeGameData.compScore += +compHand[1].bjVal;
-      cScore.textContent = storeGameData.compScore;
-      console.log(storeGameData.compScore)
-    })
-  }
+    await delay(100);
+    fadeIn(cardElem);
+    compSecondCard.append(cardElem);
 
-  async function drawCompCards(playerS, compS) {
-    async function drawCard() {
-      await printCompCards();
-      compS = storeGameData.compScore;
-    }
+    storeGameData.standClicked = true;
 
-    await showSecondCard(0);
-
-    while (compS <= 16 && storeGameData.compScore < 21) {
-      await drawCard();
-
-      if (storeGameData.compScore >= 17 && storeGameData.compScore < 21) {
-        if (playerS > compS && compS < 21) {
-          compGamestageMsg.innerHTML = 'Lose';
-          gamestageMsg.innerHTML = 'Win';
-        } else if (playerS < compS) {
-          compGamestageMsg.innerHTML = 'Win';
-          gamestageMsg.innerHTML = 'Lose';
-        }
-      }
-    }
-
+    await delay(500);
+    await printCompCards();
 
   }
+
+  stand.addEventListener("click", showSecondCard);
 
 }
 init()
