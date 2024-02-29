@@ -18,11 +18,13 @@ function init() {
     playerScore: 0,
     playerScoreArray: [],
     playerCardDist: 0,
+    playerGameState: "NULL",
 
 
     compScore: 0,
     compScoreArray: [],
     compCardDist: 0,
+    compGameState: "NULL",
 
     standClicked: false,
   }
@@ -32,12 +34,8 @@ function init() {
     data: '',
   }
 
-  let playerGameState;
   let playerCredits = 100000;
   const playerHand = [];
-
-  let compGameState;
-  let cardDist = 0;
   const compHand = [];
 
   window.onload = () => {
@@ -69,16 +67,15 @@ function init() {
     }
   }
 
-  hit.onclick = async function () {
+  hit.addEventListener("click", pressHitButton);
+
+  async function pressHitButton() {
     try {
-
-      printPlayerCards();
-
-
+      await printPlayerCards();
+      setGameState("player");
     } catch (error) {
       console.log(error);
     }
-
   }
 
   function getValueByCardType(cardType, user) {
@@ -136,6 +133,7 @@ function init() {
       await delay(100);
       fadeIn(cardElem);
     }
+    setGameState("player")
   }
 
   async function printCompCards() {
@@ -160,6 +158,8 @@ function init() {
       console.log(storeGameData.compScoreArray, "CScoreArr");
 
       compHand.push(card);
+      countUserScore("comp");
+
 
       if (compHand.length < 2 || compHand.length > 2) {
 
@@ -195,10 +195,8 @@ function init() {
         compContainer.appendChild(cardElem);
         await delay(100);
         fadeIn(cardElem);
-        console.log(compHand);
-        console.log(`comp ${storeGameData.compScore}`);
       }
-      countUserScore("comp");
+      setGameState("comp")
     }
   }
 
@@ -231,6 +229,7 @@ function init() {
         }
       })
     }
+    setGameState(user);
   }
 
   function displayCredits() {
@@ -242,8 +241,8 @@ function init() {
 
   function fadeIn(element) {
     element.style.opacity = 0;
-    var opacity = 0;
-    var timer = setInterval(function () {
+    let opacity = 0;
+    let timer = setInterval(function () {
       if (opacity >= 1) {
         clearInterval(timer);
       }
@@ -256,13 +255,13 @@ function init() {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async function showSecondCard() {
+  async function pressStandButton() {
     let compSecondCard = compContainer.children[1];
 
     compSecondCard.innerHTML = '';
 
     let cardElem = document.createElement("img");
-    cardElem.src = compHand[0].image;
+    cardElem.src = compHand[1].image;
     cardElem.style.opacity = 0;
 
     await delay(100);
@@ -271,12 +270,45 @@ function init() {
 
     storeGameData.standClicked = true;
 
-    await delay(500);
-    await printCompCards();
-
+    while (storeGameData.compScore <= 16) {
+      await delay(1000);
+      await printCompCards();
+      setGameState("comp");
+    }
   }
 
-  stand.addEventListener("click", showSecondCard);
+  stand.addEventListener("click", pressStandButton);
 
+  function setGameState(user) {
+    if (user === "player") {
+      storeGameData.playerGameState = scoreLogicSetter(storeGameData.playerScore, storeGameData.compScore, storeGameData.standClicked);
+      console.log(storeGameData.compGameState, "CGS");
+      console.log(storeGameData.playerGameState, "PGS");
+    } else {
+      storeGameData.compGameState = scoreLogicSetter(storeGameData.compScore, storeGameData.playerScore, storeGameData.standClicked);
+      console.log(storeGameData.playerGameState, "PGS");
+      console.log(storeGameData.compGameState, "CGS");
+    }
+  }
+
+  function scoreLogicSetter(userScore, opponentScore, clicked) {
+    if (clicked) {
+      if (userScore > 21 || userScore < opponentScore) {
+        return "BUST";
+      } else if (userScore === 21) {
+        return "BLACKJACK";
+      } else if (userScore > opponentScore && userScore < 21) {
+        return "WIN";
+      } else if (userScore === opponentScore) {
+        return "DRAW";
+      }
+    } else {
+      if (userScore > 21) {
+        return "BUST"
+      } else if (userScore === 21) {
+        return "BLACKJACK"
+      }
+    }
+  }
 }
 init()
