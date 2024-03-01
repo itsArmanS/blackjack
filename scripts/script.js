@@ -42,15 +42,17 @@ function init() {
   window.onload = () => {
     getDeckData();
     displayCredits();
-    disableButtons("all");
+    disableButtons("player");
   };
 
-  doubleDown.onclick = function () {
+  placeBet.addEventListener("click", pressPlaceBetButton);
+
+  cardsContainer.addEventListener("contextmenu", function (event) {
+    event.preventDefault();
+
     console.log(gameData.compGameState, "CGS");
     console.log(gameData.playerGameState, "PGS");
-  }
-
-  placeBet.addEventListener("click", pressPlaceBetButton);
+  });
 
 
   async function getDeckData() {
@@ -80,7 +82,7 @@ function init() {
   async function pressHitButton() {
     try {
       await printPlayerCards();
-      setGameState("player");
+
 
       gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
     } catch (error) {
@@ -92,9 +94,8 @@ function init() {
 
     disableButtons("bet");
     await startGame();
-    await delay(100)
-    enableButtons("player")
-
+    await delay(100);
+    enableButtons("player");
   }
 
   function disableButtons(button) {
@@ -103,7 +104,16 @@ function init() {
         button.onclick = null;
         button.classList.add("unclick")
       })
-    } else {
+    } else if (button === "player") {
+      playerBtns.forEach(button => {
+        button.onclick = null;
+        button.classList.add("unclick")
+      })
+    } else if (button === "all") {
+      betButtons.forEach(button => {
+        button.onclick = null;
+        button.classList.add("unclick")
+      })
       playerBtns.forEach(button => {
         button.onclick = null;
         button.classList.add("unclick")
@@ -125,12 +135,31 @@ function init() {
         gameData.currentBet = changeBet(gameData.currentBet, "subtract");
         betDisplay.innerHTML = gameData.currentBet;
       });
-    } else {
+    } else if (button === "player") {
       playerBtns.forEach(button => {
         button.classList.remove("unclick");
       })
       stand.addEventListener("click", pressStandButton);
       hit.addEventListener("click", pressHitButton);
+    } else if (button === "all") {
+      playerBtns.forEach(button => {
+        button.classList.remove("unclick");
+      })
+      stand.addEventListener("click", pressStandButton);
+      hit.addEventListener("click", pressHitButton);
+
+      betButtons.forEach(button => {
+        button.classList.remove("unclick");
+      })
+      placeBet.addEventListener("click", pressPlaceBetButton);
+      addBet.addEventListener("click", function () {
+        gameData.currentBet = changeBet(gameData.currentBet, "add");
+        betDisplay.innerHTML = gameData.currentBet;
+      });
+      subtractBet.addEventListener("click", function () {
+        gameData.currentBet = changeBet(gameData.currentBet, "subtract");
+        betDisplay.innerHTML = gameData.currentBet;
+      });
     }
   }
 
@@ -327,6 +356,8 @@ function init() {
 
   async function pressStandButton() {
 
+    disableButtons("all");
+
     await handleSecondCard();
 
     while (gameData.compScore <= 16) {
@@ -338,10 +369,12 @@ function init() {
 
       if (gameData.compScore >= 17) {
         gameData.finalDraw = true;
+        gameData.roundEnded = true;
+        gameData.playerCredits = decideBetReturn("player", gameData.finalDraw, gameData.playerGameState, gameData.compGameState, gameData.currentBet, gameData.playerCredits)
+
         break;
       }
     }
-
     gameData.playerGameState = getWinnerData(gameData.compGameState, gameData.playerGameState);
     gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
   }
@@ -354,9 +387,11 @@ function init() {
     let cardElem = document.createElement("img");
     cardElem.src = gameData.compHand[1].image;
     cardElem.style.opacity = 0;
+
     await delay(100);
     fadeIn(cardElem);
     compSecondCard.append(cardElem);
+
     gameData.standClicked = true;
     countUserScore("comp");
   }
@@ -402,10 +437,11 @@ function init() {
     gamestageMsg.innerHTML = userState;
   }
 
-  function decideBetReturn(user, finalDraw, userState, opponentState) {
+  function decideBetReturn(user, finalDraw, userState, opponentState, currentBet, credits) {
     if (user === "player") {
       if (userState === "WIN" && opponentState === "BUST") {
-
+        credits += currentBet * 2.5;
+        return credits;
       }
     } else {
       if (finalDraw) {
