@@ -13,31 +13,30 @@ function init() {
   let gamestageMsg = document.querySelector(".gamestage-message");
   let compGamestageMsg = document.querySelector(".comp-gamestage-message");
   let playerBtns = document.querySelectorAll(".pbtns");
+  let betDisplay = document.querySelector(".bet-num");
+  let subtractBet = document.querySelector(".minus-bet");
+  let addBet = document.querySelector(".plus-bet");
 
   let gameData = {
+    playerCredits: 1000,
     playerScore: 0,
+    playerHand: [],
     playerScoreArray: [],
     playerCardDist: 0,
     playerGameState: "NULL",
 
 
     compScore: 0,
+    compHand: [],
     compScoreArray: [],
     compCardDist: 0,
     compGameState: "NULL",
 
+    deckID: "",
     standClicked: false,
     finalDraw: false,
+    currentBet: 50,
   }
-
-  let deckData = {
-    deckID: "",
-    data: '',
-  }
-
-  let playerCredits = 100000;
-  const playerHand = [];
-  const compHand = [];
 
   window.onload = () => {
     getDeckData();
@@ -49,22 +48,32 @@ function init() {
     console.log(gameData.playerGameState, "PGS");
   }
 
+  start.addEventListener("click", startGame)
   stand.addEventListener("click", pressStandButton);
   hit.addEventListener("click", pressHitButton);
+  newBet.addEventListener("click", pressNewBetButton);
+  addBet.addEventListener("click", function () {
+    gameData.currentBet = changeBet(gameData.currentBet, "add");
+    betDisplay.innerHTML = gameData.currentBet;
+  });
+  subtractBet.addEventListener("click", function () {
+    gameData.currentBet = changeBet(gameData.currentBet, "subtract");
+    betDisplay.innerHTML = gameData.currentBet;
+  });
 
   async function getDeckData() {
     try {
       let response = await fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=3");
       let data = await response.json();
 
-      deckData.deckID = data.deck_id;
-      console.log(deckData.deckID)
+      gameData.deckID = data.deck_id;
+      console.log(gameData.deckID)
     } catch (error) {
       console.log("Error shuffling:", error);
     }
   }
 
-  start.onclick = async function () {
+  async function startGame() {
     try {
       await printCompCards();
       await printPlayerCards();
@@ -81,10 +90,29 @@ function init() {
       await printPlayerCards();
       setGameState("player");
 
-      gameData.compGameState = getWinnerData(gameData.playerGameState);
+      gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async function pressNewBetButton() {
+
+  }
+
+  function changeBet(currentBet, operation) {
+    if (operation === "add") {
+      currentBet += 50;
+      if (currentBet > gameData.playerCredits) {
+        currentBet = gameData.playerCredits
+      }
+    } else {
+      currentBet -= 50;
+      if (currentBet < 0) {
+        currentBet = 0;
+      }
+    }
+    return currentBet;
   }
 
   function getValueByCardType(cardType, user) {
@@ -109,12 +137,12 @@ function init() {
   }
 
   async function printPlayerCards() {
-    if (!deckData.deckID) {
+    if (!gameData.deckID) {
       console.error("Deck ID is not set.");
       return;
     }
 
-    let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${deckData.deckID}/draw/?count=1`);
+    let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${gameData.deckID}/draw/?count=1`);
     let drawData = await draw.json();
     let playerCards = drawData.cards;
 
@@ -124,7 +152,7 @@ function init() {
 
       gameData.playerScoreArray.push(+card.bjVal);
 
-      playerHand.push(card);
+      gameData.playerHand.push(card);
       countUserScore("player");
 
       let cardElem = document.createElement("div");
@@ -148,12 +176,12 @@ function init() {
   async function printCompCards() {
     let compContainer = document.querySelector(".comp-container");
 
-    if (!deckData.deckID) {
+    if (!gameData.deckID) {
       console.error("Deck ID is not set.");
       return;
     }
 
-    let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${deckData.deckID}/draw/?count=1`);
+    let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${gameData.deckID}/draw/?count=1`);
     let drawData = await draw.json();
     let compCards = drawData.cards;
 
@@ -166,9 +194,9 @@ function init() {
       gameData.compScoreArray.push(+card.bjVal);
       console.log(gameData.compScoreArray, "CScoreArr");
 
-      compHand.push(card);
+      gameData.compHand.push(card);
 
-      if (compHand.length < 2 || compHand.length > 2) {
+      if (gameData.compHand.length < 2 || gameData.compHand.length > 2) {
 
         let cardElem = document.createElement("div");
         cardElem.classList.add("card-face");
@@ -186,7 +214,7 @@ function init() {
         await delay(100);
         fadeIn(cardElem);
 
-      } else if (compHand.length === 2) {
+      } else if (gameData.compHand.length === 2) {
 
         let cardElem = document.createElement("div");
         cardElem.classList.add("card-face");
@@ -244,7 +272,7 @@ function init() {
     let totalCredits = document.querySelector(".total-credits");
     let innerDiv = totalCredits.firstElementChild;
 
-    innerDiv.innerHTML = `Total Credits: ${playerCredits}`;
+    innerDiv.innerHTML = `Total Credits: ${gameData.playerCredits}`;
   }
 
   function fadeIn(element) {
@@ -264,18 +292,8 @@ function init() {
   }
 
   async function pressStandButton() {
-    let compSecondCard = compContainer.children[1];
 
-    compSecondCard.innerHTML = '';
-
-    let cardElem = document.createElement("img");
-    cardElem.src = compHand[1].image;
-    cardElem.style.opacity = 0;
-    await delay(100);
-    fadeIn(cardElem);
-    compSecondCard.append(cardElem);
-    gameData.standClicked = true;
-    countUserScore("comp");
+    await handleSecondCard();
 
     while (gameData.compScore <= 16) {
 
@@ -290,8 +308,23 @@ function init() {
       }
     }
 
-    gameData.playerGameState = getWinnerData(gameData.compGameState);
-    gameData.compGameState = getWinnerData(gameData.playerGameState);
+    gameData.playerGameState = getWinnerData(gameData.compGameState, gameData.playerGameState);
+    gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
+  }
+
+  async function handleSecondCard() {
+    let compSecondCard = compContainer.children[1];
+
+    compSecondCard.innerHTML = '';
+
+    let cardElem = document.createElement("img");
+    cardElem.src = gameData.compHand[1].image;
+    cardElem.style.opacity = 0;
+    await delay(100);
+    fadeIn(cardElem);
+    compSecondCard.append(cardElem);
+    gameData.standClicked = true;
+    countUserScore("comp");
   }
 
   function setGameState(user) {
@@ -307,7 +340,7 @@ function init() {
       if (userScore > 21 || userScore < opponentScore) {
         return "BUST";
       } else if (userScore === 21) {
-        return "BLACKJACK";
+        return "WIN";
       } else if (userScore > opponentScore && userScore < 21) {
         return "WIN";
       } else if (userScore === opponentScore) {
@@ -317,16 +350,38 @@ function init() {
       if (userScore > 21) {
         return "BUST"
       } else if (userScore === 21) {
-        return "BLACKJACK"
+        return "WIN"
       }
     }
   }
 
-  function getWinnerData(opponentState) {
+  function getWinnerData(opponentState, userState) {
     if (opponentState === "BUST") {
       return "WIN";
     } else if (opponentState === "WIN") {
       return "BUST";
+    } else if (opponentState === "DRAW") {
+      return "DRAW";
+    } else if (opponentState === "BLACKJACK" && userState === "BLACKJACK") {
+      return "BLACKJACK";
+    }
+  }
+
+  function placeBet() {
+
+  }
+
+  function decideBetReturn(user, finalDraw, userState, opponentState) {
+    if (user === "player") {
+      if (userState === "WIN" && opponentState === "BUST") {
+
+      }
+    } else {
+      if (finalDraw) {
+        if (userState === "WIN" && opponentState === "BUST") {
+
+        }
+      }
     }
   }
 

@@ -196,11 +196,21 @@
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 5rem;
-  background-image: url("images/minus-circle.svg");
+}
+
+.minus-bet {
+  background-image: url("../images/minus-circle.svg");
+}
+
+.plus-bet {
+  background-image: url("../images/plus-circle.svg");
 }
 
 .bet-num {
   width: 4rem;
   height: 2.5rem;
   background-color: orange;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
