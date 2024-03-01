@@ -14,7 +14,7 @@ function init() {
   let compGamestageMsg = document.querySelector(".comp-gamestage-message");
   let playerBtns = document.querySelectorAll(".pbtns");
 
-  let storeGameData = {
+  let gameData = {
     playerScore: 0,
     playerScoreArray: [],
     playerCardDist: 0,
@@ -27,6 +27,7 @@ function init() {
     compGameState: "NULL",
 
     standClicked: false,
+    finalDraw: false,
   }
 
   let deckData = {
@@ -42,6 +43,14 @@ function init() {
     getDeckData();
     displayCredits();
   };
+
+  doubleDown.onclick = function () {
+    console.log(gameData.compGameState, "CGS");
+    console.log(gameData.playerGameState, "PGS");
+  }
+
+  stand.addEventListener("click", pressStandButton);
+  hit.addEventListener("click", pressHitButton);
 
   async function getDeckData() {
     try {
@@ -67,12 +76,12 @@ function init() {
     }
   }
 
-  hit.addEventListener("click", pressHitButton);
-
   async function pressHitButton() {
     try {
       await printPlayerCards();
       setGameState("player");
+
+      gameData.compGameState = getWinnerData(gameData.playerGameState);
     } catch (error) {
       console.log(error);
     }
@@ -91,9 +100,9 @@ function init() {
         return 10;
       case "ACE":
         if (user === "player") {
-          return (storeGameData.playerScore + 11 > 21) ? 1 : 11;
+          return (gameData.playerScore + 11 > 21) ? 1 : 11;
         } else {
-          return (storeGameData.compScore + 11 > 21) ? 1 : 11;
+          return (gameData.compScore + 11 > 21) ? 1 : 11;
         }
 
     }
@@ -113,7 +122,7 @@ function init() {
       card.backImage = "https://deckofcardsapi.com/static/img/back.png";
       card.bjVal = getValueByCardType(card.value, "player");
 
-      storeGameData.playerScoreArray.push(+card.bjVal);
+      gameData.playerScoreArray.push(+card.bjVal);
 
       playerHand.push(card);
       countUserScore("player");
@@ -126,8 +135,8 @@ function init() {
       <img src=${card.image} alt="">
   `;
 
-      cardElem.style.left = storeGameData.playerCardDist + "px";
-      storeGameData.playerCardDist += 17;
+      cardElem.style.left = gameData.playerCardDist + "px";
+      gameData.playerCardDist += 17;
 
       cardsContainer.appendChild(cardElem);
       await delay(100);
@@ -154,12 +163,10 @@ function init() {
       card.backImage = "https://deckofcardsapi.com/static/img/back.png";
       card.bjVal = getValueByCardType(card.value, "comp");
 
-      storeGameData.compScoreArray.push(+card.bjVal);
-      console.log(storeGameData.compScoreArray, "CScoreArr");
+      gameData.compScoreArray.push(+card.bjVal);
+      console.log(gameData.compScoreArray, "CScoreArr");
 
       compHand.push(card);
-      countUserScore("comp");
-
 
       if (compHand.length < 2 || compHand.length > 2) {
 
@@ -171,8 +178,8 @@ function init() {
       <img src=${card.image} alt="">
         `;
 
-        cardElem.style.left = storeGameData.compCardDist + "px";
-        storeGameData.compCardDist += 17;
+        cardElem.style.left = gameData.compCardDist + "px";
+        gameData.compCardDist += 17;
 
 
         compContainer.appendChild(cardElem);
@@ -189,8 +196,8 @@ function init() {
            <img src=${card.backImage} alt="">
             `;
 
-        cardElem.style.left = storeGameData.compCardDist + "px";
-        storeGameData.compCardDist += 17;
+        cardElem.style.left = gameData.compCardDist + "px";
+        gameData.compCardDist += 17;
 
         compContainer.appendChild(cardElem);
         await delay(100);
@@ -198,35 +205,36 @@ function init() {
       }
       setGameState("comp")
     }
+    countUserScore("comp");
+
   }
 
   function countUserScore(user) {
     if (user === "player") {
       let pCount = 0;
-      storeGameData.playerScoreArray.forEach((item) => {
+      gameData.playerScoreArray.forEach((item) => {
+
 
         pCount += +item
-        storeGameData.playerScore = +pCount
-        pScore.innerHTML = storeGameData.playerScore;
+        gameData.playerScore = +pCount
+        pScore.innerHTML = gameData.playerScore;
 
       })
     } else {
       let cCount = 0;
-      storeGameData.compScoreArray.forEach((item, index) => {
-        if (storeGameData.standClicked === false) {
-
-          cScore.innerHTML = storeGameData.compScoreArray[0];
-
-        }
-
-
-        if (storeGameData.standClicked === true) {
+      gameData.compScoreArray.forEach((item) => {
+        if (gameData.standClicked) {
 
           cCount += +item;
-          storeGameData.compScore = +cCount;
-          cScore.innerHTML = storeGameData.compScore;
+          gameData.compScore = +cCount;
+          cScore.innerHTML = gameData.compScore;
+
+        } else {
+
+          cScore.innerHTML = gameData.compScoreArray[0];
 
         }
+
       })
     }
     setGameState(user);
@@ -263,31 +271,34 @@ function init() {
     let cardElem = document.createElement("img");
     cardElem.src = compHand[1].image;
     cardElem.style.opacity = 0;
-
     await delay(100);
     fadeIn(cardElem);
     compSecondCard.append(cardElem);
+    gameData.standClicked = true;
+    countUserScore("comp");
 
-    storeGameData.standClicked = true;
+    while (gameData.compScore <= 16) {
 
-    while (storeGameData.compScore <= 16) {
-      await delay(1000);
+      await delay(500);
       await printCompCards();
+      setGameState("player");
       setGameState("comp");
-    }
-  }
 
-  stand.addEventListener("click", pressStandButton);
+      if (gameData.compScore >= 17) {
+        gameData.finalDraw = true;
+        break;
+      }
+    }
+
+    gameData.playerGameState = getWinnerData(gameData.compGameState);
+    gameData.compGameState = getWinnerData(gameData.playerGameState);
+  }
 
   function setGameState(user) {
     if (user === "player") {
-      storeGameData.playerGameState = scoreLogicSetter(storeGameData.playerScore, storeGameData.compScore, storeGameData.standClicked);
-      console.log(storeGameData.compGameState, "CGS");
-      console.log(storeGameData.playerGameState, "PGS");
+      gameData.playerGameState = scoreLogicSetter(gameData.playerScore, gameData.compScore, gameData.standClicked);
     } else {
-      storeGameData.compGameState = scoreLogicSetter(storeGameData.compScore, storeGameData.playerScore, storeGameData.standClicked);
-      console.log(storeGameData.playerGameState, "PGS");
-      console.log(storeGameData.compGameState, "CGS");
+      gameData.compGameState = scoreLogicSetter(gameData.compScore, gameData.playerScore, gameData.standClicked);
     }
   }
 
@@ -310,5 +321,15 @@ function init() {
       }
     }
   }
+
+  function getWinnerData(opponentState) {
+    if (opponentState === "BUST") {
+      return "WIN";
+    } else if (opponentState === "WIN") {
+      return "BUST";
+    }
+  }
+
+
 }
 init()
