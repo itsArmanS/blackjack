@@ -41,7 +41,8 @@ function init() {
 
   window.onload = () => {
     getDeckData();
-    displayCredits();
+    displayCredits(gameData.playerCredits);
+    enableButtons("bet");
     disableButtons("player");
   };
 
@@ -93,6 +94,9 @@ function init() {
   async function pressPlaceBetButton() {
 
     disableButtons("bet");
+    gameData.playerCredits -= gameData.currentBet;
+    displayCredits(gameData.playerCredits);
+    console.log(gameData.playerCredits)
     await startGame();
     await delay(100);
     enableButtons("player");
@@ -331,11 +335,12 @@ function init() {
     setGameState(user);
   }
 
-  function displayCredits() {
+  function displayCredits(playerCredits) {
     let totalCredits = document.querySelector(".total-credits");
     let innerDiv = totalCredits.firstElementChild;
 
-    innerDiv.innerHTML = `Total Credits: ${gameData.playerCredits}`;
+    betDisplay.innerHTML = gameData.currentBet;
+    innerDiv.innerHTML = `Total Credits: ${playerCredits}`;
   }
 
   function fadeIn(element) {
@@ -360,7 +365,7 @@ function init() {
 
     await handleSecondCard();
 
-    while (gameData.compScore <= 16) {
+    while (gameData.compScore <= 16 && gameData.compScore <= gameData.playerScore) {
 
       await delay(500);
       await printCompCards();
@@ -370,7 +375,9 @@ function init() {
       if (gameData.compScore >= 17) {
         gameData.finalDraw = true;
         gameData.roundEnded = true;
-        gameData.playerCredits = decideBetReturn("player", gameData.finalDraw, gameData.playerGameState, gameData.compGameState, gameData.currentBet, gameData.playerCredits)
+        if (gameData.playerGameState === "WIN") {
+          gameData.playerCredits = currentBet *= 2
+        }
 
         break;
       }
