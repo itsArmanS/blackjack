@@ -168,13 +168,15 @@
   align-items: center;
 }
 
-.pbtns {
+.pbtns,
+#place-bet {
   width: 5rem;
   height: 5rem;
   border-radius: 5rem;
 }
 
-.pbtns.unclick {
+.pbtns.unclick,
+.bet-btns.unclick {
   background-color: gray;
   opacity: 0.8;
   border: none;

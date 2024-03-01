@@ -1,10 +1,9 @@
 function init() {
-  let start = document.querySelector("#start");
   let hit = document.querySelector("#hit");
   let stand = document.querySelector("#stand");
   let split = document.querySelector("#split");
   let doubleDown = document.querySelector("#DD");
-  let newBet = document.querySelector("#new-bet");
+  let placeBet = document.querySelector("#place-bet");
   let playerDisplay = document.querySelector(".player-cards");
   let cardsContainer = document.querySelector(".cards-container");
   let compContainer = document.querySelector(".comp-container");
@@ -16,6 +15,7 @@ function init() {
   let betDisplay = document.querySelector(".bet-num");
   let subtractBet = document.querySelector(".minus-bet");
   let addBet = document.querySelector(".plus-bet");
+  let betButtons = document.querySelectorAll(".bet-btns");
 
   let gameData = {
     playerCredits: 1000,
@@ -36,11 +36,13 @@ function init() {
     standClicked: false,
     finalDraw: false,
     currentBet: 50,
+    roundEnded: false,
   }
 
   window.onload = () => {
     getDeckData();
     displayCredits();
+    disableButtons("all");
   };
 
   doubleDown.onclick = function () {
@@ -48,18 +50,8 @@ function init() {
     console.log(gameData.playerGameState, "PGS");
   }
 
-  start.addEventListener("click", startGame)
-  stand.addEventListener("click", pressStandButton);
-  hit.addEventListener("click", pressHitButton);
-  newBet.addEventListener("click", pressNewBetButton);
-  addBet.addEventListener("click", function () {
-    gameData.currentBet = changeBet(gameData.currentBet, "add");
-    betDisplay.innerHTML = gameData.currentBet;
-  });
-  subtractBet.addEventListener("click", function () {
-    gameData.currentBet = changeBet(gameData.currentBet, "subtract");
-    betDisplay.innerHTML = gameData.currentBet;
-  });
+  placeBet.addEventListener("click", pressPlaceBetButton);
+
 
   async function getDeckData() {
     try {
@@ -96,8 +88,50 @@ function init() {
     }
   }
 
-  async function pressNewBetButton() {
+  async function pressPlaceBetButton() {
 
+    disableButtons("bet");
+    await startGame();
+    await delay(100)
+    enableButtons("player")
+
+  }
+
+  function disableButtons(button) {
+    if (button === "bet") {
+      betButtons.forEach(button => {
+        button.onclick = null;
+        button.classList.add("unclick")
+      })
+    } else {
+      playerBtns.forEach(button => {
+        button.onclick = null;
+        button.classList.add("unclick")
+      })
+    }
+  }
+
+  function enableButtons(button) {
+    if (button === "bet") {
+      betButtons.forEach(button => {
+        button.classList.remove("unclick");
+      })
+      placeBet.addEventListener("click", pressPlaceBetButton);
+      addBet.addEventListener("click", function () {
+        gameData.currentBet = changeBet(gameData.currentBet, "add");
+        betDisplay.innerHTML = gameData.currentBet;
+      });
+      subtractBet.addEventListener("click", function () {
+        gameData.currentBet = changeBet(gameData.currentBet, "subtract");
+        betDisplay.innerHTML = gameData.currentBet;
+      });
+    } else {
+      playerBtns.forEach(button => {
+        button.classList.remove("unclick");
+      })
+      stand.addEventListener("click", pressStandButton);
+      hit.addEventListener("click", pressHitButton);
+    }
   }
 
   function changeBet(currentBet, operation) {
@@ -365,10 +399,7 @@ function init() {
     } else if (opponentState === "BLACKJACK" && userState === "BLACKJACK") {
       return "BLACKJACK";
     }
-  }
-
-  function placeBet() {
-
+    gamestageMsg.innerHTML = userState;
   }
 
   function decideBetReturn(user, finalDraw, userState, opponentState) {
