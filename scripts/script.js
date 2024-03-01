@@ -12,7 +12,7 @@ function init() {
   let gamestageMsg = document.querySelector(".gamestage-message");
   let compGamestageMsg = document.querySelector(".comp-gamestage-message");
   let playerBtns = document.querySelectorAll(".pbtns");
-  let betDisplay = document.querySelector(".bet-num");
+  let betDisplay = document.querySelector(".bet-display");
   let subtractBet = document.querySelector(".minus-bet");
   let addBet = document.querySelector(".plus-bet");
   let betButtons = document.querySelectorAll(".bet-btns");
@@ -35,7 +35,8 @@ function init() {
     deckID: "",
     standClicked: false,
     finalDraw: false,
-    currentBet: 50,
+    currentBet: 0,
+    minimumBet: 50,
     roundEnded: false,
   }
 
@@ -92,14 +93,18 @@ function init() {
   }
 
   async function pressPlaceBetButton() {
+    if (gameData.currentBet === 0) {
+      alert("Place a bet first!");
+    } else {
 
-    disableButtons("bet");
-    gameData.playerCredits -= gameData.currentBet;
-    displayCredits(gameData.playerCredits);
-    console.log(gameData.playerCredits)
-    await startGame();
-    await delay(100);
-    enableButtons("player");
+      disableButtons("bet");
+      gameData.playerCredits -= gameData.currentBet;
+      displayCredits(gameData.playerCredits);
+
+      await startGame();
+      await delay(100);
+      enableButtons("player");
+    }
   }
 
   function disableButtons(button) {
@@ -132,12 +137,17 @@ function init() {
       })
       placeBet.addEventListener("click", pressPlaceBetButton);
       addBet.addEventListener("click", function () {
-        gameData.currentBet = changeBet(gameData.currentBet, "add");
+        console.log(gameData.currentBet, gameData.minimumBet);
+        gameData.currentBet = changeBet(gameData.currentBet, "add", gameData.minimumBet);
+        console.log(gameData.currentBet, gameData.minimumBet);
         betDisplay.innerHTML = gameData.currentBet;
       });
       subtractBet.addEventListener("click", function () {
-        gameData.currentBet = changeBet(gameData.currentBet, "subtract");
+        console.log(gameData.currentBet, gameData.minimumBet);
+        gameData.currentBet = changeBet(gameData.currentBet, "subtract", gameData.minimumBet);
+        console.log(gameData.currentBet, gameData.minimumBet);
         betDisplay.innerHTML = gameData.currentBet;
+
       });
     } else if (button === "player") {
       playerBtns.forEach(button => {
@@ -151,32 +161,27 @@ function init() {
       })
       stand.addEventListener("click", pressStandButton);
       hit.addEventListener("click", pressHitButton);
-
-      betButtons.forEach(button => {
-        button.classList.remove("unclick");
-      })
-      placeBet.addEventListener("click", pressPlaceBetButton);
-      addBet.addEventListener("click", function () {
-        gameData.currentBet = changeBet(gameData.currentBet, "add");
-        betDisplay.innerHTML = gameData.currentBet;
-      });
-      subtractBet.addEventListener("click", function () {
-        gameData.currentBet = changeBet(gameData.currentBet, "subtract");
-        betDisplay.innerHTML = gameData.currentBet;
-      });
     }
   }
 
-  function changeBet(currentBet, operation) {
+  function changeBet(currentBet, operation, minimumBet) {
     if (operation === "add") {
-      currentBet += 50;
-      if (currentBet > gameData.playerCredits) {
-        currentBet = gameData.playerCredits
+      if (currentBet === 0) {
+        currentBet += minimumBet
+      } else {
+        currentBet += minimumBet;
+        if (currentBet > gameData.playerCredits) {
+          currentBet = gameData.playerCredits
+        }
       }
     } else {
-      currentBet -= 50;
-      if (currentBet < 0) {
+      if (currentBet === 0) {
         currentBet = 0;
+      } else {
+        currentBet -= minimumBet;
+        if (currentBet < minimumBet) {
+          currentBet = minimumBet;
+        }
       }
     }
     return currentBet;
@@ -339,8 +344,8 @@ function init() {
     let totalCredits = document.querySelector(".total-credits");
     let innerDiv = totalCredits.firstElementChild;
 
-    betDisplay.innerHTML = gameData.currentBet;
-    innerDiv.innerHTML = `Total Credits: ${playerCredits}`;
+    betDisplay.innerHTML = 0;
+    innerDiv.innerHTML = `Total Credits: ${+playerCredits}`;
   }
 
   function fadeIn(element) {
@@ -375,15 +380,15 @@ function init() {
       if (gameData.compScore >= 17) {
         gameData.finalDraw = true;
         gameData.roundEnded = true;
-        if (gameData.playerGameState === "WIN") {
-          gameData.playerCredits = currentBet *= 2
-        }
-
         break;
       }
     }
     gameData.playerGameState = getWinnerData(gameData.compGameState, gameData.playerGameState);
     gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
+    console.log(gameData.playerCredits, "wsdsf", gameData.currentBet)
+    gameData.currentBet *= decideBetReturn(gameData.finalDraw, gameData.playerGameState, gameData.compGameState);
+    gameData.playerCredits += gameData.currentBet;
+    displayCredits(gameData.playerCredits);
   }
 
   async function handleSecondCard() {
@@ -444,21 +449,14 @@ function init() {
     gamestageMsg.innerHTML = userState;
   }
 
-  function decideBetReturn(user, finalDraw, userState, opponentState, currentBet, credits) {
-    if (user === "player") {
-      if (userState === "WIN" && opponentState === "BUST") {
-        credits += currentBet * 2.5;
-        return credits;
-      }
-    } else {
-      if (finalDraw) {
-        if (userState === "WIN" && opponentState === "BUST") {
-
-        }
+  function decideBetReturn(finalDraw, userState, opponentState) {
+    if (finalDraw) {
+      if (userState === "WIN" || opponentState === "BUST") {
+        return 2.5;
+      } else if ((userState === "WIN" && opponentState === "WIN") && (userState === "BUST" || opponentState === "WIN")) {
+        return 1;
       }
     }
   }
-
-
 }
 init()
