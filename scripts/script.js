@@ -35,14 +35,15 @@ function init() {
     deckID: "",
     standClicked: false,
     finalDraw: false,
+    roundEnded: false,
     currentBet: 0,
     minimumBet: 50,
-    roundEnded: false,
   }
 
   window.onload = () => {
     getDeckData();
-    displayCredits(gameData.playerCredits);
+    displayCredits();
+    displayCurrentBet();
     enableButtons("bet");
     disableButtons("player");
   };
@@ -71,10 +72,15 @@ function init() {
 
   async function startGame() {
     try {
+      displayCurrentBet();
       await printCompCards();
       await printPlayerCards();
       await printCompCards();
       await printPlayerCards();
+
+      setGameState("player");
+      setGameState("comp");
+
 
     } catch (error) {
       console.log(error);
@@ -85,8 +91,16 @@ function init() {
     try {
       await printPlayerCards();
 
+      if (gameData.finalDraw) {
+        setGameState("player");
+        setGameState("comp");
+        gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
+        gameData.playerCredits += gameData.currentBet;
+      }
 
+      gameData.playerGameState = getWinnerData(gameData.compGameState, gameData.playerGameState);
       gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
+
     } catch (error) {
       console.log(error);
     }
@@ -99,7 +113,7 @@ function init() {
 
       disableButtons("bet");
       gameData.playerCredits -= gameData.currentBet;
-      displayCredits(gameData.playerCredits);
+      displayCredits();
 
       await startGame();
       await delay(100);
@@ -137,15 +151,11 @@ function init() {
       })
       placeBet.addEventListener("click", pressPlaceBetButton);
       addBet.addEventListener("click", function () {
-        console.log(gameData.currentBet, gameData.minimumBet);
         gameData.currentBet = changeBet(gameData.currentBet, "add", gameData.minimumBet);
-        console.log(gameData.currentBet, gameData.minimumBet);
         betDisplay.innerHTML = gameData.currentBet;
       });
       subtractBet.addEventListener("click", function () {
-        console.log(gameData.currentBet, gameData.minimumBet);
         gameData.currentBet = changeBet(gameData.currentBet, "subtract", gameData.minimumBet);
-        console.log(gameData.currentBet, gameData.minimumBet);
         betDisplay.innerHTML = gameData.currentBet;
 
       });
@@ -340,12 +350,23 @@ function init() {
     setGameState(user);
   }
 
-  function displayCredits(playerCredits) {
+  function displayCredits() {
     let totalCredits = document.querySelector(".total-credits");
     let innerDiv = totalCredits.firstElementChild;
 
     betDisplay.innerHTML = 0;
-    innerDiv.innerHTML = `Total Credits: ${+playerCredits}`;
+    innerDiv.innerHTML = `Total Credits: ${gameData.playerCredits}`;
+  }
+
+  function displayCurrentBet() {
+    let currentBetDisplay = document.querySelector(".current-bet");
+    let innerDiv = currentBetDisplay.firstElementChild;
+
+    if (gameData.currentBet > 0) {
+      innerDiv.innerHTML = `Current Bet: ${gameData.currentBet}`
+    } else {
+      innerDiv.innerHTML = `Current Bet: ${0}`
+    }
   }
 
   function fadeIn(element) {
@@ -367,7 +388,6 @@ function init() {
   async function pressStandButton() {
 
     disableButtons("all");
-
     await handleSecondCard();
 
     while (gameData.compScore <= 16 && gameData.compScore <= gameData.playerScore) {
@@ -379,16 +399,18 @@ function init() {
 
       if (gameData.compScore >= 17) {
         gameData.finalDraw = true;
-        gameData.roundEnded = true;
+        setGameState("player");
+        setGameState("comp");
         break;
       }
     }
+
     gameData.playerGameState = getWinnerData(gameData.compGameState, gameData.playerGameState);
     gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
-    console.log(gameData.playerCredits, "wsdsf", gameData.currentBet)
-    gameData.currentBet *= decideBetReturn(gameData.finalDraw, gameData.playerGameState, gameData.compGameState);
-    gameData.playerCredits += gameData.currentBet;
-    displayCredits(gameData.playerCredits);
+    gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
+    gameData.playerCredits += +gameData.currentBet;
+    displayCredits();
+
   }
 
   async function handleSecondCard() {
@@ -410,13 +432,13 @@ function init() {
 
   function setGameState(user) {
     if (user === "player") {
-      gameData.playerGameState = scoreLogicSetter(gameData.playerScore, gameData.compScore, gameData.standClicked);
+      gameData.playerGameState = stateLogicSetter(gameData.playerScore, gameData.compScore, gameData.standClicked);
     } else {
-      gameData.compGameState = scoreLogicSetter(gameData.compScore, gameData.playerScore, gameData.standClicked);
+      gameData.compGameState = stateLogicSetter(gameData.compScore, gameData.playerScore, gameData.standClicked);
     }
   }
 
-  function scoreLogicSetter(userScore, opponentScore, clicked) {
+  function stateLogicSetter(userScore, opponentScore, clicked) {
     if (clicked) {
       if (userScore > 21 || userScore < opponentScore) {
         return "BUST";
@@ -443,19 +465,19 @@ function init() {
       return "BUST";
     } else if (opponentState === "DRAW") {
       return "DRAW";
-    } else if (opponentState === "BLACKJACK" && userState === "BLACKJACK") {
-      return "BLACKJACK";
     }
     gamestageMsg.innerHTML = userState;
   }
 
-  function decideBetReturn(finalDraw, userState, opponentState) {
-    if (finalDraw) {
-      if (userState === "WIN" || opponentState === "BUST") {
-        return 2.5;
-      } else if ((userState === "WIN" && opponentState === "WIN") && (userState === "BUST" || opponentState === "WIN")) {
-        return 1;
-      }
+  function decideBetReturn(userState, opponentState) {
+    if (userState === "WIN" || opponentState === "BUST") {
+      return 2.5;
+    } else if (userState === "WIN" && opponentState === "WIN") {
+      return 0;
+    } else if (userState === "BUST" || opponentState === "WIN") {
+      return 0;
+    } else if (userState === "DRAW" && opponentState === "DRAW") {
+      return 1;
     }
   }
 }
