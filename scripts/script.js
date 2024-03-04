@@ -23,14 +23,14 @@ function init() {
     playerHand: [],
     playerScoreArray: [],
     playerCardDist: 0,
-    playerGameState: "NULL",
+    playerGameState: "",
 
 
     compScore: 0,
     compHand: [],
     compScoreArray: [],
     compCardDist: 0,
-    compGameState: "NULL",
+    compGameState: "",
 
     deckID: "",
     standClicked: false,
@@ -54,6 +54,7 @@ function init() {
 
     console.log(gameData.compGameState, "CGS");
     console.log(gameData.playerGameState, "PGS");
+    newRoundTimer();
   });
 
 
@@ -108,6 +109,35 @@ function init() {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async function pressStandButton() {
+
+    disableButtons("all");
+    await handleSecondCard();
+
+    while (gameData.compScore <= 16 && gameData.compScore <= gameData.playerScore) {
+
+      await delay(500);
+      await printCompCards();
+      setGameState("player");
+      setGameState("comp");
+
+      if (gameData.compScore >= 17) {
+        gameData.finalDraw = true;
+        gameData.roundEnded = true;
+        setGameState("player");
+        setGameState("comp");
+        break;
+      }
+    }
+
+    gameData.playerGameState = getWinnerData(gameData.compGameState, gameData.playerGameState);
+    gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
+    gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
+    gameData.playerCredits += +gameData.currentBet;
+    displayCredits();
+
   }
 
   async function pressDoubleDownButton() {
@@ -368,6 +398,8 @@ function init() {
 
     betDisplay.innerHTML = 0;
     innerDiv.innerHTML = `Total Credits: ${gameData.playerCredits}`;
+
+    let bet = gameData
     displayCurrentBet();
   }
 
@@ -375,10 +407,14 @@ function init() {
     let currentBetDisplay = document.querySelector(".current-bet");
     let innerDiv = currentBetDisplay.firstElementChild;
 
-    if (gameData.currentBet > 0) {
-      innerDiv.innerHTML = `Current Bet: ${gameData.currentBet}`
+    if (gameData.roundEnded) {
+      innerDiv.innerHTML = `You Won: ${gameData.currentBet}`
     } else {
-      innerDiv.innerHTML = `Current Bet: ${0}`
+      if (gameData.currentBet > 0) {
+        innerDiv.innerHTML = `Current Bet: ${gameData.currentBet}`
+      } else {
+        innerDiv.innerHTML = `Current Bet: ${0}`
+      }
     }
   }
 
@@ -396,34 +432,6 @@ function init() {
 
   function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  async function pressStandButton() {
-
-    disableButtons("all");
-    await handleSecondCard();
-
-    while (gameData.compScore <= 16 && gameData.compScore <= gameData.playerScore) {
-
-      await delay(500);
-      await printCompCards();
-      setGameState("player");
-      setGameState("comp");
-
-      if (gameData.compScore >= 17) {
-        gameData.finalDraw = true;
-        setGameState("player");
-        setGameState("comp");
-        break;
-      }
-    }
-
-    gameData.playerGameState = getWinnerData(gameData.compGameState, gameData.playerGameState);
-    gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
-    gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
-    gameData.playerCredits += +gameData.currentBet;
-    displayCredits();
-
   }
 
   async function handleSecondCard() {
@@ -491,6 +499,53 @@ function init() {
       return 0;
     } else if (userState === "DRAW" && opponentState === "DRAW") {
       return 1;
+    }
+  }
+
+  function resetGameData() {
+    gameData.playerHand = [];
+    gameData.playerScore = 0;
+    gameData.playerGameState = '';
+    gameData.playerScoreArray = [];
+    gameData.playerCardDist = 0;
+
+    gameData.compHand = [];
+    gameData.compScore = 0;
+    gameData.compGameState = '';
+    gameData.compScoreArray = [];
+    gameData.compCardDist = 0;
+
+    gameData.standClicked = false;
+    gameData.finalDraw = false;
+    gameData.roundEnded = false;
+    gameData.currentBet = 0;
+
+    cardsContainer.innerHTML = "";
+    compContainer.innerHTML = "";
+  }
+
+  function newRoundTimer() {
+    if (gameData.roundEnded) {
+      let roundTimerDisplay = document.querySelector(".round-timer");
+      let innerDiv = roundTimerDisplay.firstElementChild;
+      let count = 3;
+
+      roundTimerDisplay.style.display = "flex";
+
+      innerDiv.innerHTML = `New round in ${count}`;
+
+      let countdownInterval = setInterval(() => {
+        count--;
+        innerDiv.innerHTML = `New round in ${count}`;
+
+        if (count === 0) {
+          clearInterval(countdownInterval);
+          roundTimerDisplay.style.display = "none";
+          resetGameData();
+        }
+      }, 1000);
+
+      enableButtons("bet");
     }
   }
 }
