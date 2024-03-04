@@ -13,9 +13,10 @@ function init() {
   let compGamestageMsg = document.querySelector(".comp-gamestage-message");
   let playerBtns = document.querySelectorAll(".pbtns");
   let betDisplay = document.querySelector(".bet-display");
-  let subtractBet = document.querySelector(".minus-bet");
-  let addBet = document.querySelector(".plus-bet");
+  let subtractBetButton = document.querySelector(".minus-bet");
+  let addBetButton = document.querySelector(".plus-bet");
   let betButtons = document.querySelectorAll(".bet-btns");
+  let test = document.querySelector("#testy");
 
   let gameData = {
     playerCredits: 1000,
@@ -43,20 +44,62 @@ function init() {
   window.onload = () => {
     getDeckData();
     displayCredits();
-    enableButtons("bet");
-    disableButtons("player");
+    changeButtonFunction("off", "player");
   };
 
   placeBet.addEventListener("click", pressPlaceBetButton);
+  stand.addEventListener("click", pressStandButton);
+  hit.addEventListener("click", pressHitButton);
+  doubleDown.addEventListener("click", pressDoubleDownButton);
+  addBetButton.addEventListener("click", addBet);
+  subtractBetButton.addEventListener("click", subtractBet);
 
-  cardsContainer.addEventListener("contextmenu", function (event) {
-    event.preventDefault();
+  function changeButtonFunction(state, group) {
+    if (state === "on" && group === "player") {
+      hit.disabled = false;
+      stand.disabled = false;
+      doubleDown.disabled = false;
+      split.disabled = false;
+    } else if (state === "off" && group === "player") {
+      hit.disabled = true;
+      stand.disabled = true;
+      doubleDown.disabled = true;
+      split.disabled = true;
+    } else if (state === "on" && group === "bet") {
+      addBetButton.disabled = false;
+      subtractBetButton.disabled = false;
+      placeBet.disabled = false;
+    } else if (state === "off" && group === "bet") {
+      addBetButton.disabled = true;
+      subtractBetButton.disabled = true;
+      placeBet.disabled = true;
+    } else if (state === "on" && group === "all") {
+      hit.disabled = false;
+      stand.disabled = false;
+      doubleDown.disabled = false;
+      split.disabled = false;
+      addBetButton.disabled = false;
+      subtractBetButton.disabled = false;
+      placeBet.disabled = false;
+    } else if (state === "off" && group === "all") {
+      hit.disabled = true;
+      stand.disabled = true;
+      doubleDown.disabled = true;
+      split.disabled = true;
+      addBetButton.disabled = true;
+      subtractBetButton.disabled = true;
+      placeBet.disabled = true;
+    }
+  }
 
+  changeButtonFunction("on", "player")
+
+  test.onclick = () => {
     console.log(gameData.compGameState, "CGS");
     console.log(gameData.playerGameState, "PGS");
+    console.log(gameData.roundEnded, "ended");
     newRoundTimer();
-  });
-
+  }
 
   async function getDeckData() {
     try {
@@ -79,8 +122,10 @@ function init() {
       await printPlayerCards();
 
       if (gameData.playerScore === 21) {
+        changeButtonFunction("off", "all")
         setGameState("player");
         setGameState("comp");
+        gameData.roundEnded = true;
         gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
         gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
         gameData.playerCredits += gameData.currentBet;
@@ -103,8 +148,18 @@ function init() {
         gameData.playerCredits += gameData.currentBet;
       }
 
+      if (gameData.playerScore > 21) {
+        changeButtonFunction("off", "all");
+        gameData.roundEnded = true;
+        // newRoundTimer();
+      }
+
       gameData.playerGameState = getWinnerData(gameData.compGameState, gameData.playerGameState);
       gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
+
+      if (gameData.playerGameState !== '' && gameData.compGameState !== '') {
+        gameData.roundEnded = true;
+      }
 
     } catch (error) {
       console.log(error);
@@ -113,7 +168,7 @@ function init() {
 
   async function pressStandButton() {
 
-    disableButtons("all");
+    changeButtonFunction("off", "all")
     await handleSecondCard();
 
     while (gameData.compScore <= 16 && gameData.compScore <= gameData.playerScore) {
@@ -125,11 +180,14 @@ function init() {
 
       if (gameData.compScore >= 17) {
         gameData.finalDraw = true;
-        gameData.roundEnded = true;
         setGameState("player");
         setGameState("comp");
         break;
       }
+    }
+
+    if (gameData.playerGameState !== '' && gameData.compGameState !== '') {
+      gameData.roundEnded = true;
     }
 
     gameData.playerGameState = getWinnerData(gameData.compGameState, gameData.playerGameState);
@@ -137,10 +195,16 @@ function init() {
     gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
     gameData.playerCredits += +gameData.currentBet;
     displayCredits();
+    // newRoundTimer();
 
   }
 
   async function pressDoubleDownButton() {
+    await printPlayerCards();
+
+    gameData.playerGameState = getWinnerData(gameData.compGameState, gameData.playerGameState);
+    gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
+
     gameData.currentBet *= 2;
     gameData.playerCredits -= gameData.currentBet / 2;
     displayCredits();
@@ -151,92 +215,27 @@ function init() {
     if (gameData.currentBet === 0) {
       alert("Place a bet first!");
     } else {
-
-      disableButtons("bet");
-      gameData.playerCredits -= gameData.currentBet;
-      displayCredits();
-
       await startGame();
       await delay(100);
-      enableButtons("player");
+
+      changeButtonFunction("on", "player");
+      changeButtonFunction("off", "bet");
+      gameData.playerCredits -= gameData.currentBet;
+      betDisplay.innerHTML = 0;
+      displayCredits();
     }
   }
 
-  function disableButtons(button) {
-    if (button === "bet") {
-      betButtons.forEach(button => {
-        button.onclick = null;
-        button.classList.add("unclick")
-      })
-    } else if (button === "player") {
-      playerBtns.forEach(button => {
-        button.onclick = null;
-        button.classList.add("unclick")
-      })
-    } else if (button === "all") {
-      betButtons.forEach(button => {
-        button.onclick = null;
-        button.classList.add("unclick")
-      })
-      playerBtns.forEach(button => {
-        button.onclick = null;
-        button.classList.add("unclick")
-      })
-    }
+  function addBet() {
+    gameData.currentBet += gameData.minimumBet
+    betDisplay.innerHTML = gameData.currentBet;
+    displayCurrentBet();
   }
 
-  function enableButtons(button) {
-    if (button === "bet") {
-      betButtons.forEach(button => {
-        button.classList.remove("unclick");
-      })
-      placeBet.addEventListener("click", pressPlaceBetButton);
-      addBet.addEventListener("click", function () {
-        gameData.currentBet = changeBet(gameData.currentBet, "add", gameData.minimumBet);
-        betDisplay.innerHTML = gameData.currentBet;
-      });
-      subtractBet.addEventListener("click", function () {
-        gameData.currentBet = changeBet(gameData.currentBet, "subtract", gameData.minimumBet);
-        betDisplay.innerHTML = gameData.currentBet;
-
-      });
-    } else if (button === "player") {
-      playerBtns.forEach(button => {
-        button.classList.remove("unclick");
-      })
-      stand.addEventListener("click", pressStandButton);
-      hit.addEventListener("click", pressHitButton);
-      doubleDown.addEventListener("click", pressDoubleDownButton);
-    } else if (button === "all") {
-      playerBtns.forEach(button => {
-        button.classList.remove("unclick");
-      })
-      stand.addEventListener("click", pressStandButton);
-      hit.addEventListener("click", pressHitButton);
-    }
-  }
-
-  function changeBet(currentBet, operation, minimumBet) {
-    if (operation === "add") {
-      if (currentBet === 0) {
-        currentBet += minimumBet
-      } else {
-        currentBet += minimumBet;
-        if (currentBet > gameData.playerCredits) {
-          currentBet = gameData.playerCredits
-        }
-      }
-    } else {
-      if (currentBet === 0) {
-        currentBet = 0;
-      } else {
-        currentBet -= minimumBet;
-        if (currentBet < minimumBet) {
-          currentBet = minimumBet;
-        }
-      }
-    }
-    return currentBet;
+  function subtractBet() {
+    gameData.currentBet -= gameData.minimumBet;
+    betDisplay.innerHTML = gameData.currentBet;
+    displayCurrentBet();
   }
 
   function getValueByCardType(cardType, user) {
@@ -316,7 +315,6 @@ function init() {
       card.bjVal = getValueByCardType(card.value, "comp");
 
       gameData.compScoreArray.push(+card.bjVal);
-      console.log(gameData.compScoreArray, "CScoreArr");
 
       gameData.compHand.push(card);
 
@@ -396,10 +394,9 @@ function init() {
     let totalCredits = document.querySelector(".total-credits");
     let innerDiv = totalCredits.firstElementChild;
 
-    betDisplay.innerHTML = 0;
+    betDisplay.innerHTML = gameData.currentBet;
     innerDiv.innerHTML = `Total Credits: ${gameData.playerCredits}`;
 
-    let bet = gameData
     displayCurrentBet();
   }
 
@@ -408,7 +405,7 @@ function init() {
     let innerDiv = currentBetDisplay.firstElementChild;
 
     if (gameData.roundEnded) {
-      innerDiv.innerHTML = `You Won: ${gameData.currentBet}`
+      innerDiv.innerHTML = `You Won:    ${gameData.currentBet}`
     } else {
       if (gameData.currentBet > 0) {
         innerDiv.innerHTML = `Current Bet: ${gameData.currentBet}`
@@ -522,13 +519,18 @@ function init() {
 
     cardsContainer.innerHTML = "";
     compContainer.innerHTML = "";
+    betDisplay.innerHTML = gameData.currentBet;
+    cScore.innerHTML = gameData.compScore;
+    pScore.innerHTML = gameData.playerScore;
   }
 
   function newRoundTimer() {
     if (gameData.roundEnded) {
+
+
       let roundTimerDisplay = document.querySelector(".round-timer");
       let innerDiv = roundTimerDisplay.firstElementChild;
-      let count = 3;
+      let count = 5;
 
       roundTimerDisplay.style.display = "flex";
 
@@ -537,15 +539,14 @@ function init() {
       let countdownInterval = setInterval(() => {
         count--;
         innerDiv.innerHTML = `New round in ${count}`;
-
         if (count === 0) {
           clearInterval(countdownInterval);
           roundTimerDisplay.style.display = "none";
           resetGameData();
+          displayCurrentBet();
+          changeButtonFunction("on", "bet");
         }
       }, 1000);
-
-      enableButtons("bet");
     }
   }
 }
