@@ -43,7 +43,6 @@ function init() {
   window.onload = () => {
     getDeckData();
     displayCredits();
-    displayCurrentBet();
     enableButtons("bet");
     disableButtons("player");
   };
@@ -78,9 +77,14 @@ function init() {
       await printCompCards();
       await printPlayerCards();
 
-      setGameState("player");
-      setGameState("comp");
-
+      if (gameData.playerScore === 21) {
+        setGameState("player");
+        setGameState("comp");
+        gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
+        gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
+        gameData.playerCredits += gameData.currentBet;
+        displayCredits();
+      }
 
     } catch (error) {
       console.log(error);
@@ -104,6 +108,13 @@ function init() {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async function pressDoubleDownButton() {
+    gameData.currentBet *= 2;
+    gameData.playerCredits -= gameData.currentBet / 2;
+    displayCredits();
+    pressStandButton();
   }
 
   async function pressPlaceBetButton() {
@@ -165,6 +176,7 @@ function init() {
       })
       stand.addEventListener("click", pressStandButton);
       hit.addEventListener("click", pressHitButton);
+      doubleDown.addEventListener("click", pressDoubleDownButton);
     } else if (button === "all") {
       playerBtns.forEach(button => {
         button.classList.remove("unclick");
@@ -356,6 +368,7 @@ function init() {
 
     betDisplay.innerHTML = 0;
     innerDiv.innerHTML = `Total Credits: ${gameData.playerCredits}`;
+    displayCurrentBet();
   }
 
   function displayCurrentBet() {
