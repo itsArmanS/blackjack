@@ -215,11 +215,12 @@ function init() {
     if (gameData.currentBet === 0) {
       alert("Place a bet first!");
     } else {
+      changeButtonFunction("off", "bet");
+
       await startGame();
       await delay(100);
 
       changeButtonFunction("on", "player");
-      changeButtonFunction("off", "bet");
       gameData.playerCredits -= gameData.currentBet;
       betDisplay.innerHTML = 0;
       displayCredits();
