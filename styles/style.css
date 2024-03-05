@@ -50,7 +50,7 @@
 }
 
 .bottom-card-loc {
-  height: 30rem;
+  height: 20rem;
 }
 
 .bottom-card-loc {
@@ -73,6 +73,7 @@
 .player-cards-container,
 .comp-container {
   width: 30rem;
+  height: 20rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -180,8 +181,8 @@
 
 .pbtns,
 #place-bet {
-  width: 5rem;
-  height: 5rem;
+  width: 4rem;
+  height: 4rem;
   border-radius: 5rem;
 }
 
@@ -211,11 +212,15 @@
 }
 
 .minus-bet {
-  background-image: url("../images/minus-circle.svg");
+  background-color: transparent;
+  border: none;
+  background-image: url("../images/down-arrow.svg");
 }
 
 .plus-bet {
-  background-image: url("../images/plus-circle.svg");
+  background-color: transparent;
+  border: none;
+  background-image: url("../images/up-arrow.svg");
 }
 
 .bet-num {
@@ -225,4 +230,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.bet-amount {
+  width: 10rem;
+  height: 100%;
 }

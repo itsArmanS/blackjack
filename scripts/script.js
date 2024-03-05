@@ -18,6 +18,11 @@ function init() {
   let betDisplay = document.querySelector(".bet-display");
   let subtractBetButton = document.querySelector(".minus-bet");
   let addBetButton = document.querySelector(".plus-bet");
+  let playerScoreBubble = document.querySelector(".player-score-bubble");
+  let currentBetBubble = document.querySelector(".current-bet-bubble");
+  let gameMessageBubble = document.querySelector(".game-message-bubble");
+  let playerCreditsBubble = document.querySelector(".player-credits-bubble");
+
   let test = document.querySelector("#testy");
 
   let gameData = {
@@ -47,6 +52,7 @@ function init() {
     getDeckData();
     displayCredits();
     changeButtonFunction("off", "player");
+    displayStartingMessage();
   };
 
   placeBet.addEventListener("click", pressPlaceBetButton);
@@ -135,8 +141,8 @@ function init() {
         gameData.playerCredits += gameData.currentBet;
         displayCredits();
 
-        screenMessage.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
-        screenMessageAnimation(screenMessage);
+        gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+        screenMessageAnimation(gameMessageBubble, 20);
       }
 
     } catch (error) {
@@ -162,14 +168,14 @@ function init() {
         setGameState("player");
         setGameState("comp");
 
-        screenMessage.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
-        screenMessageAnimation(screenMessage);
+        gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+        screenMessageAnimation(gameMessageBubble);
         // newRoundTimer();
       } else if (gameData.playerScore === 21) {
         setGameState("player")
         setGameState("comp")
-        screenMessage.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
-        screenMessageAnimation(screenMessage);
+        gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+        screenMessageAnimation(gameMessageBubble);
       } else {
         changeButtonFunction("on", "player");
       }
@@ -204,7 +210,7 @@ function init() {
         setGameState("comp");
         console.log(gameData.playerGameState, gameData.compGameState, "stand")
 
-        screenMessage.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+        gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
         break;
       }
     }
@@ -217,7 +223,7 @@ function init() {
     setGameState("comp");
     console.log(gameData.playerGameState, gameData.compGameState, "out")
 
-    screenMessage.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+    gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
     gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
     gameData.playerCredits += +gameData.currentBet;
     displayCredits();
@@ -250,7 +256,6 @@ function init() {
 
       changeButtonFunction("on", "player");
       gameData.playerCredits -= gameData.currentBet;
-      betDisplay.innerHTML = 0;
       displayCredits();
     }
   }
@@ -258,26 +263,25 @@ function init() {
   function addBet() {
     if (gameData.currentBet > gameData.playerCredits) {
       gameData.currentBet = gameData.playerCredits;
-      screenMessage.innerHTML = `You do not have enough credits`;
-      screenMessageAnimation(screenMessage, 20);
+      currentBetBubble.innerHTML = `You do not have enough credits`;
+      screenMessageAnimation(currentBetBubble, 20);
     } else {
       gameData.currentBet += gameData.minimumBet;
-      screenMessage.innerHTML = `Current Bet: ${gameData.currentBet}`;
-      screenMessageAnimation(screenMessage, 20);
+      currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
+      screenMessageAnimation(currentBetBubble, 20);
       displayCurrentBet();
     }
   }
 
   function subtractBet() {
-    if (gameData.currentBet < gameData.minimumBet || gameData.currentBet === 0) {
-      screenMessage.innerHTML = `Cannot bet lower than the minimum bet`;
-      screenMessageAnimation(screenMessage, 20);
+    if (gameData.currentBet < gameData.minimumBet) {
+      currentBetBubble.innerHTML = `Bet: ${gameData.minimumBet}`;
       gameData.currentBet = gameData.minimumBet;
       displayCurrentBet();
     }
     gameData.currentBet -= gameData.minimumBet;
-    screenMessage.innerHTML = `Current Bet: ${gameData.currentBet}`;
-    screenMessageAnimation(screenMessage, 20);
+    currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
+    screenMessageAnimation(currentBetBubble, 20);
     displayCurrentBet();
   }
 
@@ -433,6 +437,11 @@ function init() {
     countUserScore("comp");
   }
 
+  function displayStartingMessage() {
+    playerScoreBubble.innerHTML = `Your Score: ${gameData.playerScore}`
+    gameMessageBubble.innerHTML = "Place Your Bet";
+  }
+
   function countUserScore(user) {
     if (user === "player") {
       let pCount = 0;
@@ -441,7 +450,7 @@ function init() {
 
         pCount += +item
         gameData.playerScore = +pCount
-        pScore.innerHTML = gameData.playerScore;
+        playerScoreBubble.innerHTML = `Your Score: ${gameData.playerScore}`;
 
       })
     } else {
@@ -465,26 +474,24 @@ function init() {
   }
 
   function displayCredits() {
-    let totalCredits = document.querySelector(".total-credits");
-    let innerDiv = totalCredits.firstElementChild;
+    let innerDiv = playerCreditsBubble.firstElementChild;
 
-    betDisplay.innerHTML = gameData.currentBet;
+    currentBetBubble.innerHTML = gameData.currentBet;
     innerDiv.innerHTML = `Total Credits: ${gameData.playerCredits}`;
 
     displayCurrentBet();
   }
 
   function displayCurrentBet() {
-    let currentBetDisplay = document.querySelector(".current-bet");
-    let innerDiv = currentBetDisplay.firstElementChild;
+    currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
 
     if (gameData.roundEnded) {
-      innerDiv.innerHTML = `You Won:    ${gameData.currentBet}`
+      currentBetBubble.innerHTML = `You Won: ${gameData.currentBet}`
     } else {
       if (gameData.currentBet > 0) {
-        innerDiv.innerHTML = `Current Bet: ${gameData.currentBet}`
+        currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`
       } else {
-        innerDiv.innerHTML = `Current Bet: ${0}`
+        currentBetBubble.innerHTML = `Bet: ${0}`
       }
     }
   }
@@ -601,27 +608,28 @@ function init() {
 
     playerCardsContainer.innerHTML = "";
     compContainer.innerHTML = "";
-    betDisplay.innerHTML = gameData.currentBet;
+    currentBetBubble.innerHTML = gameData.currentBet;
     cScore.innerHTML = gameData.compScore;
-    pScore.innerHTML = gameData.playerScore;
+
+    playerScoreBubble.innerHTML = `Your Score: ${gameData.playerScore}`;
   }
 
   function newRoundTimer() {
     if (gameData.roundEnded) {
       let count = 5;
 
-      screenMessage.innerHTML = `New round in ${count}`;
-      screenMessageAnimation(screenMessage, 20);
+      gameMessageBubble.innerHTML = `New round in ${count}`;
+      screenMessageAnimation(gameMessageBubble, 20);
 
       let countdownInterval = setInterval(() => {
         count--;
-        screenMessage.innerHTML = `New round in ${count}`;
-        screenMessageAnimation(screenMessage, 20);
+        gameMessageBubble.innerHTML = `New round in ${count}`;
+        screenMessageAnimation(gameMessageBubble, 20);
 
         if (count === 0) {
           clearInterval(countdownInterval);
-          screenMessage.innerHTML = "Place Your Bet";
-          screenMessageAnimation(screenMessage, 20);
+          gameMessageBubble.innerHTML = "Place Your Bet";
+          screenMessageAnimation(gameMessageBubble, 20);
           resetGameData();
           displayCurrentBet();
           changeButtonFunction("on", "bet");
@@ -673,6 +681,8 @@ function init() {
     } else if (opponentState === GAME_STATE_TYPES.BUST)
       return `YOU LOST ${gameData.currentBet} credits`;
   }
+
+
 
 }
 
