@@ -126,13 +126,11 @@ function init() {
 
 
       if (gameData.playerScore === 21) {
-
+        changeButtonFunction("off", "player")
         setGameState("player");
         setGameState("comp");
         gameData.roundEnded = true;
-        changeButtonFunction("off", "all")
 
-        gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
         gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
         gameData.playerCredits += gameData.currentBet;
         displayCredits();
@@ -176,8 +174,8 @@ function init() {
         changeButtonFunction("on", "player");
       }
 
-      gameData.playerGameState = getWinnerData(gameData.compGameState, gameData.playerGameState);
-      gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
+      setGameState("player");
+      setGameState("comp");
 
       if (gameData.playerGameState !== '' && gameData.compGameState !== '') {
         gameData.roundEnded = true;
@@ -200,13 +198,13 @@ function init() {
       setGameState("player");
       setGameState("comp");
 
-      if (gameData.compScore >= 17 && gameData.compScore > gameData.playerScore) {
+      if (gameData.compScore >= 17 && gameData.compScore > gameData.playerScore && gameData.compScore < 21) {
         gameData.finalDraw = true;
         setGameState("player");
         setGameState("comp");
         console.log(gameData.playerGameState, gameData.compGameState, "stand")
 
-        screenMessage.innerHTML = printGameState(gameData.playerScore, gameData.compScore);
+        screenMessage.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
         break;
       }
     }
@@ -229,6 +227,8 @@ function init() {
 
   async function pressDoubleDownButton() {
     await printPlayerCards();
+
+
 
     setGameState("player");
     setGameState("comp");
@@ -549,7 +549,7 @@ function init() {
 
   function stateLogicSetter(userScore, opponentScore, clicked) {
     if (clicked) {
-      if (userScore > 21 || userScore < opponentScore) {
+      if (userScore < opponentScore && opponentScore < 21) {
         return "BUST";
       } else if (userScore === 21) {
         return "WIN";
@@ -557,6 +557,8 @@ function init() {
         return "WIN";
       } else if (userScore === opponentScore) {
         return "DRAW";
+      } else if (userScore > 21) {
+        return "BUST";
       }
     } else {
       if (userScore > 21) {
@@ -564,16 +566,6 @@ function init() {
       } else if (userScore === 21) {
         return "WIN"
       }
-    }
-  }
-
-  function getWinnerData(opponentState, userState) {
-    if (opponentState === "BUST") {
-      return "WIN";
-    } else if (opponentState === "WIN") {
-      return "BUST";
-    } else if (opponentState === "DRAW") {
-      return "DRAW";
     }
   }
 
@@ -627,9 +619,9 @@ function init() {
         screenMessageAnimation(screenMessage, 20);
 
         if (count === 0) {
+          clearInterval(countdownInterval);
           screenMessage.innerHTML = "Place Your Bet";
           screenMessageAnimation(screenMessage, 20);
-          clearInterval(countdownInterval);
           resetGameData();
           displayCurrentBet();
           changeButtonFunction("on", "bet");
@@ -678,8 +670,8 @@ function init() {
       return `YOU WON ${gameData.currentBet} credits`;
     } else if (opponentState === GAME_STATE_TYPES.DRAW) {
       return `DRAW: Returned ${gameData.currentBet} credits`;
-    }
-    return `YOU LOST ${gameData.currentBet} credits`;
+    } else if (opponentState === GAME_STATE_TYPES.BUST)
+      return `YOU LOST ${gameData.currentBet} credits`;
   }
 
 }
