@@ -5,7 +5,7 @@ function init() {
   let doubleDown = document.querySelector("#DD");
   let placeBet = document.querySelector("#place-bet");
   let playerDisplay = document.querySelector(".player-cards");
-  let cardsContainer = document.querySelector(".cards-container");
+  let playerCardsContainer = document.querySelector(".player-cards-container");
   let compContainer = document.querySelector(".comp-container");
   let pScore = document.querySelector(".pScore");
   let cScore = document.querySelector(".cScore");
@@ -92,13 +92,12 @@ function init() {
     }
   }
 
-  changeButtonFunction("on", "player")
-
   test.onclick = () => {
     console.log(gameData.compGameState, "CGS");
     console.log(gameData.playerGameState, "PGS");
     console.log(gameData.roundEnded, "ended");
     newRoundTimer();
+    flipCard()
   }
 
   async function getDeckData() {
@@ -120,12 +119,13 @@ function init() {
       await printPlayerCards();
       await printCompCards();
       await printPlayerCards();
+      startGameFlipCard()
 
       if (gameData.playerScore === 21) {
-        changeButtonFunction("off", "all")
         setGameState("player");
         setGameState("comp");
         gameData.roundEnded = true;
+        changeButtonFunction("off", "all")
         gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
         gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
         gameData.playerCredits += gameData.currentBet;
@@ -280,17 +280,24 @@ function init() {
       countUserScore("player");
 
       let cardElem = document.createElement("div");
-      cardElem.classList.add("card-face");
+      cardElem.classList.add("card-holder");
       cardElem.style.opacity = 0;
       cardElem.innerHTML =
         `
-      <img src=${card.image} alt="">
-  `;
+        <div class="card-face card-face-flipped">
+          <div class="card-front">
+            <img src="${card.image}" alt="">
+          </div>
+          <div class="card-back">
+            <img src="${card.backImage}" alt="">
+          </div>
+        </div>
+        `;
 
       cardElem.style.left = gameData.playerCardDist + "px";
       gameData.playerCardDist += 17;
 
-      cardsContainer.appendChild(cardElem);
+      playerCardsContainer.appendChild(cardElem);
       await delay(100);
       fadeIn(cardElem);
     }
@@ -322,11 +329,19 @@ function init() {
       if (gameData.compHand.length < 2 || gameData.compHand.length > 2) {
 
         let cardElem = document.createElement("div");
-        cardElem.classList.add("card-face");
+        cardElem.classList.add("card-holder");
         cardElem.style.opacity = 0;
         cardElem.innerHTML =
           `
-      <img src=${card.image} alt="">
+          <div class="card-face card-face-flipped">
+            <div class="card-front">
+              <img src="${card.image}" alt="">
+            </div>
+            <div class="card-back">
+              <img src="${card.backImage}" alt="">
+            </div>
+          </div>
+          
         `;
 
         cardElem.style.left = gameData.compCardDist + "px";
@@ -340,12 +355,19 @@ function init() {
       } else if (gameData.compHand.length === 2) {
 
         let cardElem = document.createElement("div");
-        cardElem.classList.add("card-face");
+        cardElem.classList.add("card-holder");
         cardElem.style.opacity = 0;
         cardElem.innerHTML =
           `
-           <img src=${card.backImage} alt="">
-            `;
+          <div class="card-face card-face-flipped">
+            <div class="card-front">
+              <img src="${card.image}" alt="">
+            </div>
+            <div class="card-back">
+              <img src="${card.backImage}" alt="">
+            </div>
+          </div>
+          `;
 
         cardElem.style.left = gameData.compCardDist + "px";
         gameData.compCardDist += 17;
@@ -432,18 +454,23 @@ function init() {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  async function startGameFlipCard() {
+    compFirstCard = compContainer.querySelector(".card-holder:nth-child(1)");
+    playerFirstCard = playerCardsContainer.querySelector(".card-holder:nth-child(1)");
+    playerSecondCard = playerCardsContainer.querySelector(".card-holder:nth-child(2)");
+
+    compFirstCard.querySelector(".card-face").classList.toggle("card-face-flipped");
+    await delay(500);
+    playerFirstCard.querySelector(".card-face").classList.toggle("card-face-flipped");
+    await delay(500);
+    playerSecondCard.querySelector(".card-face").classList.toggle("card-face-flipped");
+
+  }
+
   async function handleSecondCard() {
-    let compSecondCard = compContainer.children[1];
+    let compSecondCard = compContainer.querySelector(".card-holder:nth-child(2)");
 
-    compSecondCard.innerHTML = '';
-
-    let cardElem = document.createElement("img");
-    cardElem.src = gameData.compHand[1].image;
-    cardElem.style.opacity = 0;
-
-    await delay(100);
-    fadeIn(cardElem);
-    compSecondCard.append(cardElem);
+    compSecondCard.querySelector(".card-face").classList.toggle("card-face-flipped");
 
     gameData.standClicked = true;
     countUserScore("comp");
@@ -518,7 +545,7 @@ function init() {
     gameData.roundEnded = false;
     gameData.currentBet = 0;
 
-    cardsContainer.innerHTML = "";
+    playerCardsContainer.innerHTML = "";
     compContainer.innerHTML = "";
     betDisplay.innerHTML = gameData.currentBet;
     cScore.innerHTML = gameData.compScore;

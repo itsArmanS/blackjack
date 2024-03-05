@@ -67,7 +67,7 @@
   align-items: flex-end;
 }
 
-.cards-container,
+.player-cards-container,
 .comp-container {
   width: 20rem;
   display: flex;
