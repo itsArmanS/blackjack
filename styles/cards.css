@@ -1,15 +1,7 @@
-.player-cards-container:first-child {
-    margin-left: 5rem;
-}
-
 .card-holder {
-    position: absolute;
     width: 7rem;
     height: 10rem;
     background: none;
-    top: 72%;
-    left: 20%;
-    transform: translate(-50%, -50%);
 }
 
 .card-face {

@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+#screen {
+    width: 40rem;
+    height: 5rem;
+    box-sizing: border-box;
+    font-size: 20px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: radial-gradient(#444, #111);
+    font-family: 'VT323', monospace;
+    border-radius: 5rem;
+}
+
+#screen {
+    max-width: 500px;
+    white-space: pre-line;
+    letter-spacing: 0.1em;
+    font-size: 1.5em;
+    color: #05d1e1;
+    filter: drop-shadow(0 0 2px #e4d808);
+}

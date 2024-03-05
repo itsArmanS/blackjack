@@ -1,21 +1,23 @@
+const GAME_STATE_TYPES = {
+  WIN: "WIN",
+  DRAW: "DRAW",
+  BUST: "BUST"
+}
+
 function init() {
   let hit = document.querySelector("#hit");
   let stand = document.querySelector("#stand");
   let split = document.querySelector("#split");
   let doubleDown = document.querySelector("#DD");
   let placeBet = document.querySelector("#place-bet");
-  let playerDisplay = document.querySelector(".player-cards");
   let playerCardsContainer = document.querySelector(".player-cards-container");
   let compContainer = document.querySelector(".comp-container");
   let pScore = document.querySelector(".pScore");
   let cScore = document.querySelector(".cScore");
-  let gamestageMsg = document.querySelector(".gamestage-message");
-  let compGamestageMsg = document.querySelector(".comp-gamestage-message");
-  let playerBtns = document.querySelectorAll(".pbtns");
+  let screenMessage = document.querySelector("#screen");
   let betDisplay = document.querySelector(".bet-display");
   let subtractBetButton = document.querySelector(".minus-bet");
   let addBetButton = document.querySelector(".plus-bet");
-  let betButtons = document.querySelectorAll(".bet-btns");
   let test = document.querySelector("#testy");
 
   let gameData = {
@@ -97,7 +99,6 @@ function init() {
     console.log(gameData.playerGameState, "PGS");
     console.log(gameData.roundEnded, "ended");
     newRoundTimer();
-    flipCard()
   }
 
   async function getDeckData() {
@@ -125,14 +126,19 @@ function init() {
 
 
       if (gameData.playerScore === 21) {
+
         setGameState("player");
         setGameState("comp");
         gameData.roundEnded = true;
         changeButtonFunction("off", "all")
+
         gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
         gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
         gameData.playerCredits += gameData.currentBet;
         displayCredits();
+
+        screenMessage.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+        screenMessageAnimation(screenMessage);
       }
 
     } catch (error) {
@@ -142,6 +148,7 @@ function init() {
 
   async function pressHitButton() {
     try {
+      changeButtonFunction("off", "player");
       await printPlayerCards();
 
       if (gameData.finalDraw) {
@@ -154,7 +161,19 @@ function init() {
       if (gameData.playerScore > 21) {
         changeButtonFunction("off", "all");
         gameData.roundEnded = true;
+        setGameState("player");
+        setGameState("comp");
+
+        screenMessage.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+        screenMessageAnimation(screenMessage);
         // newRoundTimer();
+      } else if (gameData.playerScore === 21) {
+        setGameState("player")
+        setGameState("comp")
+        screenMessage.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+        screenMessageAnimation(screenMessage);
+      } else {
+        changeButtonFunction("on", "player");
       }
 
       gameData.playerGameState = getWinnerData(gameData.compGameState, gameData.playerGameState);
@@ -181,10 +200,13 @@ function init() {
       setGameState("player");
       setGameState("comp");
 
-      if (gameData.compScore >= 17) {
+      if (gameData.compScore >= 17 && gameData.compScore > gameData.playerScore) {
         gameData.finalDraw = true;
         setGameState("player");
         setGameState("comp");
+        console.log(gameData.playerGameState, gameData.compGameState, "stand")
+
+        screenMessage.innerHTML = printGameState(gameData.playerScore, gameData.compScore);
         break;
       }
     }
@@ -193,8 +215,11 @@ function init() {
       gameData.roundEnded = true;
     }
 
-    gameData.playerGameState = getWinnerData(gameData.compGameState, gameData.playerGameState);
-    gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
+    setGameState("player");
+    setGameState("comp");
+    console.log(gameData.playerGameState, gameData.compGameState, "out")
+
+    screenMessage.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
     gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
     gameData.playerCredits += +gameData.currentBet;
     displayCredits();
@@ -205,8 +230,8 @@ function init() {
   async function pressDoubleDownButton() {
     await printPlayerCards();
 
-    gameData.playerGameState = getWinnerData(gameData.compGameState, gameData.playerGameState);
-    gameData.compGameState = getWinnerData(gameData.playerGameState, gameData.compGameState);
+    setGameState("player");
+    setGameState("comp");
 
     gameData.currentBet *= 2;
     gameData.playerCredits -= gameData.currentBet / 2;
@@ -231,14 +256,28 @@ function init() {
   }
 
   function addBet() {
-    gameData.currentBet += gameData.minimumBet
-    betDisplay.innerHTML = gameData.currentBet;
-    displayCurrentBet();
+    if (gameData.currentBet > gameData.playerCredits) {
+      gameData.currentBet = gameData.playerCredits;
+      screenMessage.innerHTML = `You do not have enough credits`;
+      screenMessageAnimation(screenMessage, 20);
+    } else {
+      gameData.currentBet += gameData.minimumBet;
+      screenMessage.innerHTML = `Current Bet: ${gameData.currentBet}`;
+      screenMessageAnimation(screenMessage, 20);
+      displayCurrentBet();
+    }
   }
 
   function subtractBet() {
+    if (gameData.currentBet < gameData.minimumBet || gameData.currentBet === 0) {
+      screenMessage.innerHTML = `Cannot bet lower than the minimum bet`;
+      screenMessageAnimation(screenMessage, 20);
+      gameData.currentBet = gameData.minimumBet;
+      displayCurrentBet();
+    }
     gameData.currentBet -= gameData.minimumBet;
-    betDisplay.innerHTML = gameData.currentBet;
+    screenMessage.innerHTML = `Current Bet: ${gameData.currentBet}`;
+    screenMessageAnimation(screenMessage, 20);
     displayCurrentBet();
   }
 
@@ -536,7 +575,6 @@ function init() {
     } else if (opponentState === "DRAW") {
       return "DRAW";
     }
-    gamestageMsg.innerHTML = userState;
   }
 
   function decideBetReturn(userState, opponentState) {
@@ -578,22 +616,20 @@ function init() {
 
   function newRoundTimer() {
     if (gameData.roundEnded) {
-
-
-      let roundTimerDisplay = document.querySelector(".round-timer");
-      let innerDiv = roundTimerDisplay.firstElementChild;
       let count = 5;
 
-      roundTimerDisplay.style.display = "flex";
-
-      innerDiv.innerHTML = `New round in ${count}`;
+      screenMessage.innerHTML = `New round in ${count}`;
+      screenMessageAnimation(screenMessage, 20);
 
       let countdownInterval = setInterval(() => {
         count--;
-        innerDiv.innerHTML = `New round in ${count}`;
+        screenMessage.innerHTML = `New round in ${count}`;
+        screenMessageAnimation(screenMessage, 20);
+
         if (count === 0) {
+          screenMessage.innerHTML = "Place Your Bet";
+          screenMessageAnimation(screenMessage, 20);
           clearInterval(countdownInterval);
-          roundTimerDisplay.style.display = "none";
           resetGameData();
           displayCurrentBet();
           changeButtonFunction("on", "bet");
@@ -601,5 +637,51 @@ function init() {
       }, 1000);
     }
   }
+
+  function screenMessageAnimation(element, ms) {
+    let completeCount;
+    let newText;
+
+    const array = element.textContent.split('')
+    const special = ['~', '@', '!', '#', '$', '%', '^', '&', '*']
+    const exception = [' ', '\n', '.', ',']
+    const random = (min, max) => {
+      return Math.floor(Math.random() * (max - min + 1) + min)
+    }
+
+    const numArray = []
+    array.forEach(char => {
+      const num = random(5, 40)
+      numArray.push(num)
+    })
+
+    const timer = setInterval(() => {
+      completeCount = 0
+      newText = ''
+      numArray.forEach((num, i) => {
+        if (exception.includes(array[i]) || numArray[i] === 0) {
+          newText += array[i]
+          completeCount += 1
+        } else {
+          newText += special[numArray[i] % special.length]
+          numArray[i] = --num
+        }
+      })
+
+      element.innerText = newText
+      if (completeCount === numArray.length) clearInterval(timer)
+    }, ms)
+  }
+
+  function printGameState(opponentState, userState) {
+    if (userState === GAME_STATE_TYPES.WIN) {
+      return `YOU WON ${gameData.currentBet} credits`;
+    } else if (opponentState === GAME_STATE_TYPES.DRAW) {
+      return `DRAW: Returned ${gameData.currentBet} credits`;
+    }
+    return `YOU LOST ${gameData.currentBet} credits`;
+  }
+
 }
+
 init()
