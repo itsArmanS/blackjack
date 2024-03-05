@@ -115,11 +115,14 @@ function init() {
   async function startGame() {
     try {
       displayCurrentBet();
+
       await printCompCards();
       await printPlayerCards();
       await printCompCards();
       await printPlayerCards();
-      startGameFlipCard()
+
+      await startGameFlipCard()
+
 
       if (gameData.playerScore === 21) {
         setGameState("player");
@@ -295,11 +298,16 @@ function init() {
         `;
 
       cardElem.style.left = gameData.playerCardDist + "px";
-      gameData.playerCardDist += 17;
+      gameData.playerCardDist += 105;
 
       playerCardsContainer.appendChild(cardElem);
       await delay(100);
       fadeIn(cardElem);
+
+      if (gameData.playerHand.length > 2) {
+        await delay(500);
+        flipLastCard("player");
+      }
     }
     setGameState("player")
   }
@@ -345,12 +353,17 @@ function init() {
         `;
 
         cardElem.style.left = gameData.compCardDist + "px";
-        gameData.compCardDist += 17;
+        gameData.compCardDist += 105;
 
 
         compContainer.appendChild(cardElem);
         await delay(100);
         fadeIn(cardElem);
+
+        if (gameData.compHand.length > 2) {
+          await delay(500);
+          flipLastCard("comp");
+        }
 
       } else if (gameData.compHand.length === 2) {
 
@@ -370,16 +383,15 @@ function init() {
           `;
 
         cardElem.style.left = gameData.compCardDist + "px";
-        gameData.compCardDist += 17;
+        gameData.compCardDist += 105;
 
         compContainer.appendChild(cardElem);
-        await delay(100);
+        await delay(500);
         fadeIn(cardElem);
       }
       setGameState("comp")
     }
     countUserScore("comp");
-
   }
 
   function countUserScore(user) {
@@ -461,10 +473,22 @@ function init() {
 
     compFirstCard.querySelector(".card-face").classList.toggle("card-face-flipped");
     await delay(500);
+
     playerFirstCard.querySelector(".card-face").classList.toggle("card-face-flipped");
     await delay(500);
+
     playerSecondCard.querySelector(".card-face").classList.toggle("card-face-flipped");
 
+  }
+
+  async function flipLastCard(user) {
+    if (user === "player") {
+      let latestPlayerCard = playerCardsContainer.lastElementChild
+      latestPlayerCard.querySelector(".card-face").classList.toggle("card-face-flipped");
+    } else {
+      let latestCompCard = compContainer.lastElementChild
+      latestCompCard.querySelector(".card-face").classList.toggle("card-face-flipped");
+    }
   }
 
   async function handleSecondCard() {
