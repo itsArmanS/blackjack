@@ -42,7 +42,11 @@ function init() {
     finalDraw: false,
     roundEnded: false,
     currentBet: 0,
-    minimumBet: 50,
+    minimumBet: 500,
+    previousBet: 0,
+
+    deckSplit: false,
+    splitCardArray: [[], []],
   }
 
   window.onload = () => {
@@ -56,6 +60,7 @@ function init() {
   stand.addEventListener("click", pressStandButton);
   hit.addEventListener("click", pressHitButton);
   doubleDown.addEventListener("click", pressDoubleDownButton);
+  split.addEventListener("click", pressSplitButton);
   addBetButton.addEventListener("click", addBet);
   subtractBetButton.addEventListener("click", subtractBet);
 
@@ -144,6 +149,22 @@ function init() {
 
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  async function pressPlaceBetButton() {
+    if (gameData.currentBet === 0) {
+      alert("Place a bet first!");
+    } else {
+      changeButtonFunction("off", "bet");
+
+      gameData.previousBet = gameData.currentBet;
+      await startGame();
+      await delay(100);
+
+      changeButtonFunction("on", "player");
+      gameData.playerCredits -= gameData.currentBet;
+      displayCredits();
     }
   }
 
@@ -242,23 +263,39 @@ function init() {
     pressStandButton();
   }
 
-  async function pressPlaceBetButton() {
-    if (gameData.currentBet === 0) {
-      alert("Place a bet first!");
-    } else {
-      changeButtonFunction("off", "bet");
+  async function pressSplitButton() {
+    console.log(gameData.playerHand)
+    gameData.deckSplit = true
+    printSplitContainer();
+    console.log(gameData.splitCardArray)
 
-      await startGame();
-      await delay(100);
+    gameData.splitCardArray[0].push(gameData.playerHand[0]);
+    gameData.splitCardArray[1].push(gameData.playerHand[1]);
+    if (gameData.playerHand[0].value === gameData.playerHand[1].value) {
 
-      changeButtonFunction("on", "player");
-      gameData.playerCredits -= gameData.currentBet;
-      displayCredits();
+
+
+
     }
   }
 
+  function printSplitContainer() {
+    playerCardsContainer.innerHTML =
+      `
+    <div class="split-cards-container1">
+
+    </div>
+    <div class="split-cards-container2">
+      
+    </div>
+    `
+
+    let splitContainer1 = document.querySelector(".split-cards-container1");
+    let splitContainer2 = document.querySelector(".split-cards-container2");
+  }
+
   function addBet() {
-    if (gameData.currentBet > gameData.playerCredits) {
+    if (gameData.currentBet === gameData.playerCredits) {
       gameData.currentBet = gameData.playerCredits;
       currentBetBubble.innerHTML = `You do not have enough credits`;
       screenMessageAnimation(currentBetBubble, 20);
@@ -271,7 +308,7 @@ function init() {
   }
 
   function subtractBet() {
-    if (gameData.currentBet < gameData.minimumBet) {
+    if (gameData.currentBet < gameData.minimumBet || gameData.currentBet === 0) {
       currentBetBubble.innerHTML = `Bet: ${gameData.minimumBet}`;
       gameData.currentBet = gameData.minimumBet;
       displayCurrentBet();
@@ -484,7 +521,7 @@ function init() {
     currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
 
     if (gameData.roundEnded) {
-      currentBetBubble.innerHTML = `You Won: ${gameData.currentBet}`
+      currentBetBubble.innerHTML = `Bet: ${gameData.previousBet}`;
     } else {
       if (gameData.currentBet > 0) {
         currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`
