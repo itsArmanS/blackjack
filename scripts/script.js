@@ -271,13 +271,16 @@ function init() {
   }
 
   async function pressSplitButton() {
-    console.log(gameData.playerHand)
+    let splitContainer1 = document.querySelector(".split-cards-container1");
+    let splitContainer2 = document.querySelector(".split-cards-container2");
+
     gameData.deckSplit = true
     printSplitContainer();
     console.log(gameData.splitCardArray)
 
     gameData.splitCardArray[0].push(gameData.playerHand[0]);
     gameData.splitCardArray[1].push(gameData.playerHand[1]);
+    await printFirstSplitCards();
 
     if (gameData.playerHand[0].value === gameData.playerHand[1].value) {
 
@@ -285,6 +288,68 @@ function init() {
 
 
     }
+  }
+
+  async function printFirstSplitCards() {
+    let splitContainer1 = document.querySelector(".split-cards-container1");
+    let splitContainer2 = document.querySelector(".split-cards-container2");
+
+    for (let card of gameData.splitCardArray[0]) {
+
+      let cardElem = document.createElement("div");
+      cardElem.classList.add("card-holder");
+      cardElem.style.opacity = 0;
+      cardElem.innerHTML =
+        `
+          <div class="card-face card-face-flipped">
+            <div class="card-front">
+              <img src="${card.image}" alt="">
+            </div>
+            <div class="card-back">
+              <img src="${card.backImage}" alt="">
+            </div>
+          </div>
+          `;
+
+      cardElem.style.left = gameData.splitCardDist + "px";
+      gameData.splitCardDist += 5;
+
+      splitContainer1.appendChild(cardElem);
+      await delay(100);
+      fadeIn(cardElem);
+      await delay(500);
+      flipLastCard("player", gameData.deckSplit, 1);
+      gameData.splitSwitch = true;
+    }
+
+    for (let card of gameData.splitCardArray[1]) {
+
+      let cardElem = document.createElement("div");
+      cardElem.classList.add("card-holder");
+      cardElem.style.opacity = 0;
+      cardElem.innerHTML =
+        `
+          <div class="card-face card-face-flipped">
+            <div class="card-front">
+              <img src="${card.image}" alt="">
+            </div>
+            <div class="card-back">
+              <img src="${card.backImage}" alt="">
+            </div>
+          </div>
+          `;
+
+      cardElem.style.left = gameData.splitCardDist + "px";
+      gameData.splitCardDist += 5;
+
+      splitContainer2.appendChild(cardElem);
+      await delay(100);
+      fadeIn(cardElem);
+      await delay(500);
+      flipLastCard("player", gameData.deckSplit, 2);
+      gameData.splitSwitch = true;
+    }
+
   }
 
   function printSplitContainer() {
@@ -299,7 +364,7 @@ function init() {
     `
   }
 
-  async function printSplitCards(deckNumber) {
+  async function printSplitCards(deckNumber, firstCard) {
     let splitContainer1 = document.querySelector(".split-cards-container1");
     let splitContainer2 = document.querySelector(".split-cards-container2");
 
