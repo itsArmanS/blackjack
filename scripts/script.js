@@ -355,16 +355,28 @@ function init() {
   function printSplitContainer() {
     playerCardsContainer.innerHTML =
       `
-    <div class="split-cards-container1">
+      <div class="split-container-wrapper">
+      <div class="container1-wrapper">
+        <div class="split-cards-score1">
+          <div></div>
+        </div>
+        <div class="split-cards-container1">
 
-    </div>
-    <div class="split-cards-container2">
-      
+        </div>
+      </div>
+      <div class="container2-wrapper">
+        <div class="split-cards-score2">
+          <div></div>
+        </div>
+        <div class="split-cards-container2">
+
+        </div>
+      </div>
     </div>
     `
   }
 
-  async function printSplitCards(deckNumber, firstCard) {
+  async function printSplitCards(deckNumber,) {
     let splitContainer1 = document.querySelector(".split-cards-container1");
     let splitContainer2 = document.querySelector(".split-cards-container2");
 
@@ -373,19 +385,17 @@ function init() {
     let splitPlayerCards = drawData.cards;
 
     for (let card of splitPlayerCards) {
-      if (deckNumber === 1) {
+      card.backImage = "https://deckofcardsapi.com/static/img/back.png";
+      card.bjVal = getValueByCardType(card.value, "player");
+      gameData.splitCardArray[0].push(card);
+      gameData.splitScoreArray[0].push(+card.bjVal);
+      console.log(gameData.splitCardArray, gameData.splitScoreArray);
 
-        card.backImage = "https://deckofcardsapi.com/static/img/back.png";
-        card.bjVal = getValueByCardType(card.value, "player");
-        gameData.splitCardArray[0].push(card);
-        gameData.splitScoreArray[0].push(+card.bjVal);
-        console.log(gameData.splitCardArray, gameData.splitScoreArray);
-
-        let cardElem = document.createElement("div");
-        cardElem.classList.add("card-holder");
-        cardElem.style.opacity = 0;
-        cardElem.innerHTML =
-          `
+      let cardElem = document.createElement("div");
+      cardElem.classList.add("card-holder");
+      cardElem.style.opacity = 0;
+      cardElem.innerHTML =
+        `
           <div class="card-face card-face-flipped">
             <div class="card-front">
               <img src="${card.image}" alt="">
@@ -396,49 +406,24 @@ function init() {
           </div>
           `;
 
-        cardElem.style.left = gameData.splitCardDist + "px";
-        gameData.splitCardDist += 5;
+      cardElem.style.left = gameData.splitCardDist + "px";
+      gameData.splitCardDist += 5;
 
+      if (deckNumber === 1) {
         splitContainer1.appendChild(cardElem);
-        await delay(100);
-        fadeIn(cardElem);
-        await delay(500);
+      } else {
+        splitContainer2.appendChild(cardElem);
+      }
+
+      await delay(100);
+      fadeIn(cardElem);
+      await delay(500);
+      if (deckNumber === 1) {
         flipLastCard("player", gameData.deckSplit, 1);
         gameData.splitSwitch = true;
-
       } else {
-
-        card.backImage = "https://deckofcardsapi.com/static/img/back.png";
-        card.bjVal = getValueByCardType(card.value, "player");
-        gameData.splitCardArray[1].push(card);
-        gameData.splitScoreArray[1].push(+card.bjVal);
-        console.log(gameData.splitCardArray, gameData.splitScoreArray);
-
-        let cardElem = document.createElement("div");
-        cardElem.classList.add("card-holder");
-        cardElem.style.opacity = 0;
-        cardElem.innerHTML =
-          `
-          <div class="card-face card-face-flipped">
-            <div class="card-front">
-              <img src="${card.image}" alt="">
-            </div>
-            <div class="card-back">
-              <img src="${card.backImage}" alt="">
-            </div>
-          </div>
-          `;
-
-        cardElem.style.left = gameData.splitCardDist + "px";
-        gameData.splitCardDist += 5;
-
-        splitContainer2.appendChild(cardElem);
-        await delay(100);
-        fadeIn(cardElem);
-        await delay(500);
         flipLastCard("player", gameData.deckSplit, 2);
         gameData.splitSwitch = false;
-
       }
     }
   }

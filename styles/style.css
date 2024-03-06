@@ -114,6 +114,35 @@
   height: 20rem;
 }
 
+.split-container-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+.container1-wrapper,
+.container2-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.split-cards-score1,
+.split-cards-score2 {
+  flex: 0.2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.split-cards-score1>div,
+.split-cards-score2>div {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 1rem;
+  border: 1px red solid;
+}
+
 .split-cards-container1,
 .split-cards-container2 {
   flex: 1;
