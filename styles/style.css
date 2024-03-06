@@ -118,6 +118,15 @@
 .split-cards-container2 {
   flex: 1;
   height: 100%;
+  display: flex;
+  position: relative;
+}
+
+.split-cards-container1 .card-holder,
+.split-cards-container2 .card-holder {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .pScore-count,
