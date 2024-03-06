@@ -112,8 +112,8 @@ function init() {
     console.log(gameData.playerGameState, "PGS");
     console.log(gameData.roundEnded, "ended");
     newRoundTimer();
-    printSplitCards(gameData.deckSplit, 1)
-    printSplitCards(gameData.deckSplit, 2)
+    printSplitCards(1)
+    printSplitCards(2)
   }
 
   async function getDeckData() {
@@ -296,20 +296,22 @@ function init() {
 
     for (let card of gameData.splitCardArray[0]) {
 
+      gameData.splitScoreArray[0].push(+card.bjVal);
+
       let cardElem = document.createElement("div");
       cardElem.classList.add("card-holder");
       cardElem.style.opacity = 0;
       cardElem.innerHTML =
         `
-          <div class="card-face card-face-flipped">
-            <div class="card-front">
-              <img src="${card.image}" alt="">
-            </div>
-            <div class="card-back">
-              <img src="${card.backImage}" alt="">
-            </div>
+        <div class="card-face card-face-flipped">
+          <div class="card-front">
+            <img src="${card.image}" alt="">
           </div>
-          `;
+          <div class="card-back">
+            <img src="${card.backImage}" alt="">
+          </div>
+        </div>
+      `;
 
       cardElem.style.left = gameData.splitCardDist + "px";
       gameData.splitCardDist += 5;
@@ -323,6 +325,9 @@ function init() {
     }
 
     for (let card of gameData.splitCardArray[1]) {
+
+      gameData.splitScoreArray[1].push(+card.bjVal);
+
 
       let cardElem = document.createElement("div");
       cardElem.classList.add("card-holder");
@@ -349,7 +354,8 @@ function init() {
       flipLastCard("player", gameData.deckSplit, 2);
       gameData.splitSwitch = true;
     }
-
+    countUserScore("player", gameData.deckSplit, 1);
+    countUserScore("player", gameData.deckSplit, 2);
   }
 
   function printSplitContainer() {
@@ -374,9 +380,14 @@ function init() {
       </div>
     </div>
     `
+    let splitScore1 = document.querySelector(".split-cards-score1");
+    let splitScore2 = document.querySelector(".split-cards-score2");
+
+    fadeIn(splitScore1);
+    fadeIn(splitScore2);
   }
 
-  async function printSplitCards(deckNumber,) {
+  async function printSplitCards(deckNumber) {
     let splitContainer1 = document.querySelector(".split-cards-container1");
     let splitContainer2 = document.querySelector(".split-cards-container2");
 
@@ -387,8 +398,7 @@ function init() {
     for (let card of splitPlayerCards) {
       card.backImage = "https://deckofcardsapi.com/static/img/back.png";
       card.bjVal = getValueByCardType(card.value, "player");
-      gameData.splitCardArray[0].push(card);
-      gameData.splitScoreArray[0].push(+card.bjVal);
+
       console.log(gameData.splitCardArray, gameData.splitScoreArray);
 
       let cardElem = document.createElement("div");
@@ -407,7 +417,7 @@ function init() {
           `;
 
       cardElem.style.left = gameData.splitCardDist + "px";
-      gameData.splitCardDist += 5;
+      gameData.splitCardDist += 7;
 
       if (deckNumber === 1) {
         splitContainer1.appendChild(cardElem);
@@ -419,13 +429,22 @@ function init() {
       fadeIn(cardElem);
       await delay(500);
       if (deckNumber === 1) {
-        flipLastCard("player", gameData.deckSplit, 1);
+        await flipLastCard("player", gameData.deckSplit, 1);
+        gameData.splitCardArray[0].push(card);
+        gameData.splitScoreArray[0].push(+card.bjVal);
+        console.log(gameData.splitScoreArray, "splitscorearray")
         gameData.splitSwitch = true;
       } else {
         flipLastCard("player", gameData.deckSplit, 2);
+        gameData.splitCardArray[1].push(card);
+        gameData.splitScoreArray[1].push(+card.bjVal);
+
         gameData.splitSwitch = false;
       }
+      console.log(gameData.splitScore1, gameData.splitScore2, "Split Scores")
     }
+    countUserScore("player", gameData.deckSplit, 1);
+    countUserScore("player", gameData.deckSplit, 2);
   }
 
   function addBet() {
@@ -611,32 +630,48 @@ function init() {
     compScoreBubble.innerHTML = `Dealer Score: ${gameData.compScore}`
   }
 
-  function countUserScore(user) {
+  function countUserScore(user, deckSplit, deckNumber) {
     if (user === "player") {
-      let pCount = 0;
-      gameData.playerScoreArray.forEach((item) => {
+      if (deckSplit) {
 
+        let splitScore1 = document.querySelector(".split-cards-score1");
+        let innerDiv1 = splitScore1.firstElementChild;
+        let splitScore2 = document.querySelector(".split-cards-score2");
+        let innerDiv2 = splitScore2.firstElementChild;
 
-        pCount += +item
-        gameData.playerScore = +pCount
-        playerScoreBubble.innerHTML = `Your Score: ${gameData.playerScore}`;
-
-      })
+        if (deckNumber === 1) {
+          let split1Count = 0;
+          for (let item of gameData.splitScoreArray[0]) {
+            split1Count += +item
+            gameData.splitScore1 = +split1Count
+            innerDiv1.innerHTML = gameData.splitScore1;
+          }
+        } else {
+          let split2Count = 0;
+          for (let item of gameData.splitScoreArray[1]) {
+            split2Count += +item
+            gameData.splitScore2 = +split2Count
+            innerDiv2.innerHTML = gameData.splitScore2;
+          }
+        }
+      } else {
+        let pCount = 0;
+        gameData.playerScoreArray.forEach((item) => {
+          pCount += +item
+          gameData.playerScore = +pCount
+          playerScoreBubble.innerHTML = `Your Score: ${gameData.playerScore}`;
+        })
+      }
     } else {
       let cCount = 0;
       gameData.compScoreArray.forEach((item) => {
         if (gameData.standClicked) {
-
           cCount += +item;
           gameData.compScore = +cCount;
           compScoreBubble.innerHTML = `Dealer Score: ${gameData.compScore}`;
-
         } else {
-
           compScoreBubble.innerHTML = `Dealer Score: ${gameData.compScoreArray[0]}`;
-
         }
-
       })
     }
     setGameState(user);

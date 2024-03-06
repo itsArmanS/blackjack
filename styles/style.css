@@ -141,6 +141,10 @@
   height: 2rem;
   border-radius: 1rem;
   border: 1px red solid;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .split-cards-container1,
