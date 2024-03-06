@@ -12,16 +12,13 @@ function init() {
   let placeBet = document.querySelector("#place-bet");
   let playerCardsContainer = document.querySelector(".player-cards-container");
   let compContainer = document.querySelector(".comp-container");
-  let pScore = document.querySelector(".pScore");
-  let cScore = document.querySelector(".cScore");
-  let screenMessage = document.querySelector("#screen");
-  let betDisplay = document.querySelector(".bet-display");
   let subtractBetButton = document.querySelector(".minus-bet");
   let addBetButton = document.querySelector(".plus-bet");
   let playerScoreBubble = document.querySelector(".player-score-bubble");
   let currentBetBubble = document.querySelector(".current-bet-bubble");
   let gameMessageBubble = document.querySelector(".game-message-bubble");
   let playerCreditsBubble = document.querySelector(".player-credits-bubble");
+  let compScoreBubble = document.querySelector(".comp-score-bubble");
 
   let test = document.querySelector("#testy");
 
@@ -132,7 +129,7 @@ function init() {
 
 
       if (gameData.playerScore === 21) {
-        changeButtonFunction("off", "player")
+        changeButtonFunction("off", "all")
         setGameState("player");
         setGameState("comp");
         gameData.roundEnded = true;
@@ -440,6 +437,7 @@ function init() {
   function displayStartingMessage() {
     playerScoreBubble.innerHTML = `Your Score: ${gameData.playerScore}`
     gameMessageBubble.innerHTML = "Place Your Bet";
+    compScoreBubble.innerHTML = `Dealer Score: ${gameData.compScore}`
   }
 
   function countUserScore(user) {
@@ -460,11 +458,11 @@ function init() {
 
           cCount += +item;
           gameData.compScore = +cCount;
-          cScore.innerHTML = gameData.compScore;
+          compScoreBubble.innerHTML = `Dealer Score: ${gameData.compScore}`;
 
         } else {
 
-          cScore.innerHTML = gameData.compScoreArray[0];
+          compScoreBubble.innerHTML = `Dealer Score: ${gameData.compScoreArray[0]}`;
 
         }
 
@@ -609,14 +607,14 @@ function init() {
     playerCardsContainer.innerHTML = "";
     compContainer.innerHTML = "";
     currentBetBubble.innerHTML = gameData.currentBet;
-    cScore.innerHTML = gameData.compScore;
+    compScoreBubble.innerHTML = `Dealer Score: ${gameData.compScore}`;
 
     playerScoreBubble.innerHTML = `Your Score: ${gameData.playerScore}`;
   }
 
   function newRoundTimer() {
     if (gameData.roundEnded) {
-      let count = 5;
+      let count = 2;
 
       gameMessageBubble.innerHTML = `New round in ${count}`;
       screenMessageAnimation(gameMessageBubble, 20);
@@ -633,6 +631,7 @@ function init() {
           resetGameData();
           displayCurrentBet();
           changeButtonFunction("on", "bet");
+          changeButtonFunction("off", "player");
         }
       }, 1000);
     }
@@ -675,14 +674,14 @@ function init() {
 
   function printGameState(opponentState, userState) {
     if (userState === GAME_STATE_TYPES.WIN) {
-      return `YOU WON ${gameData.currentBet} credits`;
+      return `YOU WON ${gameData.currentBet} CREDITS`;
     } else if (opponentState === GAME_STATE_TYPES.DRAW) {
-      return `DRAW: Returned ${gameData.currentBet} credits`;
-    } else if (opponentState === GAME_STATE_TYPES.BUST)
-      return `YOU LOST ${gameData.currentBet} credits`;
+      return `DRAW: Returned ${gameData.currentBet} CREDITS`;
+    } else if (opponentState === GAME_STATE_TYPES.BUST) {
+      return `YOU WON ${gameData.currentBet} CREDITS`;
+    }
+    return `YOU LOST ${gameData.currentBet} CREDITS`
   }
-
-
 
 }
 
