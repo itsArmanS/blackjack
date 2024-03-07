@@ -147,6 +147,16 @@
   align-items: center;
 }
 
+.split-cards-score1>span,
+.split-cards-score2>span {
+  width: 2rem;
+  height: 2rem;
+  color: rgb(255, 0, 0);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .split-cards-container1,
 .split-cards-container2 {
   flex: 1;

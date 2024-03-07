@@ -220,6 +220,11 @@ function init() {
   }
 
   async function pressSplitHitButton() {
+    let splitScoreContainer1 = document.querySelector(".split-cards-score1");
+    let innerArrow1 = splitScoreContainer1.children[1];
+    let splitScoreContainer2 = document.querySelector(".split-cards-score2");
+    let innerArrow2 = splitScoreContainer2.children[1];
+
     if (gameData.deckSplit) {
       console.log("test")
       console.log(gameData.splitSwitch)
@@ -230,21 +235,60 @@ function init() {
         countUserScore("player", gameData.deckSplit, 1);
 
         if (gameData.splitScore1 > 21) {
-
           changeButtonFunction("off", "all");
-          gameData.roundEnded = true;
+          gameData.splitSwitch = true;
           setGameState("player", 1, gameData.standClicked);
           setGameState("comp");
           console.log(gameData.splitState1, gameData.compGameState, "Splitstates")
-
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
           screenMessageAnimation(gameMessageBubble);
 
+          innerArrow1.innerHTML = "",
+            innerArrow2.innerHTML = "<-";
+
+          await delay(1000);
+          changeButtonFunction("on", "player");
+
+        } else if (gameData.splitScore1 === 21) {
+          changeButtonFunction("off", "all");
+          gameData.splitSwitch = true;
+          setGameState("player", 1, gameData.standClicked);
+          setGameState("comp");
+          gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
+          screenMessageAnimation(gameMessageBubble);
+
+          innerArrow1.innerHTML = "",
+            innerArrow2.innerHTML = "<-";
+
+          await delay(1000);
+          changeButtonFunction("on", "player");
 
         } else {
+          changeButtonFunction("on", "player");
+        }
+      } else {
 
+        await printSplitCards(2);
+        countUserScore("player", gameData.deckSplit, 2);
 
+        if (gameData.splitScore2 > 21) {
+          changeButtonFunction("off", "all");
+          setGameState("player", 2, gameData.standClicked);
+          setGameState("comp");
+          console.log(gameData.splitState2, gameData.compGameState, "Splitstates")
+          gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
+          screenMessageAnimation(gameMessageBubble);
 
+          innerArrow2.innerHTML = "";
+        } else if (gameData.splitScore2 === 21) {
+          setGameState("player", 2, gameData.standClicked);
+          setGameState("comp");
+          gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
+          screenMessageAnimation(gameMessageBubble);
+
+          innerArrow2.innerHTML = "";
+        } else {
+          changeButtonFunction("on", "player");
         }
 
       }
@@ -336,6 +380,7 @@ function init() {
       <div class="container1-wrapper">
         <div class="split-cards-score1">
           <div></div>
+          <span><-</span>
         </div>
         <div class="split-cards-container1">
 
@@ -344,6 +389,7 @@ function init() {
       <div class="container2-wrapper">
         <div class="split-cards-score2">
           <div></div>
+          <span></span>
         </div>
         <div class="split-cards-container2">
 
@@ -934,25 +980,16 @@ function init() {
     }, ms)
   }
 
-  function printGameState(opponentState, userState, deckSplit) {
-    if (deckSplit) {
-
-    } else {
-      if (userState === GAME_STATE_TYPES.WIN) {
-        return `YOU WON ${gameData.currentBet} CREDITS`;
-      } else if (opponentState === GAME_STATE_TYPES.DRAW) {
-        return `DRAW: Returned ${gameData.currentBet} CREDITS`;
-      } else if (opponentState === GAME_STATE_TYPES.BUST) {
-        return `YOU WON ${gameData.currentBet} CREDITS`;
-      }
-      return `YOU LOST ${gameData.currentBet} CREDITS`
+  function printGameState(opponentState, userState) {
+    if (userState === GAME_STATE_TYPES.WIN) {
+      return `YOU WON ${gameData.currentBet} CREDITS`;
+    } else if (opponentState === GAME_STATE_TYPES.DRAW) {
+      return `DRAW: Returned ${gameData.currentBet} CREDITS`;
+    } else if (opponentState === GAME_STATE_TYPES.BUST) {
+      return `YOU WON ${gameData.currentBet} CREDITS`;
     }
+    return `YOU LOST ${gameData.currentBet} CREDITS`
   }
-
-
-
-
-
 
 }
 
