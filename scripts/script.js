@@ -51,7 +51,10 @@ function init() {
     splitScore2: 0,
     splitCardArray: [[], []],
     splitScoreArray: [[], []],
-    splitCardDist: 0,
+    splitState1: "",
+    splitState2: "",
+    splitCardDist1: 0,
+    splitCardDist2: 0,
   }
 
   window.onload = () => {
@@ -104,6 +107,10 @@ function init() {
       addBetButton.disabled = true;
       subtractBetButton.disabled = true;
       placeBet.disabled = true;
+    } else if (state === "on" && group === "split") {
+      split.disabled = false;
+    } else if (state === "off" && group === "split") {
+      split.disabled = true;
     }
   }
 
@@ -176,45 +183,76 @@ function init() {
   }
 
   async function pressHitButton() {
-    try {
-      changeButtonFunction("off", "player");
-      await printPlayerCards();
+    changeButtonFunction("off", "player");
+    await printPlayerCards();
 
-      if (gameData.finalDraw) {
-        setGameState("player");
-        setGameState("comp");
-        gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
-        gameData.playerCredits += gameData.currentBet;
-      }
+    if (gameData.finalDraw) {
+      setGameState("player");
+      setGameState("comp");
+      gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
+      gameData.playerCredits += gameData.currentBet;
+    }
 
-      if (gameData.playerScore > 21) {
-        changeButtonFunction("off", "all");
-        gameData.roundEnded = true;
-        setGameState("player");
-        setGameState("comp");
-
-        gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
-        screenMessageAnimation(gameMessageBubble);
-        // newRoundTimer();
-      } else if (gameData.playerScore === 21) {
-        setGameState("player")
-        setGameState("comp")
-        gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
-        screenMessageAnimation(gameMessageBubble);
-      } else {
-        changeButtonFunction("on", "player");
-      }
-
+    if (gameData.playerScore > 21) {
+      changeButtonFunction("off", "all");
+      gameData.roundEnded = true;
       setGameState("player");
       setGameState("comp");
 
-      if (gameData.playerGameState !== '' && gameData.compGameState !== '') {
-        gameData.roundEnded = true;
-      }
-
-    } catch (error) {
-      console.log(error);
+      gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+      screenMessageAnimation(gameMessageBubble);
+      // newRoundTimer();
+    } else if (gameData.playerScore === 21) {
+      setGameState("player")
+      setGameState("comp")
+      gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+      screenMessageAnimation(gameMessageBubble);
+    } else {
+      changeButtonFunction("on", "player");
     }
+
+    setGameState("player");
+    setGameState("comp");
+
+    if (gameData.playerGameState !== '' || gameData.compGameState !== '') {
+      gameData.roundEnded = true;
+    }
+  }
+
+  async function pressSplitHitButton() {
+    if (gameData.deckSplit) {
+      console.log("test")
+      console.log(gameData.splitSwitch)
+
+      if (gameData.splitSwitch === false) {
+        // changeButtonFunction("off", "player");
+        await printSplitCards(1);
+        countUserScore("player", gameData.deckSplit, 1);
+
+        if (gameData.splitScore1 > 21) {
+
+          changeButtonFunction("off", "all");
+          gameData.roundEnded = true;
+          setGameState("player", 1, gameData.standClicked);
+          setGameState("comp");
+          console.log(gameData.splitState1, gameData.compGameState, "Splitstates")
+
+          gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
+          screenMessageAnimation(gameMessageBubble);
+
+
+        } else {
+
+
+
+        }
+
+      }
+    }
+  }
+
+  async function pressSplitStandButton() {
+
   }
 
   async function pressStandButton() {
@@ -273,11 +311,12 @@ function init() {
   async function pressSplitButton() {
     let splitContainer1 = document.querySelector(".split-cards-container1");
     let splitContainer2 = document.querySelector(".split-cards-container2");
+    hit.removeEventListener("click", pressHitButton);
+    hit.addEventListener("click", pressSplitHitButton);
 
     gameData.deckSplit = true
     printSplitContainer();
-    console.log(gameData.splitCardArray)
-
+    changeButtonFunction("off", "split")
     gameData.splitCardArray[0].push(gameData.playerHand[0]);
     gameData.splitCardArray[1].push(gameData.playerHand[1]);
     await printFirstSplitCards();
@@ -288,74 +327,6 @@ function init() {
 
 
     }
-  }
-
-  async function printFirstSplitCards() {
-    let splitContainer1 = document.querySelector(".split-cards-container1");
-    let splitContainer2 = document.querySelector(".split-cards-container2");
-
-    for (let card of gameData.splitCardArray[0]) {
-
-      gameData.splitScoreArray[0].push(+card.bjVal);
-
-      let cardElem = document.createElement("div");
-      cardElem.classList.add("card-holder");
-      cardElem.style.opacity = 0;
-      cardElem.innerHTML =
-        `
-        <div class="card-face card-face-flipped">
-          <div class="card-front">
-            <img src="${card.image}" alt="">
-          </div>
-          <div class="card-back">
-            <img src="${card.backImage}" alt="">
-          </div>
-        </div>
-      `;
-
-      cardElem.style.left = gameData.splitCardDist + "px";
-      gameData.splitCardDist += 5;
-
-      splitContainer1.appendChild(cardElem);
-      await delay(100);
-      fadeIn(cardElem);
-      await delay(500);
-      flipLastCard("player", gameData.deckSplit, 1);
-      gameData.splitSwitch = true;
-    }
-
-    for (let card of gameData.splitCardArray[1]) {
-
-      gameData.splitScoreArray[1].push(+card.bjVal);
-
-
-      let cardElem = document.createElement("div");
-      cardElem.classList.add("card-holder");
-      cardElem.style.opacity = 0;
-      cardElem.innerHTML =
-        `
-          <div class="card-face card-face-flipped">
-            <div class="card-front">
-              <img src="${card.image}" alt="">
-            </div>
-            <div class="card-back">
-              <img src="${card.backImage}" alt="">
-            </div>
-          </div>
-          `;
-
-      cardElem.style.left = gameData.splitCardDist + "px";
-      gameData.splitCardDist += 5;
-
-      splitContainer2.appendChild(cardElem);
-      await delay(100);
-      fadeIn(cardElem);
-      await delay(500);
-      flipLastCard("player", gameData.deckSplit, 2);
-      gameData.splitSwitch = true;
-    }
-    countUserScore("player", gameData.deckSplit, 1);
-    countUserScore("player", gameData.deckSplit, 2);
   }
 
   function printSplitContainer() {
@@ -387,6 +358,72 @@ function init() {
     fadeIn(splitScore2);
   }
 
+  async function printFirstSplitCards() {
+    let splitContainer1 = document.querySelector(".split-cards-container1");
+    let splitContainer2 = document.querySelector(".split-cards-container2");
+
+    for (let card of gameData.splitCardArray[0]) {
+
+      gameData.splitScoreArray[0].push(+card.bjVal);
+
+      let cardElem = document.createElement("div");
+      cardElem.classList.add("card-holder");
+      cardElem.style.opacity = 0;
+      cardElem.innerHTML =
+        `
+        <div class="card-face card-face-flipped">
+          <div class="card-front">
+            <img src="${card.image}" alt="">
+          </div>
+          <div class="card-back">
+            <img src="${card.backImage}" alt="">
+          </div>
+        </div>
+      `;
+
+      cardElem.style.left = gameData.splitCardDist1 + "px";
+      gameData.splitCardDist1 += 15;
+
+      splitContainer1.appendChild(cardElem);
+      await delay(100);
+      fadeIn(cardElem);
+      await delay(500);
+      flipLastCard("player", gameData.deckSplit, 1);
+    }
+
+    for (let card of gameData.splitCardArray[1]) {
+
+      gameData.splitScoreArray[1].push(+card.bjVal);
+
+
+      let cardElem = document.createElement("div");
+      cardElem.classList.add("card-holder");
+      cardElem.style.opacity = 0;
+      cardElem.innerHTML =
+        `
+          <div class="card-face card-face-flipped">
+            <div class="card-front">
+              <img src="${card.image}" alt="">
+            </div>
+            <div class="card-back">
+              <img src="${card.backImage}" alt="">
+            </div>
+          </div>
+          `;
+
+      cardElem.style.left = gameData.splitCardDist2 + "px";
+      gameData.splitCardDist2 += 15;
+
+      splitContainer2.appendChild(cardElem);
+      await delay(100);
+      fadeIn(cardElem);
+      await delay(500);
+      flipLastCard("player", gameData.deckSplit, 2);
+    }
+    countUserScore("player", gameData.deckSplit, 1);
+    countUserScore("player", gameData.deckSplit, 2);
+  }
+
   async function printSplitCards(deckNumber) {
     let splitContainer1 = document.querySelector(".split-cards-container1");
     let splitContainer2 = document.querySelector(".split-cards-container2");
@@ -416,12 +453,15 @@ function init() {
           </div>
           `;
 
-      cardElem.style.left = gameData.splitCardDist + "px";
-      gameData.splitCardDist += 7;
+
 
       if (deckNumber === 1) {
+        cardElem.style.left = gameData.splitCardDist1 + "px";
+        gameData.splitCardDist1 += 15;
         splitContainer1.appendChild(cardElem);
       } else {
+        cardElem.style.left = gameData.splitCardDist2 + "px";
+        gameData.splitCardDist2 += 15;
         splitContainer2.appendChild(cardElem);
       }
 
@@ -433,13 +473,10 @@ function init() {
         gameData.splitCardArray[0].push(card);
         gameData.splitScoreArray[0].push(+card.bjVal);
         console.log(gameData.splitScoreArray, "splitscorearray")
-        gameData.splitSwitch = true;
       } else {
         flipLastCard("player", gameData.deckSplit, 2);
         gameData.splitCardArray[1].push(card);
         gameData.splitScoreArray[1].push(+card.bjVal);
-
-        gameData.splitSwitch = false;
       }
       console.log(gameData.splitScore1, gameData.splitScore2, "Split Scores")
     }
@@ -763,9 +800,17 @@ function init() {
     countUserScore("comp");
   }
 
-  function setGameState(user) {
+  function setGameState(user, deckNumber, deckSplit) {
     if (user === "player") {
-      gameData.playerGameState = stateLogicSetter(gameData.playerScore, gameData.compScore, gameData.standClicked);
+      if (deckSplit) {
+        if (deckNumber === 1) {
+          gameData.splitState1 = stateLogicSetter(gameData.splitScore1, gameData.compScore, gameData.standClicked)
+        } else {
+          gameData.splitState2 = stateLogicSetter(gameData.splitScore2, gameData.compScore, gameData.standClicked)
+        }
+      } else {
+        gameData.playerGameState = stateLogicSetter(gameData.playerScore, gameData.compScore, gameData.standClicked);
+      }
     } else {
       gameData.compGameState = stateLogicSetter(gameData.compScore, gameData.playerScore, gameData.standClicked);
     }
@@ -793,15 +838,13 @@ function init() {
     }
   }
 
-  function decideBetReturn(userState, opponentState) {
-    if (userState === "WIN" || opponentState === "BUST") {
+  function decideBetReturn(userState) {
+    if (userState === GAME_STATE_TYPES.WIN) {
       return 2.5;
-    } else if (userState === "WIN" && opponentState === "WIN") {
-      return 0;
-    } else if (userState === "BUST" || opponentState === "WIN") {
-      return 0;
-    } else if (userState === "DRAW" && opponentState === "DRAW") {
+    } else if (userState === GAME_STATE_TYPES.DRAW) {
       return 1;
+    } else if (userState === GAME_STATE_TYPES.BUST) {
+      return 0;
     }
   }
 
@@ -891,16 +934,25 @@ function init() {
     }, ms)
   }
 
-  function printGameState(opponentState, userState) {
-    if (userState === GAME_STATE_TYPES.WIN) {
-      return `YOU WON ${gameData.currentBet} CREDITS`;
-    } else if (opponentState === GAME_STATE_TYPES.DRAW) {
-      return `DRAW: Returned ${gameData.currentBet} CREDITS`;
-    } else if (opponentState === GAME_STATE_TYPES.BUST) {
-      return `YOU WON ${gameData.currentBet} CREDITS`;
+  function printGameState(opponentState, userState, deckSplit) {
+    if (deckSplit) {
+
+    } else {
+      if (userState === GAME_STATE_TYPES.WIN) {
+        return `YOU WON ${gameData.currentBet} CREDITS`;
+      } else if (opponentState === GAME_STATE_TYPES.DRAW) {
+        return `DRAW: Returned ${gameData.currentBet} CREDITS`;
+      } else if (opponentState === GAME_STATE_TYPES.BUST) {
+        return `YOU WON ${gameData.currentBet} CREDITS`;
+      }
+      return `YOU LOST ${gameData.currentBet} CREDITS`
     }
-    return `YOU LOST ${gameData.currentBet} CREDITS`
   }
+
+
+
+
+
 
 }
 

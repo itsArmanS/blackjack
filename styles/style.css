@@ -256,6 +256,7 @@
   height: 2rem;
   border-radius: 5rem;
   font-size: 10px;
+  box-shadow: 3px 3px black;
 }
 
 .pbtns.unclick,
