@@ -70,6 +70,21 @@
   font-size: 10px;
 }
 
+.player-score-bubble.split {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-left: 2rem;
+}
+
+.deck1-state,
+.deck2-state {
+  font-size: 12px;
+}
+
+
 .player-credits-bubble>div {
   font-size: 10px;
   color: rgb(0, 255, 21);

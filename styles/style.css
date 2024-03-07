@@ -21,6 +21,7 @@
 
 .table-border {
   width: 50%;
+  min-width: 45rem;
   max-width: 45rem;
   border-radius: 5rem;
 }
@@ -163,6 +164,7 @@
   height: 100%;
   display: flex;
   position: relative;
+  border: 1px solid red;
 }
 
 .split-cards-container1 .card-holder,

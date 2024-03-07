@@ -61,6 +61,7 @@ function init() {
     getDeckData();
     displayCredits();
     changeButtonFunction("off", "player");
+    changeButtonFunction("off", "split");
     displayStartingMessage();
   };
 
@@ -77,12 +78,10 @@ function init() {
       hit.disabled = false;
       stand.disabled = false;
       doubleDown.disabled = false;
-      split.disabled = false;
     } else if (state === "off" && group === "player") {
       hit.disabled = true;
       stand.disabled = true;
       doubleDown.disabled = true;
-      split.disabled = true;
     } else if (state === "on" && group === "bet") {
       addBetButton.disabled = false;
       subtractBetButton.disabled = false;
@@ -95,7 +94,6 @@ function init() {
       hit.disabled = false;
       stand.disabled = false;
       doubleDown.disabled = false;
-      split.disabled = false;
       addBetButton.disabled = false;
       subtractBetButton.disabled = false;
       placeBet.disabled = false;
@@ -103,7 +101,6 @@ function init() {
       hit.disabled = true;
       stand.disabled = true;
       doubleDown.disabled = true;
-      split.disabled = true;
       addBetButton.disabled = true;
       subtractBetButton.disabled = true;
       placeBet.disabled = true;
@@ -119,8 +116,6 @@ function init() {
     console.log(gameData.playerGameState, "PGS");
     console.log(gameData.roundEnded, "ended");
     newRoundTimer();
-    printSplitCards(1)
-    printSplitCards(2)
   }
 
   async function getDeckData() {
@@ -146,9 +141,8 @@ function init() {
 
       await startGameFlipCard()
 
-
+      
       if (gameData.playerScore === 21) {
-        changeButtonFunction("off", "all")
         setGameState("player");
         setGameState("comp");
         gameData.roundEnded = true;
@@ -159,6 +153,10 @@ function init() {
 
         gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
         screenMessageAnimation(gameMessageBubble, 20);
+      }
+
+      if (gameData.playerHand[0].value === gameData.playerHand[1].value) {
+        changeButtonFunction("on", "split")
       }
 
     } catch (error) {
@@ -198,13 +196,14 @@ function init() {
       gameData.roundEnded = true;
       setGameState("player");
       setGameState("comp");
-
       gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
       screenMessageAnimation(gameMessageBubble);
       // newRoundTimer();
     } else if (gameData.playerScore === 21) {
       setGameState("player")
       setGameState("comp")
+      gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
+      gameData.playerCredits += gameData.currentBet;
       gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
       screenMessageAnimation(gameMessageBubble);
     } else {
@@ -219,13 +218,15 @@ function init() {
     }
   }
 
-  async function pressSplitHitButton() {
+  async function pressSplitHitButton(deckNumber) {
     let splitScoreContainer1 = document.querySelector(".split-cards-score1");
     let innerArrow1 = splitScoreContainer1.children[1];
     let splitScoreContainer2 = document.querySelector(".split-cards-score2");
     let innerArrow2 = splitScoreContainer2.children[1];
+    let deckState1 = document.querySelector(".deck1-state");
+    let deckState2 = document.querySelector(".deck2-state");
 
-    if (gameData.deckSplit) {
+    if (gameData.deckSplit || deckNumber === 1) {
       console.log("test")
       console.log(gameData.splitSwitch)
 
@@ -235,30 +236,28 @@ function init() {
         countUserScore("player", gameData.deckSplit, 1);
 
         if (gameData.splitScore1 > 21) {
+
           changeButtonFunction("off", "all");
-          gameData.splitSwitch = true;
-          setGameState("player", 1, gameData.standClicked);
+          setGameState("player", 1, gameData.deckSplit);
           setGameState("comp");
-          console.log(gameData.splitState1, gameData.compGameState, "Splitstates")
+          deckState1.innerHTML = `Deck 1: ${gameData.splitState1}`;
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
           screenMessageAnimation(gameMessageBubble);
-
-          innerArrow1.innerHTML = "",
-            innerArrow2.innerHTML = "<-";
-
           await delay(1000);
+          pressSplitStandButton();
           changeButtonFunction("on", "player");
 
         } else if (gameData.splitScore1 === 21) {
           changeButtonFunction("off", "all");
           gameData.splitSwitch = true;
-          setGameState("player", 1, gameData.standClicked);
+          setGameState("player", 1, gameData.deckSplit);
           setGameState("comp");
+          deckState1.innerHTML = `Deck 2: ${gameData.splitState1}`;
+
+          gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
+          gameData.playerCredits += gameData.currentBet;
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
           screenMessageAnimation(gameMessageBubble);
-
-          innerArrow1.innerHTML = "",
-            innerArrow2.innerHTML = "<-";
 
           await delay(1000);
           changeButtonFunction("on", "player");
@@ -273,16 +272,21 @@ function init() {
 
         if (gameData.splitScore2 > 21) {
           changeButtonFunction("off", "all");
-          setGameState("player", 2, gameData.standClicked);
+          setGameState("player", 2, gameData.deckSplit);
           setGameState("comp");
+          deckState2.innerHTML = `Deck 2: ${gameData.splitState2}`;
           console.log(gameData.splitState2, gameData.compGameState, "Splitstates")
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
           screenMessageAnimation(gameMessageBubble);
 
           innerArrow2.innerHTML = "";
         } else if (gameData.splitScore2 === 21) {
-          setGameState("player", 2, gameData.standClicked);
+          setGameState("player", 2, gameData.deckSplit);
           setGameState("comp");
+          deckState2.innerHTML = `Deck 2: ${gameData.splitState2}`;
+
+          gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
+          gameData.playerCredits += gameData.currentBet;
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
           screenMessageAnimation(gameMessageBubble);
 
@@ -293,17 +297,56 @@ function init() {
 
       }
     }
+    if (gameData.splitState1 !== '' || gameData.splitState2 !== '') {
+      gameData.roundEnded = true;
+    }
   }
 
   async function pressSplitStandButton() {
+    let splitScoreContainer1 = document.querySelector(".split-cards-score1");
+    let splitScoreContainer2 = document.querySelector(".split-cards-score2");
+    let innerArrow1 = splitScoreContainer1.children[1];
+    let innerArrow2 = splitScoreContainer2.children[1];
+    let deckState1 = document.querySelector(".deck1-state");
+    let deckState2 = document.querySelector(".deck2-state");
 
+    innerArrow1.innerHTML = "";
+    innerArrow2.innerHTML = "<-";
+
+    if (gameData.splitSwitch === true) {
+      changeButtonFunction("off", "all")
+      await handleSecondCard();
+
+      while (gameData.compScore <= 16) {
+        // && gameData.compScore <= gameData.splitScore1
+        await delay(500);
+        await printCompCards();
+        setGameState("player", 1, gameData.deckSplit);
+        setGameState("player", 2, gameData.deckSplit);
+        setGameState("comp");
+
+        if (gameData.compScore >= 17 && (gameData.compScore > gameData.splitScore1 && gameData.compScore > gameData.splitScore2) && gameData.compScore < 21) {
+          gameData.finalDraw = true;
+          setGameState("player", 1, gameData.deckSplit);
+          setGameState("player", 2, gameData.deckSplit);
+          setGameState("comp");
+          console.log(gameData.splitState1, gameData.compGameState, "stand in split deck1")
+
+          gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
+          await delay(1000);
+          gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
+          break;
+        }
+      }
+      setGameState("player", 1, gameData.deckSplit);
+      setGameState("player", 2, gameData.deckSplit);
+      setGameState("comp");
+    }
+
+    gameData.splitSwitch = true;
   }
 
   async function pressStandButton() {
-
-    changeButtonFunction("off", "all")
-    await handleSecondCard();
-
     while (gameData.compScore <= 16 && gameData.compScore <= gameData.playerScore) {
 
       await delay(500);
@@ -335,13 +378,10 @@ function init() {
     gameData.playerCredits += +gameData.currentBet;
     displayCredits();
     // newRoundTimer();
-
   }
 
   async function pressDoubleDownButton() {
     await printPlayerCards();
-
-
 
     setGameState("player");
     setGameState("comp");
@@ -353,17 +393,20 @@ function init() {
   }
 
   async function pressSplitButton() {
-    let splitContainer1 = document.querySelector(".split-cards-container1");
-    let splitContainer2 = document.querySelector(".split-cards-container2");
     hit.removeEventListener("click", pressHitButton);
     hit.addEventListener("click", pressSplitHitButton);
+    stand.removeEventListener("click", pressStandButton);
+    stand.addEventListener("click", pressSplitStandButton);
 
     gameData.deckSplit = true
     printSplitContainer();
     changeButtonFunction("off", "split")
+
     gameData.splitCardArray[0].push(gameData.playerHand[0]);
     gameData.splitCardArray[1].push(gameData.playerHand[1]);
     await printFirstSplitCards();
+    await printSplitCards(1);
+    await printSplitCards(2);
 
     if (gameData.playerHand[0].value === gameData.playerHand[1].value) {
 
@@ -402,6 +445,18 @@ function init() {
 
     fadeIn(splitScore1);
     fadeIn(splitScore2);
+
+    playerScoreBubble.innerHTML =
+      `
+    <div class="deck1-state">
+      Deck 1: ${gameData.splitState1}
+    </div>
+    <div class="deck2-state">
+      Deck 2: ${gameData.splitState2}
+    </div>
+    `
+    playerScoreBubble.classList.add("split");
+    fadeIn(playerScoreBubble);
   }
 
   async function printFirstSplitCards() {
@@ -725,8 +780,8 @@ function init() {
         if (deckNumber === 1) {
           let split1Count = 0;
           for (let item of gameData.splitScoreArray[0]) {
-            split1Count += +item
-            gameData.splitScore1 = +split1Count
+            split1Count += +item;
+            gameData.splitScore1 = +split1Count;
             innerDiv1.innerHTML = gameData.splitScore1;
           }
         } else {
