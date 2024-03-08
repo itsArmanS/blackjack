@@ -404,8 +404,8 @@ function init() {
   }
 
   async function pressSplitButton() {
-    await fadeOut(playerCardsContainer.children[0]);
-    await fadeOut(playerCardsContainer.children[1]);
+    await fadeOut(playerCardsContainer.children[0], 50);
+    await fadeOut(playerCardsContainer.children[1], 50);
     await delay(500);
     await printSplitContainer();
 
@@ -464,9 +464,8 @@ function init() {
     let innerScoreDiv1 = document.querySelector(".split-inner-score1");
     let innerScoreDiv2 = document.querySelector(".split-inner-score2");
 
-
-    fadeIn(innerScoreDiv1);
-    fadeIn(innerScoreDiv2);
+    fadeIn(innerScoreDiv1, 50);
+    fadeIn(innerScoreDiv2, 50);
 
     playerScoreBubble.innerHTML =
       `
@@ -478,12 +477,14 @@ function init() {
     </div>
     `
     playerScoreBubble.classList.add("split");
-    fadeIn(playerScoreBubble);
+    fadeIn(playerScoreBubble, 50);
   }
 
   async function printFirstSplitCards() {
     let splitContainer1 = document.querySelector(".split-cards-container1");
     let splitContainer2 = document.querySelector(".split-cards-container2");
+    let innerScoreDiv1 = document.querySelector(".split-inner-score1");
+    let innerScoreDiv2 = document.querySelector(".split-inner-score2");
 
     for (let card of gameData.splitCardArray[0]) {
 
@@ -509,7 +510,7 @@ function init() {
 
       splitContainer1.appendChild(cardElem);
       await delay(100);
-      fadeIn(cardElem);
+      fadeIn(cardElem, 50);
       await delay(500);
       flipLastCard("player", gameData.deckSplit, 1);
     }
@@ -539,17 +540,21 @@ function init() {
 
       splitContainer2.appendChild(cardElem);
       await delay(100);
-      fadeIn(cardElem);
+      fadeIn(cardElem, 50);
       await delay(500);
       flipLastCard("player", gameData.deckSplit, 2);
     }
     countUserScore("player", gameData.deckSplit, 1);
     countUserScore("player", gameData.deckSplit, 2);
+    fadeIn(innerScoreDiv1, 50);
+    fadeIn(innerScoreDiv2, 50);
   }
 
   async function printSplitCards(deckNumber) {
     let splitContainer1 = document.querySelector(".split-cards-container1");
     let splitContainer2 = document.querySelector(".split-cards-container2");
+    let innerScoreDiv1 = document.querySelector(".split-inner-score1");
+    let innerScoreDiv2 = document.querySelector(".split-inner-score2");
 
     let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${gameData.deckID}/draw/?count=1`);
     let drawData = await draw.json();
@@ -586,23 +591,26 @@ function init() {
         splitContainer2.appendChild(cardElem);
       }
 
-      await delay(100);
-      fadeIn(cardElem);
+      await delay(500);
+      fadeIn(cardElem, 50);
       await delay(500);
       if (deckNumber === 1) {
         await flipLastCard("player", gameData.deckSplit, 1);
         gameData.splitCardArray[0].push(card);
         gameData.splitScoreArray[0].push(+card.bjVal);
-        console.log(gameData.splitScoreArray, "splitscorearray")
+        countUserScore("player", gameData.deckSplit, 1);
+        fadeIn(innerScoreDiv1, 50);
       } else {
         flipLastCard("player", gameData.deckSplit, 2);
         gameData.splitCardArray[1].push(card);
         gameData.splitScoreArray[1].push(+card.bjVal);
+        countUserScore("player", gameData.deckSplit, 2);
+        fadeIn(innerScoreDiv2, 50);
       }
       console.log(gameData.splitScore1, gameData.splitScore2, "Split Scores")
     }
-    countUserScore("player", gameData.deckSplit, 1);
-    countUserScore("player", gameData.deckSplit, 2);
+
+
   }
 
   function addBet() {
@@ -690,14 +698,14 @@ function init() {
 
       playerCardsContainer.appendChild(cardElem);
       await delay(100);
-      fadeIn(cardElem);
+      fadeIn(cardElem, 50);
 
       if (gameData.playerHand.length > 2) {
         await delay(500);
         flipLastCard("player");
       }
     }
-    setGameState("player")
+    setGameState("player");
   }
 
   async function printCompCards() {
@@ -746,7 +754,7 @@ function init() {
 
         compContainer.appendChild(cardElem);
         await delay(100);
-        fadeIn(cardElem);
+        fadeIn(cardElem, 50);
 
         if (gameData.compHand.length > 2) {
           await delay(500);
@@ -775,7 +783,7 @@ function init() {
 
         compContainer.appendChild(cardElem);
         await delay(500);
-        fadeIn(cardElem);
+        fadeIn(cardElem, 50);
       }
       setGameState("comp")
     }
@@ -789,19 +797,17 @@ function init() {
   }
 
   function countUserScore(user, deckSplit, deckNumber) {
+    let innerScoreDiv1 = document.querySelector(".split-inner-score1");
+    let innerScoreDiv2 = document.querySelector(".split-inner-score2");
+
     if (user === "player") {
       if (deckSplit) {
-
-        let innerScoreDiv1 = document.querySelector(".split-inner-score1");
-        let innerScoreDiv2 = document.querySelector(".split-inner-score2");
-
         if (deckNumber === 1) {
           let split1Count = 0;
           for (let item of gameData.splitScoreArray[0]) {
             split1Count += +item;
             gameData.splitScore1 = +split1Count;
             innerScoreDiv1.innerHTML = gameData.splitScore1;
-            fadeIn(innerScoreDiv1);
           }
         } else {
           let split2Count = 0;
@@ -809,7 +815,6 @@ function init() {
             split2Count += +item;
             gameData.splitScore2 = +split2Count;
             innerScoreDiv2.innerHTML = gameData.splitScore2;
-            fadeIn(innerScoreDiv2);
           }
         }
       } else {
@@ -858,7 +863,7 @@ function init() {
     }
   }
 
-  async function fadeIn(element) {
+  async function fadeIn(element, ms) {
     element.style.opacity = 0;
     let opacity = 0;
     let timer = setInterval(function () {
@@ -867,10 +872,10 @@ function init() {
       }
       element.style.opacity = opacity;
       opacity += 0.1;
-    }, 50);
+    }, ms);
   }
 
-  async function fadeOut(element) {
+  async function fadeOut(element, ms) {
     element.style.opacity = 1;
     let opacity = 1;
     let timer = setInterval(function () {
@@ -879,7 +884,7 @@ function init() {
       }
       element.style.opacity = opacity;
       opacity -= 0.1;
-    }, 25);
+    }, ms);
   }
 
   function delay(ms) {
