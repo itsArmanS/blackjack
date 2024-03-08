@@ -137,16 +137,28 @@
   align-items: center;
 }
 
-.split-cards-score1>div,
-.split-cards-score2>div {
+.inner-score-wrapper1,
+.inner-score-wrapper2 {
   width: 2rem;
   height: 2rem;
   border-radius: 1rem;
-  border: 1px red solid;
+  border: 5px solid;
+  border-color: red;
   color: white;
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: border-color 0.7s ease-in-out;
+}
+
+.inner-score-wrapper1.active,
+.inner-score-wrapper2.active {
+  border: 5px solid green;
+}
+
+.inner-score-wrapper1.inactive,
+.inner-score-wrapper2.inactive {
+  border: 5px solid red;
 }
 
 .split-cards-score1>span,
