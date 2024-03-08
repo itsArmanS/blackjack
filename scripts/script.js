@@ -254,6 +254,9 @@ function init() {
           setGameState("comp");
           deckState1.innerHTML = `Deck 1: ${gameData.splitState1}`;
 
+          innerArrow1.innerHTML = '';
+          innerArrow2.innerHTML = '<-';
+
           gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
           gameData.playerCredits += gameData.currentBet;
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
@@ -404,10 +407,6 @@ function init() {
   }
 
   async function pressSplitButton() {
-    await fadeOut(playerCardsContainer.children[0], 50);
-    await fadeOut(playerCardsContainer.children[1], 50);
-    await delay(500);
-    await printSplitContainer();
 
     hit.removeEventListener("click", pressHitButton);
     hit.addEventListener("click", pressSplitHitButton);
@@ -415,6 +414,12 @@ function init() {
     stand.addEventListener("click", pressSplitStandButton);
 
     gameData.deckSplit = true
+
+    await fadeOut(playerCardsContainer.children[0], 50);
+    await fadeOut(playerCardsContainer.children[1], 50);
+    await delay(150);
+    await printSplitContainer();
+
 
     // changeButtonFunction("off", "split")
 
@@ -439,7 +444,7 @@ function init() {
       <div class="split-container-wrapper">
       <div class="container1-wrapper">
         <div class="split-cards-score1">
-          <div>
+          <div class="inner-score-wrapper1">
             <div class="split-inner-score1"></div>
           </div>
           <span><-</span>
@@ -450,7 +455,7 @@ function init() {
       </div>
       <div class="container2-wrapper">
         <div class="split-cards-score2">
-          <div>
+          <div class="inner-score-wrapper2">
             <div class="split-inner-score2"></div>
           </div>
           <span></span>
@@ -461,11 +466,15 @@ function init() {
       </div>
     </div>
     `
+    let innerScoreWrapper1 = document.querySelector(".split-inner-score1");
+    let innerScoreWrapper2 = document.querySelector(".split-inner-score2");
     let innerScoreDiv1 = document.querySelector(".split-inner-score1");
     let innerScoreDiv2 = document.querySelector(".split-inner-score2");
 
     fadeIn(innerScoreDiv1, 50);
     fadeIn(innerScoreDiv2, 50);
+    fadeIn(innerScoreWrapper1, 50);
+    fadeIn(innerScoreWrapper2, 50);
 
     playerScoreBubble.innerHTML =
       `
@@ -511,7 +520,7 @@ function init() {
       splitContainer1.appendChild(cardElem);
       await delay(100);
       fadeIn(cardElem, 50);
-      await delay(500);
+      await delay(100);
       flipLastCard("player", gameData.deckSplit, 1);
     }
 
@@ -541,7 +550,7 @@ function init() {
       splitContainer2.appendChild(cardElem);
       await delay(100);
       fadeIn(cardElem, 50);
-      await delay(500);
+      await delay(100);
       flipLastCard("player", gameData.deckSplit, 2);
     }
     countUserScore("player", gameData.deckSplit, 1);
@@ -591,7 +600,7 @@ function init() {
         splitContainer2.appendChild(cardElem);
       }
 
-      await delay(500);
+      await delay(75);
       fadeIn(cardElem, 50);
       await delay(500);
       if (deckNumber === 1) {
@@ -679,7 +688,7 @@ function init() {
       countUserScore("player");
 
       let cardElem = document.createElement("div");
-      cardElem.classList.add("card-holder");
+      cardElem.classList.add("card-holder", "slide-in");
       cardElem.style.opacity = 0;
       cardElem.innerHTML =
         `
@@ -693,12 +702,15 @@ function init() {
         </div>
         `;
 
-      cardElem.style.left = gameData.playerCardDist + "px";
-      gameData.playerCardDist += 105;
+      cardElem.style.left = "100%";
 
       playerCardsContainer.appendChild(cardElem);
       await delay(100);
-      fadeIn(cardElem, 50);
+      fadeIn(cardElem, 75);
+
+      cardElem.style.transition = "left 1s ease-in-out";
+      cardElem.style.left = gameData.playerCardDist + "px";
+      gameData.playerCardDist += 105;
 
       if (gameData.playerHand.length > 2) {
         await delay(500);
@@ -733,7 +745,7 @@ function init() {
       if (gameData.compHand.length < 2 || gameData.compHand.length > 2) {
 
         let cardElem = document.createElement("div");
-        cardElem.classList.add("card-holder");
+        cardElem.classList.add("card-holder", "slide-in");
         cardElem.style.opacity = 0;
         cardElem.innerHTML =
           `
@@ -748,13 +760,15 @@ function init() {
           
         `;
 
-        cardElem.style.left = gameData.compCardDist + "px";
-        gameData.compCardDist += 105;
-
+        cardElem.style.left = "100%";
 
         compContainer.appendChild(cardElem);
         await delay(100);
-        fadeIn(cardElem, 50);
+        fadeIn(cardElem, 75);
+
+        cardElem.style.transition = "left 1s ease-in-out";
+        cardElem.style.left = gameData.compCardDist + "px";
+        gameData.compCardDist += 105;
 
         if (gameData.compHand.length > 2) {
           await delay(500);
@@ -764,7 +778,7 @@ function init() {
       } else if (gameData.compHand.length === 2) {
 
         let cardElem = document.createElement("div");
-        cardElem.classList.add("card-holder");
+        cardElem.classList.add("card-holder", "slide-in");
         cardElem.style.opacity = 0;
         cardElem.innerHTML =
           `
@@ -778,12 +792,15 @@ function init() {
           </div>
           `;
 
-        cardElem.style.left = gameData.compCardDist + "px";
-        gameData.compCardDist += 105;
+        cardElem.style.left = "100%";
 
         compContainer.appendChild(cardElem);
         await delay(500);
-        fadeIn(cardElem, 50);
+        fadeIn(cardElem, 75);
+
+        cardElem.style.transition = "left 1s ease-in-out";
+        cardElem.style.left = gameData.compCardDist + "px";
+        gameData.compCardDist += 105;
       }
       setGameState("comp")
     }
@@ -889,6 +906,12 @@ function init() {
 
   function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  function appendAndSlide(element) {
+    setTimeout(() => {
+      element.style.right = '0';
+    }, 0);
   }
 
   async function startGameFlipCard() {

@@ -2,6 +2,14 @@
     width: 7rem;
     height: 10rem;
     background: none;
+    transition: all 0.8s ease-in-out;
+}
+
+.slide-in {
+    position: absolute;
+    top: 0;
+    right: -1000%;
+    transition: all 0.5s ease;
 }
 
 .card-face {
