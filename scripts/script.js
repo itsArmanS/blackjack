@@ -245,6 +245,9 @@ function init() {
           pressSplitStandButton();
           changeButtonFunction("on", "player");
 
+          innerScoreWrapper1.classList.remove("active");
+          innerScoreWrapper2.classList.add("active");
+
         } else if (gameData.splitScore1 === 21) {
           changeButtonFunction("off", "all");
           gameData.splitSwitch = true;
@@ -281,7 +284,7 @@ function init() {
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
           screenMessageAnimation(gameMessageBubble);
 
-          innerArrow2.innerHTML = "";
+          innerScoreWrapper2.classList.remove("active");
         } else if (gameData.splitScore2 === 21) {
           setGameState("player", 2, gameData.deckSplit);
           setGameState("comp");
@@ -292,7 +295,7 @@ function init() {
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
           screenMessageAnimation(gameMessageBubble);
 
-          innerArrow2.innerHTML = "";
+          innerScoreWrapper2.classList.remove("active");
         } else {
           changeButtonFunction("on", "player");
         }
@@ -314,8 +317,10 @@ function init() {
     innerScoreWrapper2.classList.add("active");
 
     if (gameData.splitSwitch === true) {
-      changeButtonFunction("off", "all")
+      changeButtonFunction("off", "all");
       await handleSecondCard();
+
+      innerScoreWrapper2.classList.remove("active");
 
       while (gameData.compScore <= 16) {
         // && gameData.compScore <= gameData.splitScore1
@@ -346,8 +351,18 @@ function init() {
     setGameState("player", 2, gameData.deckSplit);
     setGameState("comp");
 
-    deckState1.innerHTML = `Deck 1: ${gameData.splitState1}`;
-    deckState2.innerHTML = `Deck 2: ${gameData.splitState2}`;
+    if (gameData.splitState1 === undefined) {
+      deckState1.innerHTML = `Deck 1: `;
+    } else {
+      deckState1.innerHTML = `Deck 1: ${gameData.splitState1}`;
+      fadeIn(deckState1, 50);
+    }
+    if (gameData.splitState2 === undefined) {
+      deckState2.innerHTML = `Deck 2: `;
+    } else {
+      deckState2.innerHTML = `Deck 2: ${gameData.splitState2}`;
+      fadeIn(deckState2, 50);
+    }
 
     console.log(gameData.splitState1, gameData.compGameState, "stand in split deck1 out")
     console.log(gameData.splitState2, gameData.compGameState, "stand in split deck2 out2")
@@ -557,9 +572,6 @@ function init() {
 
     for (let card of splitPlayerCards) {
       card.backImage = "https://deckofcardsapi.com/static/img/back.png";
-      card.bjVal = getValueByCardType(card.value, "player");
-
-      console.log(gameData.splitCardArray, gameData.splitScoreArray);
 
       let cardElem = document.createElement("div");
       cardElem.classList.add("card-holder");
@@ -584,6 +596,7 @@ function init() {
         splitContainer1.appendChild(cardElem);
         await delay(500);
 
+        card.bjVal = getValueByCardType(card.value, "player", 1);
         gameData.splitCardArray[0].push(card);
         gameData.splitScoreArray[0].push(+card.bjVal);
         await delay(100);
@@ -598,6 +611,7 @@ function init() {
         splitContainer2.appendChild(cardElem);
         await delay(500);
 
+        card.bjVal = getValueByCardType(card.value, "player", 2);
         gameData.splitCardArray[1].push(card);
         gameData.splitScoreArray[1].push(+card.bjVal);
         await delay(100);
@@ -636,7 +650,7 @@ function init() {
     displayCurrentBet();
   }
 
-  function getValueByCardType(cardType, user) {
+  function getValueByCardType(cardType, user, deckNumber) {
     if (cardType > 1 && cardType < 10) {
       return cardType;
     }
@@ -649,7 +663,11 @@ function init() {
         return 10;
       case "ACE":
         if (user === "player") {
-          return (gameData.playerScore + 11 > 21) ? 1 : 11;
+          if (gameData.deckSplit === true) {
+            (deckNumber === 1) ? ((gameData.splitScore1 + 11 > 21) ? 1 : 11) : ((gameData.splitScore2 + 11 > 21) ? 1 : 11);
+          } else {
+            return (gameData.playerScore + 11 > 21) ? 1 : 11;
+          }
         } else {
           return (gameData.compScore + 11 > 21) ? 1 : 11;
         }
@@ -962,7 +980,7 @@ function init() {
 
   function stateLogicSetter(userScore, opponentScore, clicked) {
     if (clicked) {
-      if (userScore < opponentScore && opponentScore < 21) {
+      if (userScore < opponentScore && opponentScore <= 21) {
         return "BUST";
       } else if (userScore === 21) {
         return "WIN";

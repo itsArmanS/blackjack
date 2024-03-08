@@ -156,11 +156,6 @@
   border: 5px solid green;
 }
 
-.inner-score-wrapper1.inactive,
-.inner-score-wrapper2.inactive {
-  border: 5px solid red;
-}
-
 .split-cards-score1>span,
 .split-cards-score2>span {
   width: 2rem;
@@ -175,9 +170,7 @@
 .split-cards-container2 {
   flex: 1;
   height: 100%;
-  display: flex;
   position: relative;
-  border: 1px solid red;
 }
 
 .split-cards-container1 .card-holder,
