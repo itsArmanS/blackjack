@@ -3,11 +3,15 @@
   font-size: 15px;
 }
 
+body {
+  display: flex;
+}
+
 .main-wrapper {
+  flex: 1;
   width: 100vw;
   height: 100vh;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: black;
@@ -16,14 +20,17 @@
 .main-wrapper>img {
   height: 100%;
   width: 100%;
-
 }
 
 .table-border {
-  width: 50%;
+  flex: 1;
   min-width: 45rem;
   max-width: 45rem;
+  height: 100%;
   border-radius: 5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .table-background {
@@ -37,7 +44,7 @@
 
 .top-half,
 .bottom-half {
-  flex: 1;
+  flex: 2;
   display: flex;
 }
 
@@ -48,61 +55,42 @@
 }
 
 .bottom-half {
+  display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.middle-section {
-  width: 100%;
-  height: 12rem;
-  display: flex;
-  justify-content: center;
-}
-
-.play-zone {
-  display: flex;
-  width: 50rem;
-  height: 12rem;
-  background-color: green;
-}
-
-.top-card-loc,
-.bottom-card-loc {
-  width: 40rem;
-  height: 25rem;
-  margin: 0 auto;
-  border-radius: 3rem;
-}
-
-.bottom-card-loc {
-  height: 20rem;
-}
-
-.bottom-card-loc {
-  display: flex;
-  flex-direction: column;
-}
-
-.player-cards,
-.comp-cards {
-  width: 100%;
-  height: 25rem;
-  display: flex;
-  justify-content: center;
-}
-
-.comp-cards {
-  align-items: flex-end;
 }
 
 .player-cards-container,
 .comp-container {
-  width: 40rem;
-  height: 20rem;
+  flex: 2;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
+}
+
+.comp-score-bubble-wrapper,
+.player-score-bubble-wrapper {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.player-score-bubble-wrapper.active {
+  border: 5px solid;
+  border-color: green;
+  border-radius: 1rem;
+  color: white;
+}
+
+.comp-score-bubble-wrapper.active {
+  border: 5px solid;
+  border-color: green;
+  border-radius: 1rem;
+  color: white;
 }
 
 .player-cards-score,

@@ -133,7 +133,8 @@ function init() {
   async function startGame() {
     try {
       displayCurrentBet();
-
+      displayScores("player");
+      displayScores("comp");
       await printCompCards();
       await printPlayerCards();
       await printCompCards();
@@ -169,6 +170,9 @@ function init() {
       alert("Place a bet first!");
     } else {
       changeButtonFunction("off", "bet");
+
+      gameData.playerCardDist = (playerCardsContainer.clientWidth / 2) - 165;
+      gameData.compCardDist = (playerCardsContainer.clientWidth / 2) - 165;
 
       gameData.previousBet = gameData.currentBet;
       await startGame();
@@ -476,18 +480,6 @@ function init() {
     let innerScoreWrapper2 = document.querySelector(".inner-score-wrapper2");
 
     innerScoreWrapper1.classList.add("active");
-
-    playerScoreBubble.innerHTML =
-      `
-    <div class="deck1-state">
-      Deck 1: ${gameData.splitState1}
-    </div>
-    <div class="deck2-state">
-      Deck 2: ${gameData.splitState2}
-    </div>
-    `
-    playerScoreBubble.classList.add("split");
-    fadeIn(playerScoreBubble, 50);
   }
 
   async function printFirstSplitCards() {
@@ -558,6 +550,7 @@ function init() {
     countUserScore("player", gameData.deckSplit, 2);
     fadeIn(innerScoreDiv1, 100);
     fadeIn(innerScoreDiv2, 100);
+    console.log(gameData.splitCardArray, "plitcards")
   }
 
   async function printSplitCards(deckNumber) {
@@ -680,6 +673,7 @@ function init() {
       console.error("Deck ID is not set.");
       return;
     }
+    
 
     let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${gameData.deckID}/draw/?count=1`);
     let drawData = await draw.json();
@@ -710,6 +704,8 @@ function init() {
         `;
 
       cardElem.style.left = "100%";
+      cardElem.style.top = "20%";
+
 
       playerCardsContainer.appendChild(cardElem);
       await delay(100);
@@ -768,6 +764,8 @@ function init() {
         `;
 
         cardElem.style.left = "100%";
+        cardElem.style.top = "20%";
+
 
         compContainer.appendChild(cardElem);
         await delay(100);
@@ -800,6 +798,8 @@ function init() {
           `;
 
         cardElem.style.left = "100%";
+        cardElem.style.top = "20%";
+
 
         compContainer.appendChild(cardElem);
         await delay(500);
@@ -815,9 +815,8 @@ function init() {
   }
 
   function displayStartingMessage() {
-    playerScoreBubble.innerHTML = `Your Score: ${gameData.playerScore}`
+    fadeIn(playerScoreBubble, 50);
     gameMessageBubble.innerHTML = "Place Your Bet";
-    compScoreBubble.innerHTML = `Dealer Score: ${gameData.compScore}`
   }
 
   function countUserScore(user, deckSplit, deckNumber) {
@@ -844,9 +843,10 @@ function init() {
       } else {
         let pCount = 0;
         gameData.playerScoreArray.forEach((item) => {
-          pCount += +item
-          gameData.playerScore = +pCount
-          playerScoreBubble.innerHTML = `Your Score: ${gameData.playerScore}`;
+          pCount += +item;
+          gameData.playerScore = +pCount;
+          playerScoreBubble.innerHTML = gameData.playerScore;;
+          fadeIn(playerScoreBubble, 50);
         })
       }
     } else {
@@ -855,9 +855,10 @@ function init() {
         if (gameData.standClicked) {
           cCount += +item;
           gameData.compScore = +cCount;
-          compScoreBubble.innerHTML = `Dealer Score: ${gameData.compScore}`;
+          compScoreBubble.innerHTML = gameData.compScore;
+          fadeIn(compScoreBubble, 50);
         } else {
-          compScoreBubble.innerHTML = `Dealer Score: ${gameData.compScoreArray[0]}`;
+          compScoreBubble.innerHTML = gameData.compScoreArray[0];
         }
       })
     }
@@ -871,6 +872,20 @@ function init() {
     innerDiv.innerHTML = `Total Credits: ${gameData.playerCredits}`;
 
     displayCurrentBet();
+  }
+
+  async function displayScores(user) {
+    if(user === "player") {
+      let playerScoreBubbleWrapper = document.querySelector(".player-score-bubble-wrapper");
+
+      playerScoreBubbleWrapper.classList.add("active");
+      await fadeIn(playerScoreBubbleWrapper, 50);
+    }else {
+      let compScoreBubbleWrapper = document.querySelector(".comp-score-bubble-wrapper");
+
+      compScoreBubbleWrapper.classList.add("active");
+      await fadeIn(compScoreBubbleWrapper, 50);
+    }
   }
 
   function displayCurrentBet() {
@@ -1033,9 +1048,6 @@ function init() {
     playerCardsContainer.innerHTML = "";
     compContainer.innerHTML = "";
     currentBetBubble.innerHTML = gameData.currentBet;
-    compScoreBubble.innerHTML = `Dealer Score: ${gameData.compScore}`;
-
-    playerScoreBubble.innerHTML = `Your Score: ${gameData.playerScore}`;
   }
 
   function newRoundTimer() {

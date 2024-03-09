@@ -43,7 +43,6 @@
   flex: 1;
 }
 
-.player-score-bubble,
 .current-bet-bubble,
 .game-message-bubble-wrapper {
   height: 100%;
@@ -70,15 +69,6 @@
   font-size: 10px;
 }
 
-.player-score-bubble.split {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-left: 2rem;
-}
-
 .deck1-state,
 .deck2-state {
   font-size: 12px;
@@ -91,7 +81,7 @@
 }
 
 .current-bet-bubble-wrapper {
-  flex: 1;
+  height: 2rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -100,14 +90,4 @@
 
 .current-bet-bubble {
   font: 10px;
-}
-
-.comp-score-bubble {
-  flex: 1;
-  height: 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 20px;
-  color: #05d1e1;
 }
