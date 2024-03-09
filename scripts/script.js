@@ -228,6 +228,9 @@ function init() {
     let deckState1 = document.querySelector(".deck1-state");
     let deckState2 = document.querySelector(".deck2-state");
 
+    fadeIn(innerScoreWrapper1, 50);
+    fadeIn(innerScoreWrapper2, 50);
+
     if (gameData.deckSplit || deckNumber === 1) {
       console.log("test")
       console.log(gameData.splitSwitch)
@@ -428,17 +431,17 @@ function init() {
     stand.addEventListener("click", pressSplitStandButton);
     gameData.deckSplit = true
 
-    await fadeOut(playerCardsContainer.children[0], 50);
-    await fadeOut(playerCardsContainer.children[1], 50);
-    await delay(150);
+    await hideUserScore("player");
     await printSplitContainer();
-    // changeButtonFunction("off", "split")
-
-    gameData.splitCardArray[0].push(gameData.playerHand[0]);
-    gameData.splitCardArray[1].push(gameData.playerHand[1]);
+    await displaySplitScores();
     await printFirstSplitCards();
     await printSplitCards(1);
     await printSplitCards(2);
+
+    await delay(150);
+    // changeButtonFunction("off", "split")
+
+
 
     if (gameData.playerHand[0].value === gameData.playerHand[1].value) {
 
@@ -449,6 +452,8 @@ function init() {
   }
 
   async function printSplitContainer() {
+    await fadeOut(playerCardsContainer.children[0], 65);
+    await fadeOut(playerCardsContainer.children[1], 65);
 
     playerCardsContainer.innerHTML =
       `
@@ -487,6 +492,9 @@ function init() {
     let splitContainer2 = document.querySelector(".split-cards-container2");
     let innerScoreDiv1 = document.querySelector(".split-inner-score1");
     let innerScoreDiv2 = document.querySelector(".split-inner-score2");
+
+    gameData.splitScoreArray.push(gameData.playerHand[0]);
+    gameData.splitScoreArray.push(gameData.playerHand[1]);
 
     for (let card of gameData.splitCardArray[0]) {
 
@@ -874,6 +882,22 @@ function init() {
     displayCurrentBet();
   }
 
+  async function hideUserScore(user) {
+    if(user === "player") {
+      let playerScoreBubbleWrapper = document.querySelector(".player-score-bubble-wrapper");
+
+      await fadeOut(playerScoreBubbleWrapper, 50);
+      await fadeOut(playerScoreBubble, 50);
+      playerScoreBubbleWrapper.classList.remove("active");
+    }else {
+      let compScoreBubbleWrapper = document.querySelector(".comp-score-bubble-wrapper");
+
+      await fadeOut(compScoreBubbleWrapper, 50);
+      await fadeOut(compScoreBubble, 50);
+      compScoreBubbleWrapper.classList.remove("active");
+    }
+  }
+
   async function displayScores(user) {
     if(user === "player") {
       let playerScoreBubbleWrapper = document.querySelector(".player-score-bubble-wrapper");
@@ -886,6 +910,14 @@ function init() {
       compScoreBubbleWrapper.classList.add("active");
       await fadeIn(compScoreBubbleWrapper, 50);
     }
+  }
+
+  async function displaySplitScores() {
+    let innerScoreWrapper1 = document.querySelector(".inner-score-wrapper1");
+    let innerScoreWrapper2 = document.querySelector(".inner-score-wrapper2");
+
+    fadeIn(innerScoreWrapper1);
+    fadeIn(innerScoreWrapper2);
   }
 
   function displayCurrentBet() {
