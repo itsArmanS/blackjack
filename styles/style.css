@@ -80,6 +80,10 @@ body {
   transition: all 0.5s ease-in-out;
 }
 
+.player-score-bubble-wrapper {
+  margin-bottom: 1rem;
+}
+
 .player-score-bubble-wrapper.active {
   border: 5px solid;
   border-color: green;

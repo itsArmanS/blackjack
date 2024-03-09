@@ -225,8 +225,6 @@ function init() {
   async function pressSplitHitButton(deckNumber) {
     let innerScoreWrapper1 = document.querySelector(".inner-score-wrapper1");
     let innerScoreWrapper2 = document.querySelector(".inner-score-wrapper2");
-    let deckState1 = document.querySelector(".deck1-state");
-    let deckState2 = document.querySelector(".deck2-state");
 
     fadeIn(innerScoreWrapper1, 50);
     fadeIn(innerScoreWrapper2, 50);
@@ -245,7 +243,6 @@ function init() {
           changeButtonFunction("off", "all");
           setGameState("player", 1, gameData.deckSplit);
           setGameState("comp");
-          deckState1.innerHTML = `Deck 1: ${gameData.splitState1}`;
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
           screenMessageAnimation(gameMessageBubble);
           await delay(500);
@@ -260,7 +257,6 @@ function init() {
           gameData.splitSwitch = true;
           setGameState("player", 1, gameData.deckSplit);
           setGameState("comp");
-          deckState1.innerHTML = `Deck 1: ${gameData.splitState1}`;
 
           innerScoreWrapper1.classList.remove("active");
           innerScoreWrapper2.classList.add("active");
@@ -286,7 +282,6 @@ function init() {
           setGameState("player", 2, gameData.deckSplit);
           setGameState("comp");
 
-          deckState2.innerHTML = `Deck 2: ${gameData.splitState2}`;
           console.log(gameData.splitState2, gameData.compGameState, "Splitstates")
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
           screenMessageAnimation(gameMessageBubble);
@@ -295,7 +290,6 @@ function init() {
         } else if (gameData.splitScore2 === 21) {
           setGameState("player", 2, gameData.deckSplit);
           setGameState("comp");
-          deckState2.innerHTML = `Deck 2: ${gameData.splitState2}`;
 
           gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
           gameData.playerCredits += gameData.currentBet;
@@ -317,8 +311,6 @@ function init() {
   async function pressSplitStandButton() {
     let innerScoreWrapper1 = document.querySelector(".inner-score-wrapper1");
     let innerScoreWrapper2 = document.querySelector(".inner-score-wrapper2");
-    let deckState1 = document.querySelector(".deck1-state");
-    let deckState2 = document.querySelector(".deck2-state");
 
     innerScoreWrapper1.classList.remove("active");
     innerScoreWrapper2.classList.add("active");
@@ -357,19 +349,6 @@ function init() {
     setGameState("player", 1, gameData.deckSplit);
     setGameState("player", 2, gameData.deckSplit);
     setGameState("comp");
-
-    if (gameData.splitState1 === undefined) {
-      deckState1.innerHTML = `Deck 1: `;
-    } else {
-      deckState1.innerHTML = `Deck 1: ${gameData.splitState1}`;
-      fadeIn(deckState1, 50);
-    }
-    if (gameData.splitState2 === undefined) {
-      deckState2.innerHTML = `Deck 2: `;
-    } else {
-      deckState2.innerHTML = `Deck 2: ${gameData.splitState2}`;
-      fadeIn(deckState2, 50);
-    }
 
     console.log(gameData.splitState1, gameData.compGameState, "stand in split deck1 out")
     console.log(gameData.splitState2, gameData.compGameState, "stand in split deck2 out2")
@@ -425,6 +404,7 @@ function init() {
   }
 
   async function pressSplitButton() {
+    console.log(gameData.splitCardArray, "splitcardarrry OUT")
     hit.removeEventListener("click", pressHitButton);
     hit.addEventListener("click", pressSplitHitButton);
     stand.removeEventListener("click", pressStandButton);
@@ -493,8 +473,8 @@ function init() {
     let innerScoreDiv1 = document.querySelector(".split-inner-score1");
     let innerScoreDiv2 = document.querySelector(".split-inner-score2");
 
-    gameData.splitScoreArray.push(gameData.playerHand[0]);
-    gameData.splitScoreArray.push(gameData.playerHand[1]);
+    gameData.splitCardArray[0].push(gameData.playerHand[0]);
+    gameData.splitCardArray[1].push(gameData.playerHand[1]);
 
     for (let card of gameData.splitCardArray[0]) {
 
@@ -597,7 +577,7 @@ function init() {
         splitContainer1.appendChild(cardElem);
         await delay(500);
 
-        card.bjVal = getValueByCardType(card.value, "player", 1);
+        card.bjVal = +getValueByCardType(card.value, "player", 1);
         gameData.splitCardArray[0].push(card);
         gameData.splitScoreArray[0].push(+card.bjVal);
         await delay(100);
@@ -612,7 +592,7 @@ function init() {
         splitContainer2.appendChild(cardElem);
         await delay(500);
 
-        card.bjVal = getValueByCardType(card.value, "player", 2);
+        card.bjVal = +getValueByCardType(card.value, "player", 2);
         gameData.splitCardArray[1].push(card);
         gameData.splitScoreArray[1].push(+card.bjVal);
         await delay(100);
@@ -665,7 +645,11 @@ function init() {
       case "ACE":
         if (user === "player") {
           if (gameData.deckSplit === true) {
-            (deckNumber === 1) ? ((gameData.splitScore1 + 11 > 21) ? 1 : 11) : ((gameData.splitScore2 + 11 > 21) ? 1 : 11);
+            if (deckNumber === 1) {
+              return (gameData.splitScore1 + 11 > 21) ? 1 : 11;
+            }else {
+              return (gameData.splitScore2 + 11 > 21) ? 1 : 11;
+            }
           } else {
             return (gameData.playerScore + 11 > 21) ? 1 : 11;
           }
@@ -712,7 +696,7 @@ function init() {
         `;
 
       cardElem.style.left = "100%";
-      cardElem.style.top = "20%";
+      cardElem.style.top = "40%";
 
 
       playerCardsContainer.appendChild(cardElem);
