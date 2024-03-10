@@ -91,6 +91,13 @@ body {
   color: white;
 }
 
+.player-score-bubble-wrapper.split {
+  width: 100%;
+  opacity: 1;
+  display: flex;
+  justify-content: space-around;
+}
+
 .comp-score-bubble-wrapper.active {
   border: 5px solid;
   border-color: green;
@@ -148,6 +155,7 @@ body {
 .inner-score-wrapper1.active,
 .inner-score-wrapper2.active {
   border: 5px solid green;
+  transition: border-color 0.7s ease-in-out;
 }
 
 .split-cards-score1>span,
@@ -158,6 +166,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: border-color 0.7s ease-in-out;
 }
 
 .split-cards-container1,
@@ -216,7 +225,6 @@ body {
 }
 
 .total-credits,
-.current-bet,
 .bet-size,
 .round-timer {
   width: 100%;
@@ -236,8 +244,7 @@ body {
   align-items: center;
 }
 
-.total-credits>div,
-.current-bet>div {
+.total-credits>div { 
   width: 5rem;
   height: 2rem;
   font-size: 12px;
@@ -271,11 +278,13 @@ body {
   box-shadow: 3px 3px black;
 }
 
-.pbtns.unclick,
-.bet-btns.unclick {
+.pbtns:disabled,
+.bet-btns:disabled {
   background-color: gray;
+  color: white;
   opacity: 0.8;
   border: none;
+  transition: all 0.5s ease-in-outs;
 }
 
 .started {

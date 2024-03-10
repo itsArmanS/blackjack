@@ -43,7 +43,6 @@
   flex: 1;
 }
 
-.current-bet-bubble,
 .game-message-bubble-wrapper {
   height: 100%;
   flex: 1;
@@ -78,16 +77,4 @@
 .player-credits-bubble>div {
   font-size: 10px;
   color: rgb(0, 255, 21);
-}
-
-.current-bet-bubble-wrapper {
-  height: 2rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.current-bet-bubble {
-  font: 10px;
 }
