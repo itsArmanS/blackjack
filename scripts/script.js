@@ -59,10 +59,10 @@ function init() {
 
   window.onload = () => {
     getDeckData();
-    displayCredits();
+    // displayCredits();
     changeButtonFunction("off", "player");
     // changeButtonFunction("off", "split");
-    displayStartingMessage();
+    // displayStartingMessage();
   };
 
   placeBet.addEventListener("click", pressPlaceBetButton);
@@ -167,7 +167,7 @@ function init() {
 
   async function pressPlaceBetButton() {
     if (gameData.currentBet === 0) {
-      alert("Place a bet first!");
+      // alert("Place a bet first!");
     } else {
       changeButtonFunction("off", "bet");
 
@@ -482,202 +482,6 @@ function init() {
     innerScoreWrapper1.classList.add("active");
   }
 
-  async function printFirstSplitCards() {
-    let splitContainer1 = document.querySelector(".split-cards-container1");
-    let splitContainer2 = document.querySelector(".split-cards-container2");
-    let innerScoreDiv1 = document.querySelector(".split-inner-score1");
-    let innerScoreDiv2 = document.querySelector(".split-inner-score2");
-
-    gameData.splitCardArray[0].push(gameData.playerHand[0]);
-    gameData.splitCardArray[1].push(gameData.playerHand[1]);
-
-    for (let card of gameData.splitCardArray[0]) {
-
-      gameData.splitScoreArray[0].push(+card.bjVal);
-
-      let cardElem = document.createElement("div");
-      cardElem.classList.add("card-holder");
-      cardElem.style.opacity = 0;
-      cardElem.innerHTML =
-        `
-        <div class="card-face card-face-flipped">
-          <div class="card-front">
-            <img src="${card.image}" alt="">
-          </div>
-          <div class="card-back">
-            <img src="${card.backImage}" alt="">
-          </div>
-        </div>
-      `;
-
-      cardElem.style.left = gameData.splitCardDist1 + "px";
-      gameData.splitCardDist1 += 15;
-      cardElem.style.top = "40%";
-
-      splitContainer1.appendChild(cardElem);
-      await delay(100);
-      fadeIn(cardElem, 50);
-      await delay(200);
-      flipLastCard("player", gameData.deckSplit, 1);
-    }
-
-    for (let card of gameData.splitCardArray[1]) {
-
-      gameData.splitScoreArray[1].push(+card.bjVal);
-
-
-      let cardElem = document.createElement("div");
-      cardElem.classList.add("card-holder");
-      cardElem.style.opacity = 0;
-      cardElem.innerHTML =
-        `
-          <div class="card-face card-face-flipped">
-            <div class="card-front">
-              <img src="${card.image}" alt="">
-            </div>
-            <div class="card-back">
-              <img src="${card.backImage}" alt="">
-            </div>
-          </div>
-          `;
-
-      cardElem.style.left = gameData.splitCardDist2 + "px";
-      gameData.splitCardDist2 += 15;
-      cardElem.style.top = "40%";
-
-      splitContainer2.appendChild(cardElem);
-      await delay(100);
-      fadeIn(cardElem, 50);
-      await delay(200);
-      flipLastCard("player", gameData.deckSplit, 2);
-    }
-    countUserScore("player", gameData.deckSplit, 1);
-    countUserScore("player", gameData.deckSplit, 2);
-    fadeIn(innerScoreDiv1, 100);
-    fadeIn(innerScoreDiv2, 100);
-    console.log(gameData.splitCardArray, "plitcards")
-  }
-
-  async function printSplitCards(deckNumber) {
-    let splitContainer1 = document.querySelector(".split-cards-container1");
-    let splitContainer2 = document.querySelector(".split-cards-container2");
-    let innerScoreDiv1 = document.querySelector(".split-inner-score1");
-    let innerScoreDiv2 = document.querySelector(".split-inner-score2");
-
-    let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${gameData.deckID}/draw/?count=1`);
-    let drawData = await draw.json();
-    let splitPlayerCards = drawData.cards;
-
-    for (let card of splitPlayerCards) {
-      card.backImage = "https://deckofcardsapi.com/static/img/back.png";
-
-      let cardElem = document.createElement("div");
-      cardElem.classList.add("card-holder");
-      cardElem.style.opacity = 0;
-      cardElem.innerHTML =
-        `
-        <div class="card-face card-face-flipped">
-          <div class="card-front">
-            <img src="${card.image}" alt="">
-          </div>
-          <div class="card-back">
-            <img src="${card.backImage}" alt="">
-          </div>
-        </div>
-        `;
-
-      fadeIn(cardElem, 50);
-      cardElem.style.top = "40%";
-
-      if (deckNumber === 1) {
-        cardElem.style.left = gameData.splitCardDist1 + "px";
-        gameData.splitCardDist1 += 15;
-        splitContainer1.appendChild(cardElem);
-        await delay(500);
-
-        card.bjVal = +getValueByCardType(card.value, "player", 1);
-        gameData.splitCardArray[0].push(card);
-        gameData.splitScoreArray[0].push(+card.bjVal);
-        await delay(100);
-        countUserScore("player", gameData.deckSplit, 1);
-        fadeIn(innerScoreDiv1, 50);
-        await flipLastCard("player", gameData.deckSplit, 1);
-
-
-      } else {
-        cardElem.style.left = gameData.splitCardDist2 + "px";
-        gameData.splitCardDist2 += 15;
-        splitContainer2.appendChild(cardElem);
-        await delay(500);
-
-        card.bjVal = +getValueByCardType(card.value, "player", 2);
-        gameData.splitCardArray[1].push(card);
-        gameData.splitScoreArray[1].push(+card.bjVal);
-        await delay(100);
-        countUserScore("player", gameData.deckSplit, 2);
-        fadeIn(innerScoreDiv2, 50);
-        flipLastCard("player", gameData.deckSplit, 2);
-      }
-      console.log(gameData.splitScore1, gameData.splitScore2, "Split Scores")
-    }
-
-
-  }
-
-  function addBet() {
-    if (gameData.currentBet === gameData.playerCredits) {
-      gameData.currentBet = gameData.playerCredits;
-      currentBetBubble.innerHTML = `You do not have enough credits`;
-      screenMessageAnimation(currentBetBubble, 20);
-    } else {
-      gameData.currentBet += gameData.minimumBet;
-      currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
-      screenMessageAnimation(currentBetBubble, 20);
-      displayCurrentBet();
-    }
-  }
-
-  function subtractBet() {
-    if (gameData.currentBet < gameData.minimumBet || gameData.currentBet === 0) {
-      currentBetBubble.innerHTML = `Bet: ${gameData.minimumBet}`;
-      gameData.currentBet = gameData.minimumBet;
-      displayCurrentBet();
-    }
-    gameData.currentBet -= gameData.minimumBet;
-    currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
-    screenMessageAnimation(currentBetBubble, 20);
-    displayCurrentBet();
-  }
-
-  function getValueByCardType(cardType, user, deckNumber) {
-    if (cardType > 1 && cardType < 10) {
-      return cardType;
-    }
-
-    switch (cardType) {
-      case "10":
-      case "JACK":
-      case "QUEEN":
-      case "KING":
-        return 10;
-      case "ACE":
-        if (user === "player") {
-          if (gameData.deckSplit === true) {
-            if (deckNumber === 1) {
-              return (gameData.splitScore1 + 11 > 21) ? 1 : 11;
-            }else {
-              return (gameData.splitScore2 + 11 > 21) ? 1 : 11;
-            }
-          } else {
-            return (gameData.playerScore + 11 > 21) ? 1 : 11;
-          }
-        } else {
-          return (gameData.compScore + 11 > 21) ? 1 : 11;
-        }
-
-    }
-  }
-
   async function printPlayerCards() {
     if (!gameData.deckID) {
       console.error("Deck ID is not set.");
@@ -714,7 +518,7 @@ function init() {
         `;
 
       cardElem.style.left = "100%";
-      cardElem.style.top = "40%";
+      cardElem.style.top = "20%";
 
 
       playerCardsContainer.appendChild(cardElem);
@@ -822,6 +626,202 @@ function init() {
       setGameState("comp")
     }
     countUserScore("comp");
+  }
+
+  async function printFirstSplitCards() {
+    let splitContainer1 = document.querySelector(".split-cards-container1");
+    let splitContainer2 = document.querySelector(".split-cards-container2");
+    let innerScoreDiv1 = document.querySelector(".split-inner-score1");
+    let innerScoreDiv2 = document.querySelector(".split-inner-score2");
+
+    gameData.splitCardArray[0].push(gameData.playerHand[0]);
+    gameData.splitCardArray[1].push(gameData.playerHand[1]);
+
+    for (let card of gameData.splitCardArray[0]) {
+
+      gameData.splitScoreArray[0].push(+card.bjVal);
+
+      let cardElem = document.createElement("div");
+      cardElem.classList.add("card-holder");
+      cardElem.style.opacity = 0;
+      cardElem.innerHTML =
+        `
+        <div class="card-face card-face-flipped">
+          <div class="card-front">
+            <img src="${card.image}" alt="">
+          </div>
+          <div class="card-back">
+            <img src="${card.backImage}" alt="">
+          </div>
+        </div>
+      `;
+
+      cardElem.style.left = gameData.splitCardDist1 + "px";
+      gameData.splitCardDist1 += 15;
+      cardElem.style.top = "20%";
+
+      splitContainer1.appendChild(cardElem);
+      await delay(100);
+      fadeIn(cardElem, 50);
+      await delay(200);
+      flipLastCard("player", gameData.deckSplit, 1);
+    }
+
+    for (let card of gameData.splitCardArray[1]) {
+
+      gameData.splitScoreArray[1].push(+card.bjVal);
+
+
+      let cardElem = document.createElement("div");
+      cardElem.classList.add("card-holder");
+      cardElem.style.opacity = 0;
+      cardElem.innerHTML =
+        `
+          <div class="card-face card-face-flipped">
+            <div class="card-front">
+              <img src="${card.image}" alt="">
+            </div>
+            <div class="card-back">
+              <img src="${card.backImage}" alt="">
+            </div>
+          </div>
+          `;
+
+      cardElem.style.left = gameData.splitCardDist2 + "px";
+      gameData.splitCardDist2 += 15;
+      cardElem.style.top = "20%";
+
+      splitContainer2.appendChild(cardElem);
+      await delay(100);
+      fadeIn(cardElem, 50);
+      await delay(200);
+      flipLastCard("player", gameData.deckSplit, 2);
+    }
+    countUserScore("player", gameData.deckSplit, 1);
+    countUserScore("player", gameData.deckSplit, 2);
+    fadeIn(innerScoreDiv1, 100);
+    fadeIn(innerScoreDiv2, 100);
+    console.log(gameData.splitCardArray, "plitcards")
+  }
+
+  async function printSplitCards(deckNumber) {
+    let splitContainer1 = document.querySelector(".split-cards-container1");
+    let splitContainer2 = document.querySelector(".split-cards-container2");
+    let innerScoreDiv1 = document.querySelector(".split-inner-score1");
+    let innerScoreDiv2 = document.querySelector(".split-inner-score2");
+
+    let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${gameData.deckID}/draw/?count=1`);
+    let drawData = await draw.json();
+    let splitPlayerCards = drawData.cards;
+
+    for (let card of splitPlayerCards) {
+      card.backImage = "https://deckofcardsapi.com/static/img/back.png";
+
+      let cardElem = document.createElement("div");
+      cardElem.classList.add("card-holder");
+      cardElem.style.opacity = 0;
+      cardElem.innerHTML =
+        `
+        <div class="card-face card-face-flipped">
+          <div class="card-front">
+            <img src="${card.image}" alt="">
+          </div>
+          <div class="card-back">
+            <img src="${card.backImage}" alt="">
+          </div>
+        </div>
+        `;
+
+      fadeIn(cardElem, 50);
+      cardElem.style.top = "20%";
+
+      if (deckNumber === 1) {
+        cardElem.style.left = gameData.splitCardDist1 + "px";
+        gameData.splitCardDist1 += 15;
+        splitContainer1.appendChild(cardElem);
+        await delay(500);
+
+        card.bjVal = +getValueByCardType(card.value, "player", 1);
+        gameData.splitCardArray[0].push(card);
+        gameData.splitScoreArray[0].push(+card.bjVal);
+        await delay(100);
+        countUserScore("player", gameData.deckSplit, 1);
+        fadeIn(innerScoreDiv1, 50);
+        await flipLastCard("player", gameData.deckSplit, 1);
+
+
+      } else {
+        cardElem.style.left = gameData.splitCardDist2 + "px";
+        gameData.splitCardDist2 += 15;
+        splitContainer2.appendChild(cardElem);
+        await delay(500);
+
+        card.bjVal = +getValueByCardType(card.value, "player", 2);
+        gameData.splitCardArray[1].push(card);
+        gameData.splitScoreArray[1].push(+card.bjVal);
+        await delay(100);
+        countUserScore("player", gameData.deckSplit, 2);
+        fadeIn(innerScoreDiv2, 50);
+        flipLastCard("player", gameData.deckSplit, 2);
+      }
+      console.log(gameData.splitScore1, gameData.splitScore2, "Split Scores")
+    }
+
+
+  }
+
+  function addBet() {
+    if (gameData.currentBet === gameData.playerCredits) {
+      gameData.currentBet = gameData.playerCredits;
+      currentBetBubble.innerHTML = `You do not have enough credits`;
+      screenMessageAnimation(currentBetBubble, 20);
+    } else {
+      gameData.currentBet += gameData.minimumBet;
+      currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
+      screenMessageAnimation(currentBetBubble, 20);
+      displayCurrentBet();
+    }
+  }
+
+  function subtractBet() {
+    if (gameData.currentBet < gameData.minimumBet || gameData.currentBet === 0) {
+      currentBetBubble.innerHTML = `Bet: ${gameData.minimumBet}`;
+      gameData.currentBet = gameData.minimumBet;
+      displayCurrentBet();
+    }
+    gameData.currentBet -= gameData.minimumBet;
+    currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
+    screenMessageAnimation(currentBetBubble, 20);
+    displayCurrentBet();
+  }
+
+  function getValueByCardType(cardType, user, deckNumber) {
+    if (cardType > 1 && cardType < 10) {
+      return cardType;
+    }
+
+    switch (cardType) {
+      case "10":
+      case "JACK":
+      case "QUEEN":
+      case "KING":
+        return 10;
+      case "ACE":
+        if (user === "player") {
+          if (gameData.deckSplit === true) {
+            if (deckNumber === 1) {
+              return (gameData.splitScore1 + 11 > 21) ? 1 : 11;
+            }else {
+              return (gameData.splitScore2 + 11 > 21) ? 1 : 11;
+            }
+          } else {
+            return (gameData.playerScore + 11 > 21) ? 1 : 11;
+          }
+        } else {
+          return (gameData.compScore + 11 > 21) ? 1 : 11;
+        }
+
+    }
   }
 
   function displayStartingMessage() {
@@ -1082,6 +1082,8 @@ function init() {
     playerCardsContainer.innerHTML = "";
     compContainer.innerHTML = "";
     currentBetBubble.innerHTML = gameData.currentBet;
+    playerScoreBubble.innerHTML = 0;
+    compScoreBubble.innerHTML = 0;
   }
 
   function newRoundTimer() {
