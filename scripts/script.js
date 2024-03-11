@@ -69,7 +69,7 @@ function init() {
     getDeckData();
     displayCredits();
     changeButtonFunction("off", "player");
-    changeButtonFunction("off", "split");
+    // changeButtonFunction("off", "split");
     displayStartingMessage("on");
   };
 
@@ -158,7 +158,7 @@ function init() {
       }
 
       if (gameData.playerHand[0].value === gameData.playerHand[1].value) {
-        changeButtonFunction("on", "split")
+        // changeButtonFunction("on", "split")
       }
 
     } catch (error) {
@@ -425,18 +425,7 @@ function init() {
     await printFirstSplitCards();
     await printSplitCards(1);
     await printSplitCards(2);
-
-    await delay(150);
     // changeButtonFunction("off", "split")
-
-
-
-    if (gameData.playerHand[0].value === gameData.playerHand[1].value) {
-
-
-
-
-    }
   }
 
   async function printSplitContainer() {
@@ -481,10 +470,8 @@ function init() {
     let splitContainer1 = document.querySelector(".split-cards-container1");
     let splitContainer2 = document.querySelector(".split-cards-container2");
 
-    gameData.splitCardDist1 = (splitContainer1.clientWidth / 2) - 105;
-    gameData.splitCardDist2 = (splitContainer2.clientWidth / 2) - 105;
-
-
+    gameData.splitCardDist1 = (splitContainer1.clientWidth / 2) - (105 / 2);
+    gameData.splitCardDist2 = (splitContainer2.clientWidth / 2) - (105 / 2);
 
     innerScoreWrapper1.classList.add("active");
   }
@@ -652,7 +639,7 @@ function init() {
     let splitContainer1 = document.querySelector(".split-cards-container1");
     let splitContainer2 = document.querySelector(".split-cards-container2");
     let innerScoreDiv1 = document.querySelector(".split-inner-score1");
-    let innerScoreDiv2 = document.querySelector(".split-inner-score2");
+    let innerScoreDiv2 = document.querySelector(".split-inner-score2")
 
     gameData.splitCardArray[0].push(gameData.playerHand[0]);
     gameData.splitCardArray[1].push(gameData.playerHand[1]);
@@ -677,7 +664,7 @@ function init() {
       `;
 
       cardElem.style.left = gameData.splitCardDist1 + "px";
-      gameData.splitCardDist1 += 15;
+      gameData.splitCardDist1 += 7.5;
       cardElem.style.top = "20%";
 
       splitContainer1.appendChild(cardElem);
@@ -708,7 +695,7 @@ function init() {
           `;
 
       cardElem.style.left = gameData.splitCardDist2 + "px";
-      gameData.splitCardDist2 += 15;
+      gameData.splitCardDist2 += 7.5;
       cardElem.style.top = "20%";
 
       splitContainer2.appendChild(cardElem);
@@ -729,6 +716,8 @@ function init() {
     let splitContainer2 = document.querySelector(".split-cards-container2");
     let innerScoreDiv1 = document.querySelector(".split-inner-score1");
     let innerScoreDiv2 = document.querySelector(".split-inner-score2");
+    let splitCards1 = splitContainer1.querySelectorAll(".card-holder");
+    let splitCards2 = splitContainer2.querySelectorAll(".card-holder");
 
     let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${gameData.deckID}/draw/?count=1`);
     let drawData = await draw.json();
@@ -757,7 +746,14 @@ function init() {
 
       if (deckNumber === 1) {
         cardElem.style.left = gameData.splitCardDist1 + "px";
-        gameData.splitCardDist1 += 15;
+        gameData.splitCardDist1 += 7.5;
+
+        splitCards1.forEach(card => {
+          let currentLeft = parseFloat(card.style.left);
+          card.style.left = (currentLeft + (-7.5)) + "px";
+        })
+        await delay(250);
+
         splitContainer1.appendChild(cardElem);
         await delay(500);
 
@@ -772,7 +768,14 @@ function init() {
 
       } else {
         cardElem.style.left = gameData.splitCardDist2 + "px";
-        gameData.splitCardDist2 += 15;
+        gameData.splitCardDist2 += 7.5;
+
+        splitCards2.forEach(card => {
+          let currentLeft = parseFloat(card.style.left);
+          card.style.left = (currentLeft + (-7.5)) + "px";
+        })
+        await delay(250);
+
         splitContainer2.appendChild(cardElem);
         await delay(500);
 
