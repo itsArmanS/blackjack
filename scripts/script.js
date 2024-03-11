@@ -552,21 +552,14 @@ function init() {
         </div>
         `;
 
-      fadeIn(cardElem, 50);
       cardElem.style.top = "20%";
 
       if (deckNumber === 1) {
         cardElem.style.left = gameData.splitCardDist1 + "px";
         gameData.splitCardDist1 += 7.5;
 
-        splitCards1.forEach(card => {
-          let currentLeft = parseFloat(card.style.left);
-          card.style.left = (currentLeft + (-7.5)) + "px";
-        })
-        await delay(250);
-
         splitContainer1.appendChild(cardElem);
-        await delay(500);
+        await delay(250);
 
         card.bjVal = +getValueByCardType(card.value, "player", 1);
         gameData.splitCardArray[0].push(card);
@@ -574,6 +567,12 @@ function init() {
         await delay(100);
         countUserScore("player", gameData.deckSplit, 1);
         fadeIn(innerScoreDiv1, 50);
+        fadeIn(cardElem, 25);
+        splitCards1.forEach(card => {
+          let currentLeft = parseFloat(card.style.left);
+          card.style.left = (currentLeft + (-7.5)) + "px";
+        })
+        await delay(250);
         await flipLastCard("player", gameData.deckSplit, 1);
 
 
@@ -581,14 +580,8 @@ function init() {
         cardElem.style.left = gameData.splitCardDist2 + "px";
         gameData.splitCardDist2 += 7.5;
 
-        splitCards2.forEach(card => {
-          let currentLeft = parseFloat(card.style.left);
-          card.style.left = (currentLeft + (-7.5)) + "px";
-        })
-        await delay(250);
-
         splitContainer2.appendChild(cardElem);
-        await delay(500);
+        await delay(250);
 
         card.bjVal = +getValueByCardType(card.value, "player", 2);
         gameData.splitCardArray[1].push(card);
@@ -596,6 +589,11 @@ function init() {
         await delay(100);
         countUserScore("player", gameData.deckSplit, 2);
         fadeIn(innerScoreDiv2, 50);
+        fadeIn(cardElem, 25);
+        splitCards2.forEach(card => {
+          let currentLeft = parseFloat(card.style.left);
+          card.style.left = (currentLeft + (-7.5)) + "px";
+        })
         flipLastCard("player", gameData.deckSplit, 2);
       }
       console.log(gameData.splitScore1, gameData.splitScore2, "Split Scores")
