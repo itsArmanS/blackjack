@@ -132,7 +132,6 @@ function init() {
 
   async function startGame() {
     try {
-      displayCurrentBet();
       displayScores("player");
       displayScores("comp");
       await delay(250);
@@ -144,7 +143,9 @@ function init() {
       await delay(250);
       await printPlayerCards();
 
-      await startGameFlipCard()
+      await startGameFlipCard();
+      displayCurrentBet();
+
 
 
       if (gameData.playerScore === 21) {
@@ -802,7 +803,6 @@ function init() {
       gameData.currentBet += gameData.minimumBet;
       currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
       screenMessageAnimation(currentBetBubble, 20);
-      displayCurrentBet();
     }
   }
 
@@ -810,12 +810,10 @@ function init() {
     if (gameData.currentBet < gameData.minimumBet || gameData.currentBet === 0) {
       currentBetBubble.innerHTML = `Bet: ${gameData.minimumBet}`;
       gameData.currentBet = gameData.minimumBet;
-      displayCurrentBet();
     }
     gameData.currentBet -= gameData.minimumBet;
     currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
     screenMessageAnimation(currentBetBubble, 20);
-    displayCurrentBet();
   }
 
   function getValueByCardType(cardType, user, deckNumber) {
@@ -908,7 +906,6 @@ function init() {
     currentBetBubble.innerHTML = gameData.currentBet;
     innerDiv.innerHTML = `Total Credits: ${gameData.playerCredits}`;
 
-    displayCurrentBet();
   }
 
   async function hideUserScore(user) {
@@ -950,17 +947,25 @@ function init() {
   }
 
   function displayCurrentBet() {
-    currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
+    let betDisplayElem = document.createElement("div");
+    betDisplayElem.classList.add("bet-display");
 
-    if (gameData.roundEnded) {
-      currentBetBubble.innerHTML = `Bet: ${gameData.previousBet}`;
-    } else {
-      if (gameData.currentBet > 0) {
-        currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`
-      } else {
-        currentBetBubble.innerHTML = `Bet: ${0}`
-      }
-    }
+    let betDisplayRight = (playerCardsContainer.clientWidth / 2) - 145;
+    console.log(betDisplayElem.clientWidth)
+    betDisplayElem.style.right = betDisplayRight + "px";
+
+    betDisplayElem.innerHTML =
+      `
+    <div class="bet-display-text">
+    Current Bet: 
+    </div>
+    <div class="bet-display-current-bet">
+    $${gameData.currentBet}
+    </div>
+    `;
+
+    playerCardsContainer.appendChild(betDisplayElem);
+    fadeIn(betDisplayElem, 50);
   }
 
   async function fadeIn(element, ms) {
@@ -1131,7 +1136,6 @@ function init() {
           fadeIn(playerScoreBubble, 50);
 
           resetGameData();
-          displayCurrentBet();
           changeButtonFunction("on", "bet");
           changeButtonFunction("off", "player");
         }
