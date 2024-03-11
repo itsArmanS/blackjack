@@ -37,8 +37,9 @@ body {
   display: flex;
   flex-direction: column;
   border: 1.5rem solid;
-  border-color: #E3DDD3;
+  border-color: #A07047;
   overflow: hidden;
+  position: relative;
 }
 
 .table-background {
@@ -52,7 +53,8 @@ body {
 
 .top-half,
 .bottom-half {
-  background-color: #0C588A;
+  /* background-color: #0C588A; */
+  background-color: #1B5432;
   flex: 2;
   display: flex;
 }
@@ -71,7 +73,8 @@ body {
 
 .game-message-bubble-wrapper {
   height: 2rem;
-  background-color: #0C588A;
+  /* background-color: #0C588A; */
+  background-color: #1B5432;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -234,6 +237,22 @@ body {
   position: relative;
 }
 
+.split-bet1,
+.split-bet2 {
+  width: 15rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: rgb(6, 237, 6);
+  height: 2rem;
+  position: absolute;
+  right: 0;
+  top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.2rem;
+}
+
 .split-cards-container1 .card-holder,
 .split-cards-container2 .card-holder {
   position: absolute;
@@ -369,6 +388,20 @@ body {
 .bet-buttons {
   display: flex;
   align-items: center;
+}
+
+.bet-chip-buttons {
+  height: 3rem;
+  width: 3rem;
+  border-radius: 2rem;
+  border: none;
+  padding: 0;
+  background-color: transparent;
+}
+
+.bet-chip-buttons>img {
+  width: 100%;
+  height: 100%;
 }
 
 .pbtns,
