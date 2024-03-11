@@ -22,6 +22,14 @@ function init() {
 
   let test = document.querySelector("#testy");
 
+  placeBet.addEventListener("click", pressPlaceBetButton);
+  stand.addEventListener("click", pressStandButton);
+  hit.addEventListener("click", pressHitButton);
+  doubleDown.addEventListener("click", pressDoubleDownButton);
+  split.addEventListener("click", pressSplitButton);
+  addBetButton.addEventListener("click", addBet);
+  subtractBetButton.addEventListener("click", subtractBet);
+
   let gameData = {
     playerCredits: 1000,
     playerScore: 0,
@@ -59,19 +67,11 @@ function init() {
 
   window.onload = () => {
     getDeckData();
-    // displayCredits();
+    displayCredits();
     changeButtonFunction("off", "player");
-    // changeButtonFunction("off", "split");
-    // displayStartingMessage();
+    changeButtonFunction("off", "split");
+    displayStartingMessage("on");
   };
-
-  placeBet.addEventListener("click", pressPlaceBetButton);
-  stand.addEventListener("click", pressStandButton);
-  hit.addEventListener("click", pressHitButton);
-  doubleDown.addEventListener("click", pressDoubleDownButton);
-  split.addEventListener("click", pressSplitButton);
-  addBetButton.addEventListener("click", addBet);
-  subtractBetButton.addEventListener("click", subtractBet);
 
   function changeButtonFunction(state, group) {
     if (state === "on" && group === "player") {
@@ -135,9 +135,13 @@ function init() {
       displayCurrentBet();
       displayScores("player");
       displayScores("comp");
+      await delay(250);
       await printCompCards();
+      await delay(250);
       await printPlayerCards();
+      await delay(250);
       await printCompCards();
+      await delay(250);
       await printPlayerCards();
 
       await startGameFlipCard()
@@ -151,9 +155,6 @@ function init() {
         gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
         gameData.playerCredits += gameData.currentBet;
         displayCredits();
-
-        gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
-        screenMessageAnimation(gameMessageBubble, 20);
       }
 
       if (gameData.playerHand[0].value === gameData.playerHand[1].value) {
@@ -170,9 +171,10 @@ function init() {
       // alert("Place a bet first!");
     } else {
       changeButtonFunction("off", "bet");
+      displayStartingMessage("off");
 
-      gameData.playerCardDist = (playerCardsContainer.clientWidth / 2) - 165;
-      gameData.compCardDist = (playerCardsContainer.clientWidth / 2) - 165;
+      gameData.playerCardDist = (playerCardsContainer.clientWidth / 2) - (105 / 2);
+      gameData.compCardDist = (playerCardsContainer.clientWidth / 2) - (105 / 2);
 
       gameData.previousBet = gameData.currentBet;
       await startGame();
@@ -201,7 +203,7 @@ function init() {
       setGameState("player");
       setGameState("comp");
       gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
-      screenMessageAnimation(gameMessageBubble);
+      fadeIn(gameMessageBubble, 50);
       // newRoundTimer();
     } else if (gameData.playerScore === 21) {
       setGameState("player")
@@ -209,7 +211,7 @@ function init() {
       gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
       gameData.playerCredits += gameData.currentBet;
       gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
-      screenMessageAnimation(gameMessageBubble);
+      fadeIn(gameMessageBubble, 50);
     } else {
       changeButtonFunction("on", "player");
     }
@@ -245,7 +247,7 @@ function init() {
           setGameState("player", 1, gameData.deckSplit);
           setGameState("comp");
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
-          screenMessageAnimation(gameMessageBubble);
+          fadeIn(gameMessageBubble, 50);
           await delay(500);
           pressSplitStandButton();
           changeButtonFunction("on", "player");
@@ -265,7 +267,7 @@ function init() {
           gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
           gameData.playerCredits += gameData.currentBet;
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
-          screenMessageAnimation(gameMessageBubble);
+          fadeIn(gameMessageBubble, 50);
 
           await delay(1000);
           changeButtonFunction("on", "player");
@@ -285,7 +287,7 @@ function init() {
 
           console.log(gameData.splitState2, gameData.compGameState, "Splitstates")
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
-          screenMessageAnimation(gameMessageBubble);
+          fadeIn(gameMessageBubble, 50);
 
           innerScoreWrapper2.classList.remove("active");
         } else if (gameData.splitScore2 === 21) {
@@ -295,7 +297,7 @@ function init() {
           gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
           gameData.playerCredits += gameData.currentBet;
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
-          screenMessageAnimation(gameMessageBubble);
+          fadeIn(gameMessageBubble, 50);
 
           innerScoreWrapper2.classList.remove("active");
         } else {
@@ -326,6 +328,7 @@ function init() {
         console.log(gameData.playerGameState, gameData.compGameState, "stand")
 
         gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+        fadeIn(gameMessageBubble, 50);
         break;
       }
     }
@@ -339,6 +342,8 @@ function init() {
     console.log(gameData.playerGameState, gameData.compGameState, "out")
 
     gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+    fadeIn(gameMessageBubble, 50);
+
     gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
     gameData.playerCredits += +gameData.currentBet;
     displayCredits();
@@ -377,8 +382,10 @@ function init() {
           console.log(gameData.splitState2, gameData.compGameState, "stand in split deck2 over 17")
 
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
+          fadeIn(gameMessageBubble, 50);
           await delay(1000);
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
+          fadeIn(gameMessageBubble, 50);
           break;
         }
       }
@@ -432,7 +439,7 @@ function init() {
     }
   }
 
-  async function printSplitContainer() {  
+  async function printSplitContainer() {
     await fadeOut(playerCardsContainer.children[0], 65);
     await fadeOut(playerCardsContainer.children[1], 65);
 
@@ -440,8 +447,8 @@ function init() {
     playerScoreSplitBubble.classList.add("split");
     fadeIn(playerScoreSplitBubble, 50);
 
-    playerScoreSplitBubble.innerHTML = 
-    `
+    playerScoreSplitBubble.innerHTML =
+      `
     <div class="split-cards-score1">
       <div class="inner-score-wrapper1">
         <div class="split-inner-score1"></div>
@@ -483,11 +490,13 @@ function init() {
   }
 
   async function printPlayerCards() {
+    let allPlayerCards = playerCardsContainer.querySelectorAll(".card-holder");
+
     if (!gameData.deckID) {
       console.error("Deck ID is not set.");
       return;
     }
-    
+
 
     let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${gameData.deckID}/draw/?count=1`);
     let drawData = await draw.json();
@@ -520,25 +529,30 @@ function init() {
       cardElem.style.left = "100%";
       cardElem.style.top = "20%";
 
-
       playerCardsContainer.appendChild(cardElem);
       await delay(100);
       fadeIn(cardElem, 75);
 
       cardElem.style.transition = "left 1s ease-in-out";
       cardElem.style.left = gameData.playerCardDist + "px";
-      gameData.playerCardDist += 105;
+      gameData.playerCardDist += 52.5;
 
       if (gameData.playerHand.length > 2) {
         await delay(500);
         flipLastCard("player");
       }
+
+      allPlayerCards.forEach(item => {
+        let currentLeft = parseFloat(item.style.left);
+        item.style.left = (currentLeft + (-52.5)) + "px";
+      })
     }
     setGameState("player");
   }
 
   async function printCompCards() {
     let compContainer = document.querySelector(".comp-container");
+    let allCompCards = compContainer.querySelectorAll(".card-holder");
 
     if (!gameData.deckID) {
       console.error("Deck ID is not set.");
@@ -578,8 +592,7 @@ function init() {
         `;
 
         cardElem.style.left = "100%";
-        cardElem.style.top = "20%";
-
+        cardElem.style.top = "10%";
 
         compContainer.appendChild(cardElem);
         await delay(100);
@@ -587,7 +600,7 @@ function init() {
 
         cardElem.style.transition = "left 1s ease-in-out";
         cardElem.style.left = gameData.compCardDist + "px";
-        gameData.compCardDist += 105;
+        gameData.compCardDist += 52.5;
 
         if (gameData.compHand.length > 2) {
           await delay(500);
@@ -612,7 +625,7 @@ function init() {
           `;
 
         cardElem.style.left = "100%";
-        cardElem.style.top = "20%";
+        cardElem.style.top = "10%";
 
 
         compContainer.appendChild(cardElem);
@@ -621,10 +634,17 @@ function init() {
 
         cardElem.style.transition = "left 1s ease-in-out";
         cardElem.style.left = gameData.compCardDist + "px";
-        gameData.compCardDist += 105;
+        gameData.compCardDist += 52.5;
+
       }
+      allCompCards.forEach(item => {
+        let currentLeft = parseFloat(item.style.left);
+        item.style.left = (currentLeft + (-52.5)) + "px";
+      })
+
       setGameState("comp")
     }
+
     countUserScore("comp");
   }
 
@@ -811,7 +831,7 @@ function init() {
           if (gameData.deckSplit === true) {
             if (deckNumber === 1) {
               return (gameData.splitScore1 + 11 > 21) ? 1 : 11;
-            }else {
+            } else {
               return (gameData.splitScore2 + 11 > 21) ? 1 : 11;
             }
           } else {
@@ -824,9 +844,13 @@ function init() {
     }
   }
 
-  function displayStartingMessage() {
-    fadeIn(playerScoreBubble, 50);
-    gameMessageBubble.innerHTML = "Place Your Bet";
+  function displayStartingMessage(display) {
+    if (display === "on") {
+      gameMessageBubble.innerHTML = "Place Your Bet";
+      fadeIn(gameMessageBubble, 50);
+    } else {
+      fadeOut(gameMessageBubble, 50);
+    }
   }
 
   function countUserScore(user, deckSplit, deckNumber) {
@@ -885,13 +909,13 @@ function init() {
   }
 
   async function hideUserScore(user) {
-    if(user === "player") {
+    if (user === "player") {
       let playerScoreBubbleWrapper = document.querySelector(".player-score-bubble-wrapper");
 
       await fadeOut(playerScoreBubbleWrapper, 50);
       await fadeOut(playerScoreBubble, 50);
       playerScoreBubbleWrapper.classList.remove("active");
-    }else {
+    } else {
       let compScoreBubbleWrapper = document.querySelector(".comp-score-bubble-wrapper");
 
       await fadeOut(compScoreBubbleWrapper, 50);
@@ -901,12 +925,12 @@ function init() {
   }
 
   async function displayScores(user) {
-    if(user === "player") {
+    if (user === "player") {
       let playerScoreBubbleWrapper = document.querySelector(".player-score-bubble-wrapper");
 
       playerScoreBubbleWrapper.classList.add("active");
       await fadeIn(playerScoreBubbleWrapper, 50);
-    }else {
+    } else {
       let compScoreBubbleWrapper = document.querySelector(".comp-score-bubble-wrapper");
 
       compScoreBubbleWrapper.classList.add("active");
@@ -1091,17 +1115,18 @@ function init() {
       let count = 2;
 
       gameMessageBubble.innerHTML = `New round in ${count}`;
-      screenMessageAnimation(gameMessageBubble, 20);
+      fadeIn(playerScoreBubble, 50);
 
       let countdownInterval = setInterval(() => {
         count--;
         gameMessageBubble.innerHTML = `New round in ${count}`;
-        screenMessageAnimation(gameMessageBubble, 20);
+        fadeIn(playerScoreBubble, 50);
 
         if (count === 0) {
           clearInterval(countdownInterval);
           gameMessageBubble.innerHTML = "Place Your Bet";
-          screenMessageAnimation(gameMessageBubble, 20);
+          fadeIn(playerScoreBubble, 50);
+
           resetGameData();
           displayCurrentBet();
           changeButtonFunction("on", "bet");
