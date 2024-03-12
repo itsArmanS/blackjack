@@ -49,6 +49,7 @@ function init() {
     standClicked: false,
     finalDraw: false,
     roundEnded: false,
+    newRound: false,
     currentBet: 0,
     minimumBet: 500,
     previousBet: 0,
@@ -73,6 +74,8 @@ function init() {
     changeButtonFunction("off", "player");
     // changeButtonFunction("off", "split");
     displayStartingMessage("on");
+    gameData.playerCardDist = (playerCardsContainer.clientWidth / 2) - (105 / 2);
+    gameData.compCardDist = (compContainer.clientWidth / 2) - (105 / 2);
   };
 
   function changeButtonFunction(state, group) {
@@ -144,11 +147,10 @@ function init() {
       await printCompCards();
       await delay(250);
       await printPlayerCards();
-
       await startGameFlipCard();
       displayCurrentBet();
 
-
+      console.log(gameData.playerCardDist, "PCD", gameData.compCardDist, "CCD", gameData.splitCardDist1, gameData.splitCardDist1)
 
       if (gameData.playerScore === 21) {
         setGameState("player");
@@ -178,11 +180,9 @@ function init() {
     } else {
       // changeButtonFunction("off", "bet");
       displayStartingMessage("off");
-
-      gameData.splitBet2 = currentBetBubble.innerHTML
-
-      gameData.playerCardDist = (playerCardsContainer.clientWidth / 2) - (105 / 2);
-      gameData.compCardDist = (playerCardsContainer.clientWidth / 2) - (105 / 2);
+      if (gameData.newRound === true) {
+        await endGameFadeOut("off");
+      }
 
       gameData.previousBet = gameData.currentBet;
       await startGame();
@@ -413,6 +413,8 @@ function init() {
 
     innerScoreWrapper1.classList.remove("active");
     innerScoreWrapper2.classList.add("active");
+
+    gameData.splitBet2 = currentBetBubble.innerHTML
 
     if (gameData.splitSwitch === true || gameData.splitScore2 === 21) {
       changeButtonFunction("off", "all");
@@ -698,7 +700,6 @@ function init() {
       gameData.playerScoreArray.push(+card.bjVal);
 
       gameData.playerHand.push(card);
-      countUserScore("player");
 
       let cardElem = document.createElement("div");
       cardElem.classList.add("card-holder", "slide-in");
@@ -737,10 +738,10 @@ function init() {
       })
     }
     setGameState("player");
+    countUserScore("player");
   }
 
   async function printCompCards() {
-    let compContainer = document.querySelector(".comp-container");
     let allCompCards = compContainer.querySelectorAll(".card-holder");
 
     if (!gameData.deckID) {
@@ -987,11 +988,15 @@ function init() {
 
       playerScoreBubbleWrapper.classList.add("active");
       await fadeIn(playerScoreBubbleWrapper, 50);
+      playerScoreBubble.innerHTML = 0;
+      fadeIn(playerScoreBubble, 50);
     } else {
       let compScoreBubbleWrapper = document.querySelector(".comp-score-bubble-wrapper");
 
       compScoreBubbleWrapper.classList.add("active");
       await fadeIn(compScoreBubbleWrapper, 50);
+      compScoreBubble.innerHTML = 0;
+      fadeIn(playerScoreBubble, 50);
     }
   }
 
@@ -1193,13 +1198,11 @@ function init() {
     gameData.playerScore = 0;
     gameData.playerGameState = '';
     gameData.playerScoreArray = [];
-    gameData.playerCardDist = 0;
 
     gameData.compHand = [];
     gameData.compScore = 0;
     gameData.compGameState = '';
     gameData.compScoreArray = [];
-    gameData.compCardDist = 0;
 
     gameData.standClicked = false;
     gameData.finalDraw = false;
@@ -1212,6 +1215,7 @@ function init() {
 
     gameData.deckSplit = false;
     gameData.splitSwitch = false;
+    gameData.newRound = true;
     gameData.splitScore1 = 0;
     gameData.splitScore2 = 0;
     gameData.splitCardArray = [[], []];
@@ -1222,17 +1226,22 @@ function init() {
     gameData.splitCardDist2 = 0;
     gameData.splitBet1 = 0;
     gameData.splitBet2 = 0;
+
+    gameData.playerCardDist = (playerCardsContainer.clientWidth / 2) - (105 / 2);
+    gameData.compCardDist = (compContainer.clientWidth / 2) - (105 / 2);
+
+    placeBet.removeEventListener("click", pressSplitPlaceBetButton);
+    placeBet.addEventListener("click", pressPlaceBetButton);
+    hit.removeEventListener("click", pressSplitHitButton);
+    hit.addEventListener("click", pressHitButton);
+    stand.removeEventListener("click", pressSplitStandButton);
+    stand.addEventListener("click", pressStandButton);
   }
 
   async function newRoundTimer() {
-    let innerScoreWrapper1 = document.querySelector(".inner-score-wrapper1");
-    let innerScoreWrapper2 = document.querySelector(".inner-score-wrapper2");
-    let compScoreBubbleWrapper = document.querySelector(".comp-score-bubble-wrapper");
     let playerScoreBubbleWrapper = document.querySelector(".player-score-bubble-wrapper");
-    let betDisplay = document.querySelector(".bet-display");
-
-    let splitContainer1 = document.querySelector(".split-cards-container1");
-    let splitContainer2 = document.querySelector(".split-cards-container2");
+    let splitScore1 = document.querySelector(".split-cards-score1");
+    let splitScore2 = document.querySelector(".split-cards-score2");
 
     if (gameData.roundEnded) {
       let count = 3;
@@ -1242,38 +1251,70 @@ function init() {
       async function updateCountdown() {
         count--;
         gameMessageBubble.innerHTML = `New round in ${count}`;
-        fadeIn(playerScoreBubble, 50);
 
         if (count === 0) {
           clearInterval(countdownInterval);
 
-          if (gameData.deckSplit === true) {
-            await fadeOut(splitContainer1, 50);
-            await fadeOut(splitContainer2, 50);
-            await fadeOut(compContainer, 50);
-            await fadeOut(compScoreBubble, 50);
-            await fadeOut(compScoreBubbleWrapper, 50);
-            await fadeOut(innerScoreWrapper1, 50);
-            await fadeOut(innerScoreWrapper2, 50);
-          } else {
-            await fadeOut(playerCardsContainer, 50);
-            await fadeOut(compContainer, 50);
-            await fadeOut(compScoreBubble, 50);
-            await fadeOut(compScoreBubbleWrapper, 50);
-            await fadeOut(playerScoreBubble, 50);
-            await fadeOut(playerScoreBubbleWrapper, 50);
-            await fadeOut(betDisplay, 50)
-          }
-          await delay(600);
+          await endGameFadeOut("on");
+          await delay(250);
 
-          gameMessageBubble.innerHTML = "Place Your Bet";
+          if (gameData.deckSplit) {
+            playerScoreBubbleWrapper.classList.remove("split");
+            playerScoreBubbleWrapper.removeChild(splitScore1);
+            playerScoreBubbleWrapper.removeChild(splitScore2);
+            playerScoreBubbleWrapper.appendChild(playerScoreBubble);
+          } else {
+            playerScoreBubbleWrapper.classList.remove("split");
+            playerScoreBubbleWrapper.appendChild(playerScoreBubble);
+          }
 
           resetGameData();
+          playerCardsContainer.innerHTML = '';
+          compContainer.innerHTML = '';
           changeButtonFunction("on", "bet");
           changeButtonFunction("off", "player");
+          gameMessageBubble.innerHTML = "Place Your Bet";
         }
       }
       let countdownInterval = setInterval(updateCountdown, 1000);
+    }
+  }
+
+  async function endGameFadeOut(state) {
+    let innerScoreWrapper1 = document.querySelector(".inner-score-wrapper1");
+    let innerScoreWrapper2 = document.querySelector(".inner-score-wrapper2");
+    let compScoreBubbleWrapper = document.querySelector(".comp-score-bubble-wrapper");
+    let playerScoreBubbleWrapper = document.querySelector(".player-score-bubble-wrapper");
+    let betDisplay = document.querySelector(".bet-display");
+    let splitContainer1 = document.querySelector(".split-cards-container1");
+    let splitContainer2 = document.querySelector(".split-cards-container2");
+
+    if (state === "on") {
+      if (gameData.deckSplit === true) {
+        await fadeOut(splitContainer1, 50);
+        await fadeOut(splitContainer2, 50);
+        await fadeOut(compContainer, 50);
+        await fadeOut(compScoreBubble, 50);
+        await fadeOut(compScoreBubbleWrapper, 50);
+        await fadeOut(innerScoreWrapper1, 50);
+        await fadeOut(innerScoreWrapper2, 50);
+      } else {
+        await fadeOut(playerCardsContainer, 50);
+        await fadeOut(compContainer, 50);
+        await fadeOut(compScoreBubble, 50);
+        await fadeOut(compScoreBubbleWrapper, 50);
+        await fadeOut(playerScoreBubble, 50);
+        await fadeOut(playerScoreBubbleWrapper, 50);
+        await fadeOut(betDisplay, 50);
+      }
+    } else {
+
+      await fadeIn(playerCardsContainer, 50);
+      await fadeIn(compContainer, 50);
+      await fadeIn(compScoreBubble, 50);
+      await fadeIn(compScoreBubbleWrapper, 50);
+      await fadeIn(playerScoreBubble, 50);
+      await fadeIn(playerScoreBubbleWrapper, 50);
     }
   }
 
