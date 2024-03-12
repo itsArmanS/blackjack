@@ -74,6 +74,7 @@ function init() {
     changeButtonFunction("off", "player");
     // changeButtonFunction("off", "split");
     displayStartingMessage("on");
+    settingsModalDisplay();
     gameData.playerCardDist = (playerCardsContainer.clientWidth / 2) - (105 / 2);
     gameData.compCardDist = (compContainer.clientWidth / 2) - (105 / 2);
   };
@@ -137,15 +138,11 @@ function init() {
 
   async function startGame() {
     try {
-      displayScores("player");
       displayScores("comp");
-      await delay(250);
+      displayScores("player");
       await printCompCards();
-      await delay(250);
       await printPlayerCards();
-      await delay(250);
       await printCompCards();
-      await delay(250);
       await printPlayerCards();
       await startGameFlipCard();
       displayCurrentBet();
@@ -634,9 +631,13 @@ function init() {
   }
 
   async function printSplitContainer() {
-
-
     let playerScoreSplitBubble = document.querySelector(".player-score-bubble-wrapper");
+    let currentPlayerCards = playerCardsContainer.querySelectorAll(".ard-holder");
+
+    for (let card of currentPlayerCards) {
+      await fadeOut(card, 50);
+    }
+    await delay(550);
     playerScoreSplitBubble.classList.add("split");
     fadeIn(playerScoreSplitBubble, 50);
 
@@ -1089,10 +1090,10 @@ function init() {
     playerSecondCard = playerCardsContainer.querySelector(".card-holder:nth-child(2)");
 
     compFirstCard.querySelector(".card-face").classList.toggle("card-face-flipped");
-    await delay(500);
+    await delay(150);
 
     playerFirstCard.querySelector(".card-face").classList.toggle("card-face-flipped");
-    await delay(500);
+    await delay(150);
 
     playerSecondCard.querySelector(".card-face").classList.toggle("card-face-flipped");
 
@@ -1256,7 +1257,7 @@ function init() {
           clearInterval(countdownInterval);
 
           await endGameFadeOut("on");
-          await delay(250);
+          await delay(1000);
 
           if (gameData.deckSplit) {
             playerScoreBubbleWrapper.classList.remove("split");
@@ -1291,24 +1292,25 @@ function init() {
 
     if (state === "on") {
       if (gameData.deckSplit === true) {
-        await fadeOut(splitContainer1, 50);
-        await fadeOut(splitContainer2, 50);
-        await fadeOut(compContainer, 50);
+        await fadeOut(splitContainer1, 75);
+        await fadeOut(splitContainer2, 75);
+        await fadeOut(compContainer, 75);
         await fadeOut(compScoreBubble, 50);
         await fadeOut(compScoreBubbleWrapper, 50);
         await fadeOut(innerScoreWrapper1, 50);
         await fadeOut(innerScoreWrapper2, 50);
+        await fadeOut(gameMessageBubble, 50);
       } else {
-        await fadeOut(playerCardsContainer, 50);
-        await fadeOut(compContainer, 50);
+        await fadeOut(playerCardsContainer, 75);
+        await fadeOut(compContainer, 75);
         await fadeOut(compScoreBubble, 50);
         await fadeOut(compScoreBubbleWrapper, 50);
         await fadeOut(playerScoreBubble, 50);
         await fadeOut(playerScoreBubbleWrapper, 50);
         await fadeOut(betDisplay, 50);
+        await fadeOut(gameMessageBubble, 50);
       }
     } else {
-
       await fadeIn(playerCardsContainer, 50);
       await fadeIn(compContainer, 50);
       await fadeIn(compScoreBubble, 50);
@@ -1384,7 +1386,21 @@ function init() {
     }
   }
 
+  async function settingsModalDisplay() {
+    let settingsModal = document.querySelector("#settings-dialog");
+    let closeModalButton = document.querySelector("#close-modal-button");
+    let openModalButton = document.querySelector("#open-modal-button");
 
+    openModalButton.onclick = () => {
+      settingsModal.showModal();
+      fadeIn(settingsModal, 50);
+    }
+
+    closeModalButton.onclick = () => {
+      settingsModal.close();
+      fadeOut(settingsModal, 50);
+    }
+  }
 
 }
 

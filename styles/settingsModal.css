@@ -1,0 +1,16 @@
+#settings-dialog {
+    position: fixed;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #fefefe;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.5s ease-in-out;
+}
+
+#settings-dialog[open] {
+    top: 0;
+    transform: translateX(-50%) translateY(100%);
+}
