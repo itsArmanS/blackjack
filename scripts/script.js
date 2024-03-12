@@ -221,6 +221,7 @@ function init() {
       gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
       gameData.playerCredits += gameData.currentBet;
       gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+      displayCredits();
       fadeIn(gameMessageBubble, 50);
     } else {
       changeButtonFunction("on", "player");
@@ -361,7 +362,7 @@ function init() {
           gameData.playerCredits += gameData.currentBet;
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
           fadeIn(gameMessageBubble, 50);
-
+          displayCredits();
           await delay(1000);
           changeButtonFunction("on", "player");
 
@@ -391,7 +392,7 @@ function init() {
           gameData.playerCredits += gameData.currentBet;
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
           fadeIn(gameMessageBubble, 50);
-
+          displayCredits();
           innerScoreWrapper2.classList.remove("active");
         } else {
           changeButtonFunction("on", "player");
@@ -437,7 +438,9 @@ function init() {
 
           gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
           gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
-          console.log(gameData.splitBet1, gameData.splitBet2, "split bets stand after")
+
+          gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
+          console.log(gameData.splitBet1, gameData.splitBet2, "split bets stand after");
 
           console.log(gameData.splitState1, gameData.compGameState, "stand in split deck1 over 17")
           console.log(gameData.splitState2, gameData.compGameState, "stand in split deck2 over 17")
@@ -454,6 +457,7 @@ function init() {
     setGameState("player", 2, gameData.deckSplit);
     setGameState("comp");
     gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitState2, gameData.splitBet1, gameData.splitBet2);
+    displayCredits();
     fadeIn(gameMessageBubble, 50);
     console.log(gameData.splitState1, gameData.compGameState, "stand in split deck1 out")
     console.log(gameData.splitState2, gameData.compGameState, "stand in split deck2 out2")
@@ -1257,6 +1261,9 @@ function init() {
           clearInterval(countdownInterval);
 
           await endGameFadeOut("on");
+          await delay(500);
+          gameMessageBubble.innerHTML = "Place Your Bet";
+          await fadeIn(gameMessageBubble, 100);
           await delay(1000);
 
           if (gameData.deckSplit) {
@@ -1274,7 +1281,6 @@ function init() {
           compContainer.innerHTML = '';
           changeButtonFunction("on", "bet");
           changeButtonFunction("off", "player");
-          gameMessageBubble.innerHTML = "Place Your Bet";
         }
       }
       let countdownInterval = setInterval(updateCountdown, 1000);
@@ -1357,11 +1363,11 @@ function init() {
 
   function printGameState(opponentState, userState) {
     if (userState === GAME_STATE_TYPES.WIN) {
-      return `YOU WON ${gameData.currentBet} CREDITS`;
+      return `YOU WON ${gameData.currentBet * 2.5} CREDITS`;
     } else if (opponentState === GAME_STATE_TYPES.DRAW) {
       return `DRAW: Returned ${gameData.currentBet} CREDITS`;
     } else if (opponentState === GAME_STATE_TYPES.BUST) {
-      return `YOU WON ${gameData.currentBet} CREDITS`;
+      return `YOU WON ${gameData.currentBet * 2.5} CREDITS`;
     }
     return `YOU LOST ${gameData.currentBet} CREDITS`
   }
