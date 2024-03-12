@@ -37,7 +37,7 @@ function init() {
     playerScoreArray: [],
     playerCardDist: 0,
     playerGameState: "",
-
+    playerBlackjack: false,
 
     compScore: 0,
     compHand: [],
@@ -154,9 +154,12 @@ function init() {
         setGameState("player");
         setGameState("comp");
         gameData.roundEnded = true;
+        gameData.playerBlackjack = true;
+        changeButtonFunction("off", all);
 
         gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
         gameData.playerCredits += gameData.currentBet;
+        gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
         displayCredits();
       }
 
@@ -202,6 +205,8 @@ function init() {
       setGameState("comp");
       gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
       gameData.playerCredits += gameData.currentBet;
+      gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+      displayCredits();
     }
 
     if (gameData.playerScore > 21) {
@@ -215,6 +220,7 @@ function init() {
     } else if (gameData.playerScore === 21) {
       setGameState("player")
       setGameState("comp")
+      gameData.playerBlackjack = true;
       gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
       gameData.playerCredits += gameData.currentBet;
       gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
@@ -290,8 +296,6 @@ function init() {
     stand.addEventListener("click", pressSplitStandButton);
     placeBet.removeEventListener("click", pressPlaceBetButton);
     placeBet.addEventListener("click", pressSplitPlaceBetButton);
-
-    gameData.splitBet1 = gameData.currentBet;
 
     await hideUserScore("player");
     await printSplitContainer();
@@ -410,14 +414,13 @@ function init() {
     innerScoreWrapper1.classList.remove("active");
     innerScoreWrapper2.classList.add("active");
 
-    if (gameData.splitSwitch === true) {
+    if (gameData.splitSwitch === true || gameData.splitScore2 === 21) {
       changeButtonFunction("off", "all");
       await handleSecondCard();
 
       innerScoreWrapper2.classList.remove("active");
 
       while (gameData.compScore <= 16) {
-        // && gameData.compScore <= gameData.splitScore1
         await delay(500);
         await printCompCards();
         setGameState("player", 1, gameData.deckSplit);
@@ -431,14 +434,14 @@ function init() {
           setGameState("player", 1, gameData.deckSplit);
           setGameState("player", 2, gameData.deckSplit);
           setGameState("comp");
+          console.log(gameData.splitBet1, gameData.splitBet2, "split bets stand before")
+
+          gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
+          gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
+          console.log(gameData.splitBet1, gameData.splitBet2, "split bets stand after")
+
           console.log(gameData.splitState1, gameData.compGameState, "stand in split deck1 over 17")
           console.log(gameData.splitState2, gameData.compGameState, "stand in split deck2 over 17")
-
-          gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
-          fadeIn(gameMessageBubble, 50);
-          await delay(1000);
-          gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
-          fadeIn(gameMessageBubble, 50);
           break;
         }
       }
@@ -446,9 +449,11 @@ function init() {
     setGameState("player", 1, gameData.deckSplit);
     setGameState("player", 2, gameData.deckSplit);
     setGameState("comp");
-
+    gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitState2, gameData.splitBet1, gameData.splitBet2);
+    fadeIn(gameMessageBubble, 50);
     console.log(gameData.splitState1, gameData.compGameState, "stand in split deck1 out")
     console.log(gameData.splitState2, gameData.compGameState, "stand in split deck2 out2")
+    console.log(gameData.splitBet1, gameData.splitBet2, "split bets stand out")
     gameData.splitSwitch = true;
   }
 
@@ -613,6 +618,7 @@ function init() {
     gameMessageBubble.innerHTML = "Place a bet for the second deck";
     fadeIn(gameMessageBubble, 50);
     console.log(gameData.currentBet, 'splitDeckBet');
+    gameData.splitBet1 = gameData.currentBet;
     gameData.currentBet = 0
 
     changeButtonFunction("off", "player");
@@ -835,11 +841,9 @@ function init() {
       if (gameData.currentBet === gameData.playerCredits) {
         gameData.currentBet = gameData.playerCredits;
         gameMessageBubble.innerHTML = `You do not have enough credits`;
-        screenMessageAnimation(gameMessageBubble, 20);
       } else {
         gameData.currentBet += gameData.minimumBet;
         currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
-        screenMessageAnimation(currentBetBubble, 20);
       }
     }
   }
@@ -853,11 +857,9 @@ function init() {
       if (gameData.currentBet <= 0) {
         gameData.currentBet = 0;
         gameMessageBubble.innerHTML = `You do not have enough credits`;
-        screenMessageAnimation(gameMessageBubble, 20);
       } else {
         gameData.currentBet -= gameData.minimumBet;
         currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
-        screenMessageAnimation(currentBetBubble, 20);
       }
     }
   }
@@ -1126,6 +1128,7 @@ function init() {
         } else {
           gameData.splitState2 = stateLogicSetter(gameData.splitScore2, gameData.compScore, gameData.standClicked)
         }
+        gameData.compGameState = stateLogicSetter(gameData.compScore, gameData.playerScore, gameData.standClicked);
       } else {
         gameData.playerGameState = stateLogicSetter(gameData.playerScore, gameData.compScore, gameData.standClicked);
       }
@@ -1158,13 +1161,25 @@ function init() {
     }
   }
 
-  function decideBetReturn(userState) {
-    if (userState === GAME_STATE_TYPES.WIN) {
-      return 2.5;
-    } else if (userState === GAME_STATE_TYPES.DRAW) {
-      return 1;
-    } else if (userState === GAME_STATE_TYPES.BUST) {
-      return 0;
+  function decideBetReturn(userState, deckSplit) {
+    if (deckSplit) {
+      if (userState === GAME_STATE_TYPES.WIN) {
+        return 2.5;
+      } else if (userState === GAME_STATE_TYPES.DRAW) {
+        return 1;
+      } else if (userState === GAME_STATE_TYPES.BUST) {
+        return 0;
+      }
+    } else {
+      if (userState === GAME_STATE_TYPES.WIN) {
+        return 2.5;
+      } else if (userState === GAME_STATE_TYPES.WIN && gameData.playerBlackjack === true) {
+        return 2.9;
+      } else if (userState === GAME_STATE_TYPES.DRAW) {
+        return 1;
+      } else if (userState === GAME_STATE_TYPES.BUST) {
+        return 0;
+      }
     }
   }
 
@@ -1263,6 +1278,28 @@ function init() {
     }
     return `YOU LOST ${gameData.currentBet} CREDITS`
   }
+
+  function printSplitGameMessage(deckState1, deckState2, bet1, bet2) {
+    if (gameData.deckSplit === true) {
+      if (deckState1 === GAME_STATE_TYPES.WIN && deckState2 === GAME_STATE_TYPES.WIN) {
+        return `YOU WON ${(bet1 + bet2) * 2.5} CREDITS`;
+      } else if ((deckState1 === GAME_STATE_TYPES.WIN && deckState2 === GAME_STATE_TYPES.BUST) || (deckState1 === GAME_STATE_TYPES.WIN && deckState2 === GAME_STATE_TYPES.DRAW)) {
+        return `YOU WON ${bet1 * 2.5} CREDITS`;
+      } else if ((deckState1 === GAME_STATE_TYPES.BUST && deckState2 === GAME_STATE_TYPES.WIN) || (deckState1 === GAME_STATE_TYPES.DRAW && deckState2 === GAME_STATE_TYPES.WIN)) {
+        return `YOU WON ${bet2 * 2.5} CREDITS`;
+      } else if (deckState1 === GAME_STATE_TYPES.BUST && deckState2 === GAME_STATE_TYPES.BUST) {
+        return `YOU LOST ${bet1 + bet2} CREDITS`;
+      } else if (deckState1 === GAME_STATE_TYPES.BUST && deckState2 === GAME_STATE_TYPES.DRAW) {
+        return `RETURNED ${bet2} CREDITS`;
+      } else if (deckState1 === GAME_STATE_TYPES.DRAW && deckState2 === GAME_STATE_TYPES.BUST) {
+        return `RETURNED ${bet1} CREDITS`;
+      } else if (deckState1 === GAME_STATE_TYPES.DRAW && deckState2 === GAME_STATE_TYPES.DRAW) {
+        return `RETURNED ${bet1 + bet2} CREDITS`;
+      }
+    }
+  }
+
+
 
 }
 
