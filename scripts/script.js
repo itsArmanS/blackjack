@@ -118,9 +118,7 @@ function init() {
   }
 
   test.onclick = () => {
-    console.log(gameData.compGameState, "CGS");
-    console.log(gameData.playerGameState, "PGS");
-    console.log(gameData.roundEnded, "ended");
+
     newRoundTimer();
   }
 
@@ -147,14 +145,13 @@ function init() {
       await startGameFlipCard();
       displayCurrentBet();
 
-      console.log(gameData.playerCardDist, "PCD", gameData.compCardDist, "CCD", gameData.splitCardDist1, gameData.splitCardDist1)
 
       if (gameData.playerScore === 21) {
         setGameState("player");
         setGameState("comp");
         gameData.roundEnded = true;
         gameData.playerBlackjack = true;
-        changeButtonFunction("off", all);
+        changeButtonFunction("off", "all");
 
         gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
         gameData.playerCredits += gameData.currentBet;
@@ -188,7 +185,6 @@ function init() {
       changeButtonFunction("on", "player");
       gameData.playerCredits -= gameData.currentBet;
       displayCredits();
-      console.log(gameData.currentBet, 'normal');
 
     }
   }
@@ -249,7 +245,6 @@ function init() {
         gameData.finalDraw = true;
         setGameState("player");
         setGameState("comp");
-        console.log(gameData.playerGameState, gameData.compGameState, "stand")
 
         gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
         fadeIn(gameMessageBubble, 50);
@@ -263,7 +258,6 @@ function init() {
 
     setGameState("player");
     setGameState("comp");
-    console.log(gameData.playerGameState, gameData.compGameState, "out")
 
     gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
     fadeIn(gameMessageBubble, 50);
@@ -307,12 +301,10 @@ function init() {
     displayCurrentBet(gameData.deckSplit, 1);
     displayCurrentBet(gameData.deckSplit, 2);
     await setSplitDeckBet();
-    console.log(gameData.currentBet, "cbet beforeq")
 
   }
 
   async function pressSplitPlaceBetButton() {
-    console.log(gameData.splitBet2, "cbet2 splitplace")
 
     displayCurrentBet(gameData.deckSplit);
 
@@ -332,8 +324,6 @@ function init() {
     // fadeIn(innerScoreWrapper2, 50);
 
     if (gameData.deckSplit || deckNumber === 1) {
-      console.log("test")
-      console.log(gameData.splitSwitch)
 
       if (gameData.splitSwitch === false) {
         // changeButtonFunction("off", "player");
@@ -363,7 +353,7 @@ function init() {
 
           gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
           gameData.splitBet1 += gameData.currentBet;
-          gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
+          gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitState2, gameData.splitBet1, gameData.splitBet2);
           fadeIn(gameMessageBubble, 50);
           displayCredits();
           await delay(1000);
@@ -382,8 +372,7 @@ function init() {
           setGameState("player", 2, gameData.deckSplit);
           setGameState("comp");
 
-          console.log(gameData.splitState2, gameData.compGameState, "Splitstates")
-          gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
+          gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitState2, gameData.splitBet1, gameData.splitBet2);
           fadeIn(gameMessageBubble, 50);
 
           innerScoreWrapper2.classList.remove("active");
@@ -393,7 +382,7 @@ function init() {
 
           gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
           gameData.playerCredits += gameData.currentBet;
-          gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState2);
+          gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitState2, gameData.splitBet1, gameData.splitBet2);
           fadeIn(gameMessageBubble, 50);
           displayCredits();
           innerScoreWrapper2.classList.remove("active");
@@ -415,9 +404,7 @@ function init() {
     innerScoreWrapper1.classList.remove("active");
     innerScoreWrapper2.classList.add("active");
 
-    gameData.splitBet2 = gameData.currentBet;
-
-    if (gameData.splitSwitch === true || gameData.splitScore2 === 21 || gameData.splitScore2 > 21) {
+    if (gameData.splitSwitch === true || gameData.splitScore2 === 21) {
       changeButtonFunction("off", "all");
       await handleSecondCard();
 
@@ -429,22 +416,16 @@ function init() {
         setGameState("player", 1, gameData.deckSplit);
         setGameState("player", 2, gameData.deckSplit);
         setGameState("comp");
-        console.log(gameData.splitState1, gameData.compGameState, "stand in split deck1 under 16")
-        console.log(gameData.splitState2, gameData.compGameState, "stand in split deck2 under 16")
 
-        if (gameData.compScore >= 17 && (gameData.compScore > gameData.splitScore1 && gameData.compScore > gameData.splitScore2) && gameData.compScore < 21) {
+        if (gameData.compScore >= 17 && (gameData.compScore >= gameData.splitScore1 && gameData.compScore >= gameData.splitScore2) && gameData.compScore < 21) {
           gameData.finalDraw = true;
           setGameState("player", 1, gameData.deckSplit);
           setGameState("player", 2, gameData.deckSplit);
           setGameState("comp");
-          console.log(gameData.splitBet1, gameData.splitBet2, "split bets stand before")
-
-          gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
-          gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
+          gameData.splitBet1 += decideBetReturn(gameData.splitState1, gameData.deckSplit);
+          gameData.splitBet2 += decideBetReturn(gameData.splitState2, gameData.deckSplit);
           gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
           gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitState2, gameData.splitBet1, gameData.splitBet2);
-          console.log(gameData.splitBet1, gameData.splitBet2, "BETS IN 17")
-
           break;
         }
       }
@@ -536,7 +517,6 @@ function init() {
     countUserScore("player", gameData.deckSplit, 2);
     fadeIn(innerScoreDiv1, 100);
     fadeIn(innerScoreDiv2, 100);
-    console.log(gameData.splitCardArray, "plitcards")
   }
 
   async function printSplitCards(deckNumber) {
@@ -613,7 +593,6 @@ function init() {
         })
         flipLastCard("player", gameData.deckSplit, 2);
       }
-      console.log(gameData.splitScore1, gameData.splitScore2, "Split Scores")
     }
 
 
@@ -623,7 +602,6 @@ function init() {
     await delay(250);
     gameMessageBubble.innerHTML = "Place a bet for the second deck";
     fadeIn(gameMessageBubble, 50);
-    console.log(gameData.currentBet, 'splitDeckBet');
 
     gameData.splitBet1 += gameData.currentBet;
     gameData.currentBet = 0
