@@ -248,7 +248,7 @@ body {
 }
 
 .split-bet1,
-.split-bet2 {
+.split-bet2-wrapper {
   width: 15rem;
   font-size: 1rem;
   font-weight: bold;
@@ -261,6 +261,20 @@ body {
   justify-content: center;
   align-items: center;
   gap: 0.2rem;
+}
+
+.split-bet2-text {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.split-bet2 {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .split-cards-container1 .card-holder,

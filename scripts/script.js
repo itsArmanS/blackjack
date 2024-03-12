@@ -304,11 +304,16 @@ function init() {
     await printSplitCards(1);
     await delay(200);
     await printSplitCards(2);
+    displayCurrentBet(gameData.deckSplit, 1);
+    displayCurrentBet(gameData.deckSplit, 2);
     await setSplitDeckBet();
+    console.log(gameData.currentBet, "cbet beforeq")
+
   }
 
   async function pressSplitPlaceBetButton() {
-    gameData.playerCredits -= gameData.currentBet;
+    console.log(gameData.splitBet2, "cbet2 splitplace")
+
     displayCurrentBet(gameData.deckSplit);
 
     changeButtonFunction("off", "split")
@@ -340,8 +345,6 @@ function init() {
           changeButtonFunction("off", "all");
           setGameState("player", 1, gameData.deckSplit);
           setGameState("comp");
-          gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
-          fadeIn(gameMessageBubble, 50);
           await delay(500);
           pressSplitStandButton();
           changeButtonFunction("on", "player");
@@ -359,7 +362,7 @@ function init() {
           innerScoreWrapper2.classList.add("active");
 
           gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
-          gameData.playerCredits += gameData.currentBet;
+          gameData.splitBet1 += gameData.currentBet;
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
           fadeIn(gameMessageBubble, 50);
           displayCredits();
@@ -412,9 +415,9 @@ function init() {
     innerScoreWrapper1.classList.remove("active");
     innerScoreWrapper2.classList.add("active");
 
-    gameData.splitBet2 = currentBetBubble.innerHTML
+    gameData.splitBet2 = gameData.currentBet;
 
-    if (gameData.splitSwitch === true || gameData.splitScore2 === 21) {
+    if (gameData.splitSwitch === true || gameData.splitScore2 === 21 || gameData.splitScore2 > 21) {
       changeButtonFunction("off", "all");
       await handleSecondCard();
 
@@ -438,12 +441,10 @@ function init() {
 
           gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
           gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
-
           gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
-          console.log(gameData.splitBet1, gameData.splitBet2, "split bets stand after");
+          gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitState2, gameData.splitBet1, gameData.splitBet2);
+          console.log(gameData.splitBet1, gameData.splitBet2, "BETS IN 17")
 
-          console.log(gameData.splitState1, gameData.compGameState, "stand in split deck1 over 17")
-          console.log(gameData.splitState2, gameData.compGameState, "stand in split deck2 over 17")
           break;
         }
       }
@@ -451,17 +452,14 @@ function init() {
 
     if (gameData.splitState1 !== '' && gameData.splitState2 !== '') {
       gameData.roundEnded = true;
+      gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitState2, gameData.splitBet1, gameData.splitBet2);
     }
 
     setGameState("player", 1, gameData.deckSplit);
     setGameState("player", 2, gameData.deckSplit);
     setGameState("comp");
-    gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitState2, gameData.splitBet1, gameData.splitBet2);
     displayCredits();
     fadeIn(gameMessageBubble, 50);
-    console.log(gameData.splitState1, gameData.compGameState, "stand in split deck1 out")
-    console.log(gameData.splitState2, gameData.compGameState, "stand in split deck2 out2")
-    console.log(gameData.splitBet1, gameData.splitBet2, "split bets stand out")
     gameData.splitSwitch = true;
   }
 
@@ -626,7 +624,8 @@ function init() {
     gameMessageBubble.innerHTML = "Place a bet for the second deck";
     fadeIn(gameMessageBubble, 50);
     console.log(gameData.currentBet, 'splitDeckBet');
-    gameData.splitBet1 = gameData.currentBet;
+
+    gameData.splitBet1 += gameData.currentBet;
     gameData.currentBet = 0
 
     changeButtonFunction("off", "player");
@@ -845,9 +844,12 @@ function init() {
 
   function addBet() {
     if (gameData.deckSplit === true) {
-      gameData.currentBet += gameData.minimumBet;
-      currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
-      gameData.splitBet2 = +gameData.currentBet;
+      let splitBet2 = document.querySelector(".split-bet2");
+
+      gameData.splitBet2 += gameData.minimumBet;
+      splitBet2.innerHTML = `$${gameData.splitBet2}`;
+      fadeIn(splitBet2, 50);
+
     } else {
       if (gameData.currentBet === gameData.playerCredits) {
         gameData.currentBet = gameData.playerCredits;
@@ -861,9 +863,11 @@ function init() {
 
   function subtractBet() {
     if (gameData.deckSplit === true) {
-      gameData.currentBet -= gameData.minimumBet;
-      currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
-      gameData.splitBet2 = +gameData.currentBet;
+      let splitBet2 = document.querySelector(".split-bet2");
+
+      gameData.splitBet2 -= gameData.minimumBet;
+      splitBet2.innerHTML = `$${gameData.splitBet2}`;
+      fadeIn(splitBet2, 50);
     } else {
       if (gameData.currentBet <= 0) {
         gameData.currentBet = 0;
@@ -1013,30 +1017,37 @@ function init() {
     fadeIn(innerScoreWrapper2);
   }
 
-  function displayCurrentBet(split) {
+  function displayCurrentBet(split, deckNumber) {
     if (split) {
-      let splitContainer1 = document.querySelector(".split-cards-container1");
-      let splitContainer2 = document.querySelector(".split-cards-container2");
-      let splitBet1 = document.createElement("div");
-      let splitBet2 = document.createElement("div");
-      console.log(gameData.splitBet1, 'displayCurrentBet1');
-      console.log(gameData.splitBet2, 'displayCurrentBet2');
-
       gameData.splitBet1 += +gameData.currentBet;
 
-      splitBet1.classList.add("split-bet1");
-      let splitBetRight1 = (splitContainer1.clientWidth / 2) - 110;
-      splitBet1.style.right = splitBetRight1 + "px";
-      splitBet1.innerHTML = `Deck 1: $${gameData.splitBet1}`;
-      splitContainer1.appendChild(splitBet1);
-      fadeIn(splitBet1, 50);
+      if (deckNumber === 1) {
+        let splitContainer1 = document.querySelector(".split-cards-container1");
+        let splitBet1 = document.createElement("div");
+        splitBet1.classList.add("split-bet1");
+        let splitBetRight1 = (splitContainer1.clientWidth / 2) - 110;
+        splitBet1.style.right = splitBetRight1 + "px";
+        splitBet1.innerHTML = `Deck 1: $${gameData.splitBet1}`;
+        splitContainer1.appendChild(splitBet1);
+        fadeIn(splitBet1, 50);
+      } else {
+        let splitContainer2 = document.querySelector(".split-cards-container2");
+        let splitBet2Wrapper = document.createElement("div");
+        splitBet2Wrapper.classList.add("split-bet2-wrapper");
+        let splitBetRight2 = (splitContainer2.clientWidth / 2) - 110;
+        splitBet2Wrapper.style.right = splitBetRight2 + "px";
+        splitBet2Wrapper.innerHTML =
+          `
+          <div class="split-bet2-text">
+            Deck 2: 
+          </div>
+          <div class="split-bet2">
+            $${gameData.splitBet2}
+          </div>
+        `
 
-      splitBet2.classList.add("split-bet2");
-      let splitBetRight2 = (splitContainer2.clientWidth / 2) - 110;
-      splitBet2.style.right = splitBetRight2 + "px";
-      splitBet2.innerHTML = `Deck 2: $${gameData.splitBet2}`;
-      splitContainer2.appendChild(splitBet2);
-      fadeIn(splitBet2, 50);
+        splitContainer2.appendChild(splitBet2Wrapper);
+      }
 
     } else {
       let betDisplayElem = document.createElement("div");
