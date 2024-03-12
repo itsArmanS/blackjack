@@ -446,6 +446,11 @@ function init() {
         }
       }
     }
+
+    if (gameData.splitState1 !== '' && gameData.splitState2 !== '') {
+      gameData.roundEnded = true;
+    }
+
     setGameState("player", 1, gameData.deckSplit);
     setGameState("player", 2, gameData.deckSplit);
     setGameState("comp");
@@ -1201,35 +1206,74 @@ function init() {
     gameData.roundEnded = false;
     gameData.currentBet = 0;
 
-    playerCardsContainer.innerHTML = "";
-    compContainer.innerHTML = "";
     currentBetBubble.innerHTML = gameData.currentBet;
     playerScoreBubble.innerHTML = 0;
     compScoreBubble.innerHTML = 0;
+
+    gameData.deckSplit = false;
+    gameData.splitSwitch = false;
+    gameData.splitScore1 = 0;
+    gameData.splitScore2 = 0;
+    gameData.splitCardArray = [[], []];
+    gameData.splitScoreArray = [[], []];
+    gameData.splitState1 = "";
+    gameData.splitState2 = "";
+    gameData.splitCardDist1 = 0;
+    gameData.splitCardDist2 = 0;
+    gameData.splitBet1 = 0;
+    gameData.splitBet2 = 0;
   }
 
-  function newRoundTimer() {
+  async function newRoundTimer() {
+    let innerScoreWrapper1 = document.querySelector(".inner-score-wrapper1");
+    let innerScoreWrapper2 = document.querySelector(".inner-score-wrapper2");
+    let compScoreBubbleWrapper = document.querySelector(".comp-score-bubble-wrapper");
+    let playerScoreBubbleWrapper = document.querySelector(".player-score-bubble-wrapper");
+    let betDisplay = document.querySelector(".bet-display");
+
+    let splitContainer1 = document.querySelector(".split-cards-container1");
+    let splitContainer2 = document.querySelector(".split-cards-container2");
+
     if (gameData.roundEnded) {
-      let count = 2;
+      let count = 3;
 
       gameMessageBubble.innerHTML = `New round in ${count}`;
-      fadeIn(playerScoreBubble, 50);
 
-      let countdownInterval = setInterval(() => {
+      async function updateCountdown() {
         count--;
         gameMessageBubble.innerHTML = `New round in ${count}`;
         fadeIn(playerScoreBubble, 50);
 
         if (count === 0) {
           clearInterval(countdownInterval);
+
+          if (gameData.deckSplit === true) {
+            await fadeOut(splitContainer1, 50);
+            await fadeOut(splitContainer2, 50);
+            await fadeOut(compContainer, 50);
+            await fadeOut(compScoreBubble, 50);
+            await fadeOut(compScoreBubbleWrapper, 50);
+            await fadeOut(innerScoreWrapper1, 50);
+            await fadeOut(innerScoreWrapper2, 50);
+          } else {
+            await fadeOut(playerCardsContainer, 50);
+            await fadeOut(compContainer, 50);
+            await fadeOut(compScoreBubble, 50);
+            await fadeOut(compScoreBubbleWrapper, 50);
+            await fadeOut(playerScoreBubble, 50);
+            await fadeOut(playerScoreBubbleWrapper, 50);
+            await fadeOut(betDisplay, 50)
+          }
+          await delay(600);
+
           gameMessageBubble.innerHTML = "Place Your Bet";
-          fadeIn(playerScoreBubble, 50);
 
           resetGameData();
           changeButtonFunction("on", "bet");
           changeButtonFunction("off", "player");
         }
-      }, 1000);
+      }
+      let countdownInterval = setInterval(updateCountdown, 1000);
     }
   }
 
