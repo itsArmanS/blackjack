@@ -88,7 +88,7 @@ function init() {
   window.onload = () => {
     getDeckData();
     displayCredits();
-    changeSettings();
+    changeColorSettings();
     changeButtonFunction("off", "player");
     // changeButtonFunction("off", "split");
     displayStartingMessage("on");
@@ -429,7 +429,7 @@ function init() {
     gameMessageBubble.innerHTML = "";
 
     if (gameData.splitSwitch === true) {
-      if (gameData.splitState1 === GAME_STATE_TYPES.BUST && gameData.splitState1 === GAME_STATE_TYPES.BUST) {
+      if (gameData.splitState1 === GAME_STATE_TYPES.BUST && gameData.splitState2 === GAME_STATE_TYPES.BUST) {
         innerScoreWrapper2.classList.remove("active");
         gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
         fadeIn(gameMessageBubble, 50);
@@ -440,23 +440,7 @@ function init() {
 
         innerScoreWrapper2.classList.remove("active");
 
-        if (gameData.compScore >= 17 || (gameData.compScore >= gameData.splitScore1 || gameData.compScore >= gameData.splitScore2) && gameData.compScore <= 21) {
-          gameData.finalDraw = true;
-          setGameState("player", 1, gameData.deckSplit);
-          setGameState("player", 2, gameData.deckSplit);
-          setGameState("comp");
-          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS IN")
 
-          gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
-          gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
-          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS after")
-
-          gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
-          gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
-          fadeIn(gameMessageBubble, 50);
-          console.log(gameData.splitState1, gameData.splitState2, "SPLIT STATES")
-          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS OUT")
-        }
 
         while (gameData.compScore <= 16) {
           await delay(500);
@@ -483,6 +467,24 @@ function init() {
             console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS OUT")
             break;
           }
+        }
+
+        if (gameData.compScore >= 17 || (gameData.compScore >= gameData.splitScore1 || gameData.compScore >= gameData.splitScore2) && gameData.compScore <= 21) {
+          gameData.finalDraw = true;
+          setGameState("player", 1, gameData.deckSplit);
+          setGameState("player", 2, gameData.deckSplit);
+          setGameState("comp");
+          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS IN")
+
+          gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
+          gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
+          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS after")
+
+          gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
+          gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
+          fadeIn(gameMessageBubble, 50);
+          console.log(gameData.splitState1, gameData.splitState2, "SPLIT STATES")
+          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS OUT")
         }
       }
     }
@@ -1370,40 +1372,40 @@ function init() {
     }
   }
 
-  function screenMessageAnimation(element, ms) {
-    let completeCount;
-    let newText;
+  // function screenMessageAnimation(element, ms) {
+  //   let completeCount;
+  //   let newText;
 
-    const array = element.textContent.split('')
-    const special = ['~', '@', '!', '#', '$', '%', '^', '&', '*']
-    const exception = [' ', '\n', '.', ',']
-    const random = (min, max) => {
-      return Math.floor(Math.random() * (max - min + 1) + min)
-    }
+  //   const array = element.textContent.split('')
+  //   const special = ['~', '@', '!', '#', '$', '%', '^', '&', '*']
+  //   const exception = [' ', '\n', '.', ',']
+  //   const random = (min, max) => {
+  //     return Math.floor(Math.random() * (max - min + 1) + min)
+  //   }
 
-    const numArray = []
-    array.forEach(char => {
-      const num = random(5, 40)
-      numArray.push(num)
-    })
+  //   const numArray = []
+  //   array.forEach(char => {
+  //     const num = random(5, 40)
+  //     numArray.push(num)
+  //   })
 
-    const timer = setInterval(() => {
-      completeCount = 0
-      newText = ''
-      numArray.forEach((num, i) => {
-        if (exception.includes(array[i]) || numArray[i] === 0) {
-          newText += array[i]
-          completeCount += 1
-        } else {
-          newText += special[numArray[i] % special.length]
-          numArray[i] = --num
-        }
-      })
+  //   const timer = setInterval(() => {
+  //     completeCount = 0
+  //     newText = ''
+  //     numArray.forEach((num, i) => {
+  //       if (exception.includes(array[i]) || numArray[i] === 0) {
+  //         newText += array[i]
+  //         completeCount += 1
+  //       } else {
+  //         newText += special[numArray[i] % special.length]
+  //         numArray[i] = --num
+  //       }
+  //     })
 
-      element.innerText = newText
-      if (completeCount === numArray.length) clearInterval(timer)
-    }, ms)
-  }
+  //     element.innerText = newText
+  //     if (completeCount === numArray.length) clearInterval(timer)
+  //   }, ms)
+  // }
 
   function printGameState(opponentState, userState) {
     if (userState === GAME_STATE_TYPES.WIN) {
@@ -1502,7 +1504,7 @@ function init() {
   }
   handleSoundSettingChange();
 
-  function changeSettings() {
+  function changeColorSettings() {
     let topHalf = document.querySelector(".top-half");
     let bottomHalf = document.querySelector(".bottom-half");
     let middleHalf = document.querySelector(".game-message-bubble-wrapper");
@@ -1511,7 +1513,6 @@ function init() {
     let greenButton = document.getElementById("green");
     let blueButton = document.getElementById("blue");
 
-    let musicButton = document.getElementById("music-button");
 
     redButton.onclick = () => {
       topHalf.style.background = "#630f0f";
