@@ -27,11 +27,12 @@
       <div class="settings-title">SETTINGS</div>
       <div class="settings-dialog-wrapper">
         <div class="music-controls controls">
-          <button type="button" id="music-button"></button>
+          <input type="checkbox" id="music-button" checked>
           <div id="music-label">MUSIC</div>
         </div>
         <div class="sound-controls controls">
-          <button type="button" id="sound-button"></button>
+          <!-- <button type="button" id="sound-button"></button> -->
+          <input type="checkbox" id="sound-button" checked>
           <div id="sound-label">SOUND</div>
         </div>
         <div class="color-controls">
@@ -45,6 +46,9 @@
         <button id="close-modal-button">&times;</button>
       </div>
     </dialog>
+    <audio id="click-sound">
+      <source src="audio/clickSound.wav" type="audio/mpeg">Your browser does not support the audio element.
+    </audio>
 
     <div class="table-border">
       <div class="top-half">

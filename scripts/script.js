@@ -4,6 +4,11 @@ const GAME_STATE_TYPES = {
   BUST: "BUST",
 }
 
+const SETTINGS_DATA = {
+  sound: true,
+  music: true,
+}
+
 function init() {
   let hit = document.querySelector("#hit");
   let stand = document.querySelector("#stand");
@@ -29,6 +34,8 @@ function init() {
   split.addEventListener("click", pressSplitButton);
   addBetButton.addEventListener("click", addBet);
   subtractBetButton.addEventListener("click", subtractBet);
+
+
 
   let gameData = {
     playerCredits: 10000,
@@ -73,6 +80,7 @@ function init() {
   window.onload = () => {
     getDeckData();
     displayCredits();
+    changeSettings();
     changeButtonFunction("off", "player");
     // changeButtonFunction("off", "split");
     displayStartingMessage("on");
@@ -1446,7 +1454,8 @@ function init() {
     let openModalButton = document.querySelector("#open-modal-button");
 
     openModalButton.onclick = () => {
-      changeSettings();
+      // changeSettings();
+      console.log(soundButton.value)
       settingsModal.showModal();
       settingsModal.style.top = 23 + "%";
       fadeIn(settingsModal, 50);
@@ -1466,11 +1475,22 @@ function init() {
     let bottomHalf = document.querySelector(".bottom-half");
     let middleHalf = document.querySelector(".game-message-bubble-wrapper");
     let tableBorder = document.querySelector(".table-border");
+    let redButton = document.getElementById("red");
+    let greenButton = document.getElementById("green");
+    let blueButton = document.getElementById("blue");
 
-    let redButton = document.querySelector("#red");
-    let greenButton = document.querySelector("#green");
-    let blueButton = document.querySelector("#blue");
+    let musicButton = document.getElementById("music-button");
+    let soundButton = document.getElementById("sound-button");
 
+
+    let clickSound = document.getElementById("click-sound");
+    let allButtons = document.querySelectorAll("button");
+
+    allButtons.forEach(button => {
+      button.onclick = () => {
+        // clickSound.play();
+      }
+    })
 
     redButton.onclick = () => {
       topHalf.style.background = "#630f0f";
