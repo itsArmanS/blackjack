@@ -181,6 +181,8 @@ function init() {
       }
 
       gameData.previousBet = gameData.currentBet;
+      console.log(gameData.currentBet, "current bet")
+
       await startGame();
       await delay(100);
 
@@ -284,12 +286,16 @@ function init() {
 
   async function pressSplitButton() {
     gameData.deckSplit = true
+    gameData.splitBet1 = gameData.currentBet;
+
     hit.removeEventListener("click", pressHitButton);
     hit.addEventListener("click", pressSplitHitButton);
     stand.removeEventListener("click", pressStandButton);
     stand.addEventListener("click", pressSplitStandButton);
     placeBet.removeEventListener("click", pressPlaceBetButton);
     placeBet.addEventListener("click", pressSplitPlaceBetButton);
+
+    console.log(gameData.splitBet1, gameData.splitBet2, "splitonclick")
 
     await hideUserScore("player");
     await printSplitContainer();
@@ -633,8 +639,6 @@ function init() {
     await delay(250);
     gameMessageBubble.innerHTML = "Place a bet for the second deck";
     fadeIn(gameMessageBubble, 50);
-
-    gameData.splitBet1 += gameData.currentBet;
     gameData.currentBet = 0
 
     changeButtonFunction("off", "player");
@@ -855,7 +859,12 @@ function init() {
     if (gameData.deckSplit === true) {
       let splitBet2 = document.querySelector(".split-bet2");
 
-      gameData.splitBet2 += gameData.minimumBet;
+
+      counter2 = 0;
+      counter2 += gameData.minimumBet;
+      gameData.splitBet2 += counter2;
+      console.log(gameData.splitBet1, gameData.splitBet2, counter2, "splitonclick in add")
+
       splitBet2.innerHTML = `$${gameData.splitBet2}`;
       fadeIn(splitBet2, 50);
 
@@ -876,6 +885,8 @@ function init() {
 
       gameData.splitBet2 -= gameData.minimumBet;
       splitBet2.innerHTML = `$${gameData.splitBet2}`;
+      console.log(gameData.splitBet1, gameData.splitBet2, "splitonclick in subtract")
+
       fadeIn(splitBet2, 50);
     } else {
       if (gameData.currentBet <= 0) {
@@ -1026,7 +1037,6 @@ function init() {
   function displayCurrentBet(split, deckNumber) {
     if (split) {
       if (deckNumber === 1) {
-        gameData.splitBet1 += +gameData.currentBet;
         let splitContainer1 = document.querySelector(".split-cards-container1");
         let splitBet1 = document.createElement("div");
         splitBet1.classList.add("split-bet1");
