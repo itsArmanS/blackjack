@@ -22,15 +22,6 @@ body {
   position: relative;
 }
 
-#settings {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 4rem;
-  height: 4rem;
-  border: red 1px solid;
-}
-
 .main-wrapper>img {
   height: 100%;
   width: 100%;

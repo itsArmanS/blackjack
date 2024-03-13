@@ -10,6 +10,8 @@ const SETTINGS_DATA = {
 }
 
 function init() {
+
+
   let hit = document.querySelector("#hit");
   let stand = document.querySelector("#stand");
   let split = document.querySelector("#split");
@@ -469,30 +471,9 @@ function init() {
           }
         }
 
-        if (gameData.compScore >= 17 || (gameData.compScore >= gameData.splitScore1 || gameData.compScore >= gameData.splitScore2) && gameData.compScore <= 21) {
-          gameData.finalDraw = true;
-          setGameState("player", 1, gameData.deckSplit);
-          setGameState("player", 2, gameData.deckSplit);
-          setGameState("comp");
-          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS IN")
 
-          gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
-          gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
-          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS after")
-
-          gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
-          gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
-          fadeIn(gameMessageBubble, 50);
-          console.log(gameData.splitState1, gameData.splitState2, "SPLIT STATES")
-          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS OUT")
-        }
       }
     }
-
-    // if (gameData.splitState1 !== '' & gameData.splitState2 !== '') {
-    //   gameData.roundEnded = true;
-    //   gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
-    // }
 
     setGameState("player", 1, gameData.deckSplit);
     setGameState("comp");
@@ -1460,23 +1441,23 @@ function init() {
   }
 
   async function closeSettingsMenu() {
+    let defaultY = -50;
     closeModalButton.onclick = () => {
-      settingsModal.style.top = -100 + "%";
+      settingsModal.style.left = 150 + "%";
       fadeOut(settingsModal, 50, () => {
         settingsModal.close();
+        settingsModal.style.left = defaultY + "%";
       });
     }
+
   }
 
   function openSettingsMenu() {
     openModalButton.onclick = () => {
-      fadeIn(settingsModal, 50);
       settingsModal.showModal();
-      settingsModal.style.top = 23 + "%";
+      settingsModal.style.left = 50 + "%";
+      fadeIn(settingsModal, 50);
     }
-    console.log(openModalButton.value)
-
-
   }
 
   function updateSoundEventListeners() {
