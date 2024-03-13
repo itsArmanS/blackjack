@@ -24,6 +24,14 @@ function init() {
   let gameMessageBubble = document.querySelector(".game-message-bubble");
   let playerCreditsBubble = document.querySelector(".player-credits-bubble");
   let compScoreBubble = document.querySelector(".comp-score-bubble");
+  let settingsModal = document.querySelector("#settings-dialog");
+  let closeModalButton = document.querySelector("#close-modal-button");
+  let openModalButton = document.querySelector("#open-modal-button");
+  let soundButton = document.getElementById("sound-button");
+  let allButtons = document.querySelectorAll("button");
+
+  const CLICK_SOUND = document.getElementById("click-sound");
+
 
   let test = document.querySelector("#testy");
 
@@ -34,8 +42,8 @@ function init() {
   split.addEventListener("click", pressSplitButton);
   addBetButton.addEventListener("click", addBet);
   subtractBetButton.addEventListener("click", subtractBet);
-
-
+  openModalButton.addEventListener("click", openSettingsMenu);
+  closeModalButton.addEventListener("click", closeSettingsMenu);
 
   let gameData = {
     playerCredits: 10000,
@@ -84,10 +92,11 @@ function init() {
     changeButtonFunction("off", "player");
     // changeButtonFunction("off", "split");
     displayStartingMessage("on");
-    settingsModalDisplay();
     gameData.playerCardDist = (playerCardsContainer.clientWidth / 2) - (105 / 2);
     gameData.compCardDist = (compContainer.clientWidth / 2) - (105 / 2);
   };
+
+
 
   function changeButtonFunction(state, group) {
     if (state === "on" && group === "player") {
@@ -1448,27 +1457,50 @@ function init() {
     }
   }
 
-  async function settingsModalDisplay() {
-    let settingsModal = document.querySelector("#settings-dialog");
-    let closeModalButton = document.querySelector("#close-modal-button");
-    let openModalButton = document.querySelector("#open-modal-button");
-
-    openModalButton.onclick = () => {
-      // changeSettings();
-      console.log(soundButton.value)
-      settingsModal.showModal();
-      settingsModal.style.top = 23 + "%";
-      fadeIn(settingsModal, 50);
-    }
-
+  async function closeSettingsMenu() {
     closeModalButton.onclick = () => {
       settingsModal.style.top = -100 + "%";
-
       fadeOut(settingsModal, 50, () => {
         settingsModal.close();
       });
     }
   }
+
+  function openSettingsMenu() {
+    openModalButton.onclick = () => {
+      fadeIn(settingsModal, 50);
+      settingsModal.showModal();
+      settingsModal.style.top = 23 + "%";
+    }
+    console.log(openModalButton.value)
+
+
+  }
+
+  function updateSoundEventListeners() {
+    allButtons.forEach(button => {
+      button.onclick = () => {
+        if (SETTINGS_DATA.sound === true) {
+          CLICK_SOUND.play();
+        } else {
+          CLICK_SOUND.pause();
+          CLICK_SOUND.currentTime = 0;
+        }
+      }
+    });
+  }
+  updateSoundEventListeners();
+
+  function handleSoundSettingChange() {
+    soundButton.onclick = () => {
+      if (soundButton.checked) {
+        SETTINGS_DATA.sound = true;
+      } else {
+        SETTINGS_DATA.sound = false;
+      }
+    }
+  }
+  handleSoundSettingChange();
 
   function changeSettings() {
     let topHalf = document.querySelector(".top-half");
@@ -1480,17 +1512,6 @@ function init() {
     let blueButton = document.getElementById("blue");
 
     let musicButton = document.getElementById("music-button");
-    let soundButton = document.getElementById("sound-button");
-
-
-    let clickSound = document.getElementById("click-sound");
-    let allButtons = document.querySelectorAll("button");
-
-    allButtons.forEach(button => {
-      button.onclick = () => {
-        // clickSound.play();
-      }
-    })
 
     redButton.onclick = () => {
       topHalf.style.background = "#630f0f";
