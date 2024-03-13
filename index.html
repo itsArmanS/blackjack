@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="styles/cards.css">
   <link rel="stylesheet" href="styles/style.css">
   <link rel="stylesheet" href="styles/messageScreen.css">
+  <link rel="stylesheet" href="styles/settingsModal.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -23,7 +24,26 @@
       <button id="open-modal-button">&times;</button>
     </div>
     <dialog id="settings-dialog">
-      <button id="close-modal-button">&times;</button>
+      <div class="settings-title">SETTINGS</div>
+      <div class="settings-dialog-wrapper">
+        <div class="music-controls controls">
+          <button type="button" id="music-button"></button>
+          <div id="music-label">MUSIC</div>
+        </div>
+        <div class="sound-controls controls">
+          <button type="button" id="sound-button"></button>
+          <div id="sound-label">SOUND</div>
+        </div>
+        <div class="color-controls">
+          <div class="color-control-title">TABLE COLOR</div>
+          <div class="color-change-buttons">
+            <button id="red"></button>
+            <button id="green"></button>
+            <button id="blue"></button>
+          </div>
+        </div>
+        <button id="close-modal-button">&times;</button>
+      </div>
     </dialog>
 
     <div class="table-border">

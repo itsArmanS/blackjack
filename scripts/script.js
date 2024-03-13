@@ -1446,14 +1446,51 @@ function init() {
     let openModalButton = document.querySelector("#open-modal-button");
 
     openModalButton.onclick = () => {
+      changeSettings();
       settingsModal.showModal();
+      settingsModal.style.top = 23 + "%";
       fadeIn(settingsModal, 50);
     }
 
     closeModalButton.onclick = () => {
+      settingsModal.style.top = -100 + "%";
+
       fadeOut(settingsModal, 50, () => {
-        settingsModal.close(); // Close modal after fade out
+        settingsModal.close();
       });
+    }
+  }
+
+  function changeSettings() {
+    let topHalf = document.querySelector(".top-half");
+    let bottomHalf = document.querySelector(".bottom-half");
+    let middleHalf = document.querySelector(".game-message-bubble-wrapper");
+    let tableBorder = document.querySelector(".table-border");
+
+    let redButton = document.querySelector("#red");
+    let greenButton = document.querySelector("#green");
+    let blueButton = document.querySelector("#blue");
+
+
+    redButton.onclick = () => {
+      topHalf.style.background = "#630f0f";
+      bottomHalf.style.background = "#630f0f";
+      middleHalf.style.background = "#630f0f";
+      tableBorder.style.borderColor = "#000000";
+    }
+
+    greenButton.onclick = () => {
+      topHalf.style.background = "#1B5432";
+      bottomHalf.style.background = "#1B5432";
+      middleHalf.style.background = "#1B5432";
+      tableBorder.style.borderColor = "#A07047";
+    }
+
+    blueButton.onclick = () => {
+      topHalf.style.background = "#0C588A";
+      bottomHalf.style.background = "#0C588A";
+      middleHalf.style.background = "#0C588A";
+      tableBorder.style.borderColor = "#D7CFC5";
     }
   }
 

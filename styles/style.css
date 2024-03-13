@@ -17,7 +17,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: black;
+  background-color: gray;
   gap: 1rem;
   position: relative;
 }
@@ -50,6 +50,7 @@ body {
   border-color: #A07047;
   overflow: hidden;
   position: relative;
+  transition: border-color 0.5s ease-in-out;
 }
 
 .table-background {
@@ -67,6 +68,7 @@ body {
   background-color: #1B5432;
   flex: 2;
   display: flex;
+  transition: background-color 0.5s ease-in-out;
 }
 
 .top-half {
@@ -91,6 +93,7 @@ body {
   font-weight: bold;
   font-size: 20px;
   color: white;
+  transition: background-color 0.5s ease-in-out;
 }
 
 .bet-display {
