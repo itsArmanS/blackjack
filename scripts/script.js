@@ -1,7 +1,7 @@
 const GAME_STATE_TYPES = {
   WIN: "WIN",
   DRAW: "DRAW",
-  BUST: "BUST"
+  BUST: "BUST",
 }
 
 function init() {
@@ -60,6 +60,8 @@ function init() {
     splitScore2: 0,
     splitCardArray: [[], []],
     splitScoreArray: [[], []],
+    splitCompState1: "",
+    splitCompState2: "",
     splitState1: "",
     splitState2: "",
     splitCardDist1: 0,
@@ -301,6 +303,7 @@ function init() {
     displayCurrentBet(gameData.deckSplit, 1);
     displayCurrentBet(gameData.deckSplit, 2);
     await setSplitDeckBet();
+    console.log(gameData.splitBet1, gameData.splitBet2, "splitonclick")
 
   }
 
@@ -313,84 +316,79 @@ function init() {
     changeButtonFunction("on", "player");
 
     displayCredits();
+
+    await fadeOut(gameMessageBubble, 50);
+    gameMessageBubble.innerHTML = '';
   }
 
-  async function pressSplitHitButton(deckNumber) {
-    let innerScoreWrapper1 = document.querySelector(".inner-score-wrapper1");
+  async function pressSplitHitButton() {
     let innerScoreWrapper2 = document.querySelector(".inner-score-wrapper2");
 
+    if (gameData.splitSwitch === false) {
+      changeButtonFunction("off", "player");
+      await printSplitCards(1);
+      countUserScore("player", gameData.deckSplit, 1);
 
-    // fadeIn(innerScoreWrapper1, 50);
-    // fadeIn(innerScoreWrapper2, 50);
+      if (gameData.splitScore1 > 21) {
 
-    if (gameData.deckSplit || deckNumber === 1) {
+        changeButtonFunction("off", "all");
+        setGameState("player", 1, gameData.deckSplit);
+        setGameState("comp");
+        gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitBet1, 1);
+        await delay(500);
+        pressSplitStandButton();
+        changeButtonFunction("on", "player");
 
-      if (gameData.splitSwitch === false) {
-        // changeButtonFunction("off", "player");
-        await printSplitCards(1);
-        countUserScore("player", gameData.deckSplit, 1);
+      } else if (gameData.splitScore1 === 21) {
+        gameData.playerBlackjack = true;
+        changeButtonFunction("off", "all");
+        setGameState("player", 1, gameData.deckSplit);
+        setGameState("comp");
 
-        if (gameData.splitScore1 > 21) {
+        gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
+        gameData.playerCredits += gameData.splitBet1;
+        gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitBet1, 1);
+        fadeIn(gameMessageBubble, 50);
+        displayCredits();
+        await delay(1000);
+        changeButtonFunction("on", "player");
+        gameData.playerBlackjack = false;
+        pressSplitStandButton();
 
-          changeButtonFunction("off", "all");
-          setGameState("player", 1, gameData.deckSplit);
-          setGameState("comp");
-          await delay(500);
-          pressSplitStandButton();
-          changeButtonFunction("on", "player");
-
-          innerScoreWrapper1.classList.remove("active");
-          innerScoreWrapper2.classList.add("active");
-
-        } else if (gameData.splitScore1 === 21) {
-          changeButtonFunction("off", "all");
-          gameData.splitSwitch = true;
-          setGameState("player", 1, gameData.deckSplit);
-          setGameState("comp");
-
-          innerScoreWrapper1.classList.remove("active");
-          innerScoreWrapper2.classList.add("active");
-
-          gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
-          gameData.splitBet1 += gameData.currentBet;
-          gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitState2, gameData.splitBet1, gameData.splitBet2);
-          fadeIn(gameMessageBubble, 50);
-          displayCredits();
-          await delay(1000);
-          changeButtonFunction("on", "player");
-
-        } else {
-          changeButtonFunction("on", "player");
-        }
       } else {
-
-        await printSplitCards(2);
-        countUserScore("player", gameData.deckSplit, 2);
-
-        if (gameData.splitScore2 > 21) {
-          changeButtonFunction("off", "all");
-          setGameState("player", 2, gameData.deckSplit);
-          setGameState("comp");
-
-          gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitState2, gameData.splitBet1, gameData.splitBet2);
-          fadeIn(gameMessageBubble, 50);
-
-          innerScoreWrapper2.classList.remove("active");
-        } else if (gameData.splitScore2 === 21) {
-          setGameState("player", 2, gameData.deckSplit);
-          setGameState("comp");
-
-          gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
-          gameData.playerCredits += gameData.currentBet;
-          gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitState2, gameData.splitBet1, gameData.splitBet2);
-          fadeIn(gameMessageBubble, 50);
-          displayCredits();
-          innerScoreWrapper2.classList.remove("active");
-        } else {
-          changeButtonFunction("on", "player");
-        }
-
+        changeButtonFunction("on", "player");
       }
+    } else {
+
+      await printSplitCards(2);
+      countUserScore("player", gameData.deckSplit, 2);
+
+      if (gameData.splitScore2 > 21) {
+        innerScoreWrapper2.classList.remove("active");
+        setGameState("player", 2, gameData.deckSplit);
+        setGameState("comp");
+        gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState2, gameData.splitBet2, 2);
+        fadeIn(gameMessageBubble, 50);
+        pressSplitStandButton();
+        changeButtonFunction("off", "all");
+
+      } else if (gameData.splitScore2 === 21) {
+        setGameState("player", 2, gameData.deckSplit);
+        setGameState("comp");
+
+        gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
+        gameData.playerCredits += gameData.splitBet2;
+        gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState2, gameData.splitBet2, 2);
+        fadeIn(gameMessageBubble, 50);
+        displayCredits();
+        innerScoreWrapper2.classList.remove("active");
+        gameData.playerBlackjack = false;
+        pressSplitStandButton();
+
+      } else {
+        changeButtonFunction("on", "player");
+      }
+
     }
     if (gameData.splitState1 !== '' || gameData.splitState2 !== '') {
       gameData.roundEnded = true;
@@ -404,43 +402,76 @@ function init() {
     innerScoreWrapper1.classList.remove("active");
     innerScoreWrapper2.classList.add("active");
 
-    if (gameData.splitSwitch === true || gameData.splitScore2 === 21) {
-      changeButtonFunction("off", "all");
-      await handleSecondCard();
+    await fadeOut(gameMessageBubble, 50);
+    gameMessageBubble.innerHTML = "";
 
-      innerScoreWrapper2.classList.remove("active");
+    if (gameData.splitSwitch === true) {
+      if (gameData.splitState1 === GAME_STATE_TYPES.BUST && gameData.splitState1 === GAME_STATE_TYPES.BUST) {
+        innerScoreWrapper2.classList.remove("active");
+        gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
+        fadeIn(gameMessageBubble, 50);
+        gameData.roundEnded = true;
+      } else {
+        changeButtonFunction("off", "all");
+        await handleSecondCard();
 
-      while (gameData.compScore <= 16) {
-        await delay(500);
-        await printCompCards();
-        setGameState("player", 1, gameData.deckSplit);
-        setGameState("player", 2, gameData.deckSplit);
-        setGameState("comp");
+        innerScoreWrapper2.classList.remove("active");
 
-        if (gameData.compScore >= 17 && (gameData.compScore >= gameData.splitScore1 && gameData.compScore >= gameData.splitScore2) && gameData.compScore < 21) {
+        if (gameData.compScore >= 17 || (gameData.compScore >= gameData.splitScore1 || gameData.compScore >= gameData.splitScore2) && gameData.compScore <= 21) {
           gameData.finalDraw = true;
           setGameState("player", 1, gameData.deckSplit);
           setGameState("player", 2, gameData.deckSplit);
           setGameState("comp");
-          gameData.splitBet1 += decideBetReturn(gameData.splitState1, gameData.deckSplit);
-          gameData.splitBet2 += decideBetReturn(gameData.splitState2, gameData.deckSplit);
+          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS IN")
+
+          gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
+          gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
+          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS after")
+
           gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
-          gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitState2, gameData.splitBet1, gameData.splitBet2);
-          break;
+          gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
+          fadeIn(gameMessageBubble, 50);
+          console.log(gameData.splitState1, gameData.splitState2, "SPLIT STATES")
+          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS OUT")
+        }
+
+        while (gameData.compScore <= 16) {
+          await delay(500);
+          await printCompCards();
+          setGameState("player", 1, gameData.deckSplit);
+          setGameState("player", 2, gameData.deckSplit);
+          setGameState("comp");
+
+          if (gameData.compScore >= 17 || (gameData.compScore >= gameData.splitScore1 || gameData.compScore >= gameData.splitScore2) && gameData.compScore <= 21) {
+            gameData.finalDraw = true;
+            setGameState("player", 1, gameData.deckSplit);
+            setGameState("player", 2, gameData.deckSplit);
+            setGameState("comp");
+            console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS IN")
+
+            gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
+            gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
+            console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS after")
+
+            gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
+            gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
+            fadeIn(gameMessageBubble, 50);
+            console.log(gameData.splitState1, gameData.splitState2, "SPLIT STATES")
+            console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS OUT")
+            break;
+          }
         }
       }
     }
 
-    if (gameData.splitState1 !== '' && gameData.splitState2 !== '') {
-      gameData.roundEnded = true;
-      gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitState2, gameData.splitBet1, gameData.splitBet2);
-    }
+    // if (gameData.splitState1 !== '' & gameData.splitState2 !== '') {
+    //   gameData.roundEnded = true;
+    //   gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
+    // }
 
     setGameState("player", 1, gameData.deckSplit);
-    setGameState("player", 2, gameData.deckSplit);
     setGameState("comp");
     displayCredits();
-    fadeIn(gameMessageBubble, 50);
     gameData.splitSwitch = true;
   }
 
@@ -943,10 +974,7 @@ function init() {
 
   function displayCredits() {
     let innerDiv = playerCreditsBubble.firstElementChild;
-
-    currentBetBubble.innerHTML = gameData.currentBet;
     innerDiv.innerHTML = `Total Credits: ${gameData.playerCredits}`;
-
   }
 
   async function hideUserScore(user) {
@@ -997,9 +1025,8 @@ function init() {
 
   function displayCurrentBet(split, deckNumber) {
     if (split) {
-      gameData.splitBet1 += +gameData.currentBet;
-
       if (deckNumber === 1) {
+        gameData.splitBet1 += +gameData.currentBet;
         let splitContainer1 = document.querySelector(".split-cards-container1");
         let splitBet1 = document.createElement("div");
         splitBet1.classList.add("split-bet1");
@@ -1061,12 +1088,13 @@ function init() {
     }, ms);
   }
 
-  async function fadeOut(element, ms) {
+  async function fadeOut(element, ms, callback) {
     element.style.opacity = 1;
     let opacity = 1;
     let timer = setInterval(function () {
       if (opacity <= 0) {
         clearInterval(timer);
+        if (callback) callback();
       }
       element.style.opacity = opacity;
       opacity -= 0.1;
@@ -1172,7 +1200,7 @@ function init() {
       } else if (userState === GAME_STATE_TYPES.DRAW) {
         return 1;
       } else if (userState === GAME_STATE_TYPES.BUST) {
-        return 0;
+        return 1;
       }
     } else {
       if (userState === GAME_STATE_TYPES.WIN) {
@@ -1182,7 +1210,7 @@ function init() {
       } else if (userState === GAME_STATE_TYPES.DRAW) {
         return 1;
       } else if (userState === GAME_STATE_TYPES.BUST) {
-        return 0;
+        return 1;
       }
     }
   }
@@ -1361,23 +1389,44 @@ function init() {
     return `YOU LOST ${gameData.currentBet} CREDITS`
   }
 
-  function printSplitGameMessage(deckState1, deckState2, bet1, bet2) {
+  function printSplitFinalMessage(deckState, deckBet, deckState2, deckBet2) {
+    if (deckState === GAME_STATE_TYPES.WIN && deckState2 === GAME_STATE_TYPES.WIN) {
+      return `YOU WON ${(deckBet + deckBet2)} CREDITS`;
+    } else if ((deckState === GAME_STATE_TYPES.WIN && deckState2 === GAME_STATE_TYPES.BUST) || (deckState === GAME_STATE_TYPES.WIN && deckState2 === GAME_STATE_TYPES.DRAW)) {
+      return `YOU WON ${deckBet} CREDITS`;
+    } else if ((deckState === GAME_STATE_TYPES.BUST && deckState2 === GAME_STATE_TYPES.WIN) || (deckState === GAME_STATE_TYPES.DRAW && deckState2 === GAME_STATE_TYPES.WIN)) {
+      return `YOU WON ${deckBet2} CREDITS`;
+    } else if (deckState === GAME_STATE_TYPES.BUST && deckState2 === GAME_STATE_TYPES.BUST) {
+      return `YOU LOST ${deckBet + deckBet2} CREDITS`;
+    } else if (deckState === GAME_STATE_TYPES.BUST && deckState2 === GAME_STATE_TYPES.DRAW) {
+      return `RETURNED ${deckBet2} CREDITS`;
+    } else if (deckState === GAME_STATE_TYPES.DRAW && deckState2 === GAME_STATE_TYPES.BUST) {
+      return `RETURNED ${deckBet} CREDITS`;
+    } else if (deckState === GAME_STATE_TYPES.DRAW && deckState2 === GAME_STATE_TYPES.DRAW) {
+      return `RETURNED ${deckBet + deckBet2} CREDITS`;
+    }
+  }
+
+  function printSplitGameMessage(deckState, deckBet, deckNumber) {
     if (gameData.deckSplit === true) {
-      if (deckState1 === GAME_STATE_TYPES.WIN && deckState2 === GAME_STATE_TYPES.WIN) {
-        return `YOU WON ${(bet1 + bet2) * 2.5} CREDITS`;
-      } else if ((deckState1 === GAME_STATE_TYPES.WIN && deckState2 === GAME_STATE_TYPES.BUST) || (deckState1 === GAME_STATE_TYPES.WIN && deckState2 === GAME_STATE_TYPES.DRAW)) {
-        return `YOU WON ${bet1 * 2.5} CREDITS`;
-      } else if ((deckState1 === GAME_STATE_TYPES.BUST && deckState2 === GAME_STATE_TYPES.WIN) || (deckState1 === GAME_STATE_TYPES.DRAW && deckState2 === GAME_STATE_TYPES.WIN)) {
-        return `YOU WON ${bet2 * 2.5} CREDITS`;
-      } else if (deckState1 === GAME_STATE_TYPES.BUST && deckState2 === GAME_STATE_TYPES.BUST) {
-        return `YOU LOST ${bet1 + bet2} CREDITS`;
-      } else if (deckState1 === GAME_STATE_TYPES.BUST && deckState2 === GAME_STATE_TYPES.DRAW) {
-        return `RETURNED ${bet2} CREDITS`;
-      } else if (deckState1 === GAME_STATE_TYPES.DRAW && deckState2 === GAME_STATE_TYPES.BUST) {
-        return `RETURNED ${bet1} CREDITS`;
-      } else if (deckState1 === GAME_STATE_TYPES.DRAW && deckState2 === GAME_STATE_TYPES.DRAW) {
-        return `RETURNED ${bet1 + bet2} CREDITS`;
+      if (deckNumber === 1) {
+        if (deckState === GAME_STATE_TYPES.WIN) {
+          return `Deck 1: YOU WON $${deckBet * 2.5} CREDITS`
+        } else if (deckState === GAME_STATE_TYPES.DRAW) {
+          return `Deck 1: DRAW - RETURNED $${deckBet} CREDITS`;
+        } else if (deckState === GAME_STATE_TYPES.BUST) {
+          return `Deck 1: YOU LOST $${deckBet * 2.5} CREDITS`;
+        }
+      } else if (deckNumber === 2) {
+        if (deckState === GAME_STATE_TYPES.WIN) {
+          return `Deck 2: YOU WON $${deckBet * 2.5} CREDITS`
+        } else if (deckState === GAME_STATE_TYPES.DRAW) {
+          return `Deck 2: DRAW - RETURNED $${deckBet} CREDITS`;
+        } else if (deckState === GAME_STATE_TYPES.BUST) {
+          return `Deck 2: YOU LOST $${deckBet * 2.5} CREDITS`;
+        }
       }
+
     }
   }
 
@@ -1392,8 +1441,9 @@ function init() {
     }
 
     closeModalButton.onclick = () => {
-      settingsModal.close();
-      fadeOut(settingsModal, 50);
+      fadeOut(settingsModal, 50, () => {
+        settingsModal.close(); // Close modal after fade out
+      });
     }
   }
 
