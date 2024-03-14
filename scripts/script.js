@@ -10,8 +10,6 @@ const SETTINGS_DATA = {
 }
 
 function init() {
-
-
   let hit = document.querySelector("#hit");
   let stand = document.querySelector("#stand");
   let split = document.querySelector("#split");
@@ -26,16 +24,21 @@ function init() {
   let gameMessageBubble = document.querySelector(".game-message-bubble");
   let playerCreditsBubble = document.querySelector(".player-credits-bubble");
   let compScoreBubble = document.querySelector(".comp-score-bubble");
+
   let settingsModal = document.querySelector("#settings-dialog");
-  let closeModalButton = document.querySelector("#close-modal-button");
-  let openModalButton = document.querySelector("#open-modal-button");
+  let openSettingsModalButton = document.querySelector("#open-modal-button");
+  let closeSettingsModalButton = document.querySelector("#close-modal-button");
+
+  let rulesModal = document.getElementById("game-rules");
+  let openRulesModalButton = document.getElementById("open-rules-button");
+  let closeRulesModalButton = document.getElementById("close-rules-button");
+
   let soundButton = document.getElementById("sound-button");
   let allButtons = document.querySelectorAll("button");
-
   const CLICK_SOUND = document.getElementById("click-sound");
 
 
-  let test = document.querySelector("#testy");
+  let test = document.getElementById("test");
 
   placeBet.addEventListener("click", pressPlaceBetButton);
   stand.addEventListener("click", pressStandButton);
@@ -44,8 +47,18 @@ function init() {
   split.addEventListener("click", pressSplitButton);
   addBetButton.addEventListener("click", addBet);
   subtractBetButton.addEventListener("click", subtractBet);
-  openModalButton.addEventListener("click", openSettingsMenu);
-  closeModalButton.addEventListener("click", closeSettingsMenu);
+  openSettingsModalButton.addEventListener("click", openSettingsMenu);
+  closeSettingsModalButton.addEventListener("click", closeSettingsMenu);
+  openRulesModalButton.addEventListener("click", openRulesMenu);
+  closeRulesModalButton.addEventListener("click", closeRulesMenu);
+
+  test.addEventListener("click", testtest);
+  function testtest() {
+    console.log(gameData.roundEnded, 'roundEnded');
+    console.log('roundEnded');
+
+    newRoundTimer();
+  }
 
   let gameData = {
     playerCredits: 10000,
@@ -55,6 +68,8 @@ function init() {
     playerCardDist: 0,
     playerGameState: "",
     playerBlackjack: false,
+    over17Bust: false,
+    over17Draw: false,
 
     compScore: 0,
     compHand: [],
@@ -98,6 +113,9 @@ function init() {
     gameData.compCardDist = (compContainer.clientWidth / 2) - (105 / 2);
   };
 
+  test.onclick = () => {
+
+  }
 
 
   function changeButtonFunction(state, group) {
@@ -136,11 +154,6 @@ function init() {
     } else if (state === "off" && group === "split") {
       split.disabled = true;
     }
-  }
-
-  test.onclick = () => {
-
-    newRoundTimer();
   }
 
   async function getDeckData() {
@@ -370,10 +383,6 @@ function init() {
         setGameState("player", 1, gameData.deckSplit);
         setGameState("comp");
 
-        gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
-        gameData.playerCredits += gameData.splitBet1;
-        gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState1, gameData.splitBet1, 1);
-        fadeIn(gameMessageBubble, 50);
         displayCredits();
         await delay(1000);
         changeButtonFunction("on", "player");
@@ -442,7 +451,11 @@ function init() {
 
         innerScoreWrapper2.classList.remove("active");
 
-
+        if (gameData.compScore >= 17 && (gameData.compScore < gameData.splitScore1 || gameData.compScore < gameData.splitScore2) && gameData.compScore <= 21) {
+          gameData.over17Bust = true;
+        } else if (gameData.compScore >= 17 && (gameData.compScore <= gameData.splitScore1 || gameData.compScore <= gameData.splitScore2) && gameData.compScore <= 21) {
+          gameData.over17Draw = true;
+        }
 
         while (gameData.compScore <= 16) {
           await delay(500);
@@ -451,7 +464,7 @@ function init() {
           setGameState("player", 2, gameData.deckSplit);
           setGameState("comp");
 
-          if (gameData.compScore >= 17 || (gameData.compScore >= gameData.splitScore1 || gameData.compScore >= gameData.splitScore2) && gameData.compScore <= 21) {
+          if (gameData.compScore >= 17 && gameData.compScore <= 21) {
             gameData.finalDraw = true;
             setGameState("player", 1, gameData.deckSplit);
             setGameState("player", 2, gameData.deckSplit);
@@ -468,10 +481,45 @@ function init() {
             console.log(gameData.splitState1, gameData.splitState2, "SPLIT STATES")
             console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS OUT")
             break;
+          } else if (gameData.compScore > 21) {
+            gameData.roundEnded = true;
+            setGameState("player", 1, gameData.deckSplit);
+            setGameState("player", 2, gameData.deckSplit);
+            setGameState("comp");
+            console.log("over25")
+            gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
+            gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
+            console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS after")
+
+            gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
+            gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
+            fadeIn(gameMessageBubble, 50);
+            break
           }
         }
 
+        if (gameData.over17Bust || gameData.over17Draw) {
+          gameData.finalDraw = true;
+          setGameState("player", 1, gameData.deckSplit);
+          setGameState("player", 2, gameData.deckSplit);
+          setGameState("comp");
+          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS whileout")
+          console.log(gameData.splitState2, gameData.splitState2, "SPLIT state whileout")
 
+          gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
+          gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
+          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS after whileout")
+
+          gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
+          gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
+          fadeIn(gameMessageBubble, 50);
+          console.log(gameData.splitState1, gameData.splitState2, "SPLIT STATES whileout")
+          console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS OUT whileout")
+        }
+      }
+
+      if (gameData.splitState1 !== '' && gameData.splitState2 !== '') {
+        gameData.roundEnded = true;
       }
     }
 
@@ -1274,7 +1322,6 @@ function init() {
     let playerScoreBubbleWrapper = document.querySelector(".player-score-bubble-wrapper");
     let splitScore1 = document.querySelector(".split-cards-score1");
     let splitScore2 = document.querySelector(".split-cards-score2");
-
     if (gameData.roundEnded) {
       let count = 3;
 
@@ -1440,9 +1487,17 @@ function init() {
     }
   }
 
+  function openSettingsMenu() {
+    openSettingsModalButton.onclick = () => {
+      settingsModal.showModal();
+      settingsModal.style.left = 50 + "%";
+      fadeIn(settingsModal, 50);
+    }
+  }
+
   async function closeSettingsMenu() {
     let defaultY = -50;
-    closeModalButton.onclick = () => {
+    closeSettingsModalButton.onclick = () => {
       settingsModal.style.left = 150 + "%";
       fadeOut(settingsModal, 50, () => {
         settingsModal.close();
@@ -1452,12 +1507,25 @@ function init() {
 
   }
 
-  function openSettingsMenu() {
-    openModalButton.onclick = () => {
-      settingsModal.showModal();
-      settingsModal.style.left = 50 + "%";
-      fadeIn(settingsModal, 50);
+  function openRulesMenu() {
+    openRulesModalButton.onclick = () => {
+      rulesModal.showModal();
+      rulesModal.style.top = 28 + "%";
+      fadeIn(rulesModal, 50);
     }
+  }
+
+  function closeRulesMenu() {
+    let defaultX = -100;
+    closeRulesModalButton.onclick = () => {
+      rulesModal.style.top = 150 + "%";
+      fadeOut(rulesModal, 50, () => {
+        rulesModal.close();
+        rulesModal.style.top = defaultX + "%";
+
+      });
+    }
+
   }
 
   function updateSoundEventListeners() {
