@@ -20,6 +20,7 @@ section {
     background: #052254;
     will-change: filter, transform;
     animation: bubble 15s infinite;
+    z-index: -1;
 
     &:nth-of-type(1) {
         right: -5%;

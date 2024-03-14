@@ -26,8 +26,10 @@ function init() {
   let gameMessageBubble = document.querySelector(".game-message-bubble");
   let playerCreditsBubble = document.querySelector(".player-credits-bubble");
   let compScoreBubble = document.querySelector(".comp-score-bubble");
+
   let logoutButton = document.getElementById("logout");
   let signinButton = document.getElementById("signin");
+  let signupButton = document.getElementById("create-account")
 
   let settingsModal = document.querySelector("#settings-dialog");
   let openSettingsModalButton = document.querySelector("#open-modal-button");
@@ -40,7 +42,6 @@ function init() {
   let soundButton = document.getElementById("sound-button");
   let allButtons = document.querySelectorAll("button");
   const CLICK_SOUND = document.getElementById("click-sound");
-
 
   let test = document.getElementById("test");
 
@@ -55,6 +56,9 @@ function init() {
   closeSettingsModalButton.addEventListener("click", closeSettingsMenu);
   openRulesModalButton.addEventListener("click", openRulesMenu);
   closeRulesModalButton.addEventListener("click", closeRulesMenu);
+
+  signinButton.addEventListener("click", signin);
+  signupButton.addEventListener("click", signup)
   logoutButton.addEventListener("click", logout);
 
   test.addEventListener("click", testtest);
@@ -112,15 +116,51 @@ function init() {
     let signupWrapper = document.querySelector(".signup-wrapper")
 
     await Promise.all([
-      fadeOut(gameWrapper, 100), // Fade out the game wrapper
-      fadeIn(signupWrapper, 100) // Fade in the signup wrapper
+      fadeOut(gameWrapper, 50),
+      fadeIn(signupWrapper, 50)
     ]);
 
     gameWrapper.style.flex = "0";
     signupWrapper.style.flex = "1";
-
   }
 
+  async function signin() {
+    let gameWrapper = document.querySelector(".game-wrapper")
+    let signupWrapper = document.querySelector(".signup-wrapper")
+
+    await Promise.all([
+      fadeIn(gameWrapper, 50),
+      fadeOut(signupWrapper, 50)
+    ]);
+
+    gameWrapper.style.flex = "1";
+    signupWrapper.style.flex = "0";
+  }
+
+  async function signup() {
+    let signinForm = document.getElementById("signin-form");
+    let signupForm = document.getElementById("signup-form");
+    let backToSignin = document.getElementById("back-to-signin");
+
+    await Promise.all([
+      fadeOut(signinForm, 50),
+      fadeIn(signupForm, 50)
+    ]);
+
+    signinForm.style.flex = 0;
+    signupForm.style.flex = 1.5;
+
+    backToSignin.onclick = async function () {
+      await Promise.all([
+        fadeIn(signinForm, 50),
+        fadeOut(signupForm, 50),
+      ]);
+
+      signinForm.style.flex = 1.5;
+      signupForm.style.flex = 0;
+    }
+
+  }
 
   window.onload = () => {
     getDeckData();

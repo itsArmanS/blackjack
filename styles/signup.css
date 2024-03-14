@@ -7,6 +7,7 @@
     background-color: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(5px);
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
@@ -35,20 +36,44 @@
     justify-content: center;
     align-items: center;
     border: 1px solid black;
+    position: relative;
 }
 
 #signin-form {
     flex: 1;
-    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    box-sizing: border-box;
     gap: 1rem;
+    padding-bottom: 1rem;
 }
 
+#signup-form {
+    flex: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    gap: 1rem;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+#signup-form,
+#signin-form {
+    overflow: hidden;
+    transition: flex 1s ease;
+}
+
+
+
 #usernameSignin,
-#passwordSignin {
+#passwordSignin,
+#usernameSignup,
+#passwordSignup {
     width: 60%;
     border-radius: 1rem;
     box-sizing: border-box;
@@ -58,7 +83,8 @@
     transition: box-shadow 0.5s ease-in-out;
 }
 
-#signin {
+#signin,
+#signup {
     width: 4rem;
     height: 1rem;
     border: none;
@@ -73,4 +99,28 @@
 #passwordSignin:hover,
 #signin:hover {
     box-shadow: 0.3rem 0.3rem;
+}
+
+#create-account {
+    width: 20rem;
+    text-align: start;
+    box-sizing: border-box;
+    padding-left: 1.5rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: blue;
+    background-color: transparent;
+    border: none;
+}
+
+#back-to-signin {
+    position: absolute;
+    top: 23%;
+    left: 6%;
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    background-color: transparent;
+    background-image: url(../images/backToSignin.svg);
+    cursor: pointer;
 }
