@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="styles/messageScreen.css">
   <link rel="stylesheet" href="styles/settingsModal.css">
   <link rel="stylesheet" href="styles/gameRules.css">
+  <link rel="stylesheet" href="styles/signup.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -20,145 +21,161 @@
 </head>
 
 <body>
-  <div class="main-wrapper">
-    <dialog id="settings-dialog">
-      <div class="settings-title">SETTINGS</div>
-      <div class="settings-dialog-wrapper">
-        <div class="music-controls controls">
-          <input type="checkbox" id="music-button" checked>
-          <div id="music-label">MUSIC</div>
+  <div class="site-wrapper">
+    <div class="signup-wrapper">
+
+      <div class="signup-box">
+        <div id="signin-form">
+          <input type="text" name="usernameSignin" id="usernameSignin" placeholder="username">
+          <input type="password" name="passwordSignin" id="passwordSignin" placeholder="password">
+          <button id="signin">Sign In</button>
         </div>
-        <div class="sound-controls controls">
-          <!-- <button type="button" id="sound-button"></button> -->
-          <input type="checkbox" id="sound-button" checked>
-          <div id="sound-label">SOUND</div>
-        </div>
-        <div class="color-controls">
-          <div class="color-control-title">TABLE COLOR</div>
-          <div class="color-change-buttons">
-            <button id="red"></button>
-            <button id="green"></button>
-            <button id="blue"></button>
-          </div>
-        </div>
-        <button id="close-modal-button"></button>
       </div>
-    </dialog>
 
-    <dialog id="game-rules">
-      <div class="rules-wrapper">
-        <div class="rules-title">RULES</div>
-        <ol>
-          <li>The player places a bet before the game begins.</li>
-          <li>The dealer deals two cards to the player, including themselves. One card is face-up, the other face-down.
-          </li>
-          <li>The player evaluates their hands and decides whether to "hit" (receive another card) or "stand" (keep
-            their current hand).</li>
-          <li>If the players total hand value exceeds 21, they bust and lose the round.</li>
-          <li>After the player has finished their turn, the dealer reveals their face-down card.</li>
-          <li>The dealer hits until they reach a total of 17 or higher.</li>
-          <li>If the dealer busts, all remaining players win.</li>
-          <li>If the dealer's total is higher than a player's but 21 or less, the player loses their bet.</li>
-          <li>If a player's total is higher than the dealer's and 21 or less, they win and receive a payout.</li>
-          <li>If both the dealer and player have the same total, it's a push, and the player gets their bet back.</li>
-          <p>Remember, the objective is to have a hand total closer to 21 than the dealer without going over.</p>
-        </ol>
-
-
-
-        <button id="close-rules-button"></button>
-      </div>
-    </dialog>
-
-    <audio id="click-sound">
-      <!-- <source src="audio/clickSound.wav" type="audio/mpeg">Your browser does not support the audio element. -->
-    </audio>
-
-    <div id="rules">
-      <button id="open-rules-button"></button>
-      <span>RULES</span>
     </div>
-    <div id="settings">
-      <button id="open-modal-button"></button>
-      <span>SETTINGS</span>
-    </div>
+    <div class="game-wrapper">
+      <button id="logout">Logout</button>
+      <dialog id="settings-dialog">
+        <div class="settings-title">SETTINGS</div>
+        <div class="settings-dialog-wrapper">
+          <div class="music-controls controls">
+            <input type="checkbox" id="music-button" checked>
+            <div id="music-label">MUSIC</div>
+          </div>
+          <div class="sound-controls controls">
+            <!-- <button type="button" id="sound-button"></button> -->
+            <input type="checkbox" id="sound-button" checked>
+            <div id="sound-label">SOUND</div>
+          </div>
+          <div class="color-controls">
+            <div class="color-control-title">TABLE COLOR</div>
+            <div class="color-change-buttons">
+              <button id="red"></button>
+              <button id="green"></button>
+              <button id="blue"></button>
+            </div>
+          </div>
+          <button id="close-modal-button"></button>
+        </div>
+      </dialog>
+
+      <dialog id="game-rules">
+        <div class="rules-wrapper">
+          <div class="rules-title">RULES</div>
+          <ol>
+            <li>The player places a bet before the game begins.</li>
+            <li>The dealer deals two cards to the player, including themselves. One card is face-up, the other
+              face-down.
+            </li>
+            <li>The player evaluates their hands and decides whether to "hit" (receive another card) or "stand" (keep
+              their current hand).</li>
+            <li>If the players total hand value exceeds 21, they bust and lose the round.</li>
+            <li>After the player has finished their turn, the dealer reveals their face-down card.</li>
+            <li>The dealer hits until they reach a total of 17 or higher.</li>
+            <li>If the dealer busts, all remaining players win.</li>
+            <li>If the dealer's total is higher than a player's but 21 or less, the player loses their bet.</li>
+            <li>If a player's total is higher than the dealer's and 21 or less, they win and receive a payout.</li>
+            <li>If both the dealer and player have the same total, it's a push, and the player gets their bet back.</li>
+            <p>Remember, the objective is to have a hand total closer to 21 than the dealer without going over.</p>
+          </ol>
+
+
+
+          <button id="close-rules-button"></button>
+        </div>
+      </dialog>
+
+      <audio id="click-sound">
+        <!-- <source src="audio/clickSound.wav" type="audio/mpeg">Your browser does not support the audio element. -->
+      </audio>
+
+      <div id="rules">
+        <button id="open-rules-button"></button>
+        <span>RULES</span>
+      </div>
+      <div id="settings">
+        <button id="open-modal-button"></button>
+        <span>SETTINGS</span>
+      </div>
 
 
 
 
-    <div class="table-border">
-      <div class="top-half">
-        <div class="comp-score-bubble-wrapper">
-          <div class="comp-score-bubble">
+      <div class="table-border">
+        <div class="top-half">
+          <div class="comp-score-bubble-wrapper">
+            <div class="comp-score-bubble">
+
+            </div>
+          </div>
+          <div class="comp-container">
 
           </div>
         </div>
-        <div class="comp-container">
-
-        </div>
-      </div>
-      <div class="game-message-bubble-wrapper">
-        <div class="game-message-bubble">
-
-        </div>
-      </div>
-      <div class="bottom-half">
-        <div class="player-cards-container">
-
-        </div>
-        <div class="player-score-bubble-wrapper">
-          <div class="player-score-bubble">
+        <div class="game-message-bubble-wrapper">
+          <div class="game-message-bubble">
 
           </div>
         </div>
-      </div>
-    </div>
-    <div class="player-buttons-wrapper">
-      <div class="player-buttons">
-        <div class="bet-buttons">
-          <button id="hit" class="pbtns">HIT</button>
-          <button id="stand" class="pbtns">STAND</button>
-          <button id="DD" class="pbtns">DOUBLE DOWN</button>
-          <button id="split" class="pbtns">SPLIT</button>
-          <button id="place-bet" class="bet-btns">PLACE BET</button>
-          <button id="test" class="pbtns">test</button>
-        </div>
-      </div>
-      <div class="player-data-wrapper">
-        <!-- <div class="bet-chips">
-          <button class="bet-chip-buttons chip10">
-            <img src="images/casino-chip10.png" alt="">
-          </button>
-          <button class="bet-chip-buttons chip25">
-            <img src="images/casino-chip25.png" alt="">
-          </button>
-          <button class="bet-chip-buttons chip50">
-            <img src="images/casino-chip50.png" alt="">
-          </button>
-          <button class="bet-chip-buttons chip100">
-            <img src="images/casino-chip100.png" alt="">
-          </button>
-          <button class="bet-chip-buttons chip500">
-            <img src="images/casino-chip500.png" alt="">
-          </button>
-        </div> -->
-        <div class="player-credits-bubble">
-          <div class="credits"></div>
-        </div>
-        <div class="current-bet-bubble-wrapper">
-          <button class="minus-bet bet-btns">
-
-          </button>
-          <div class="current-bet-bubble">
+        <div class="bottom-half">
+          <div class="player-cards-container">
 
           </div>
-          <button class="plus-bet bet-btns">
+          <div class="player-score-bubble-wrapper">
+            <div class="player-score-bubble">
 
-          </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="player-buttons-wrapper">
+        <div class="player-buttons">
+          <div class="bet-buttons">
+            <button id="hit" class="pbtns">HIT</button>
+            <button id="stand" class="pbtns">STAND</button>
+            <button id="DD" class="pbtns">DOUBLE DOWN</button>
+            <button id="split" class="pbtns">SPLIT</button>
+            <button id="place-bet" class="bet-btns">PLACE BET</button>
+            <button id="test" class="pbtns">test</button>
+          </div>
+        </div>
+        <div class="player-data-wrapper">
+          <!-- <div class="bet-chips">
+            <button class="bet-chip-buttons chip10">
+              <img src="images/casino-chip10.png" alt="">
+            </button>
+            <button class="bet-chip-buttons chip25">
+              <img src="images/casino-chip25.png" alt="">
+            </button>
+            <button class="bet-chip-buttons chip50">
+              <img src="images/casino-chip50.png" alt="">
+            </button>
+            <button class="bet-chip-buttons chip100">
+              <img src="images/casino-chip100.png" alt="">
+            </button>
+            <button class="bet-chip-buttons chip500">
+              <img src="images/casino-chip500.png" alt="">
+            </button>
+          </div> -->
+          <div class="player-credits-bubble">
+            <div class="credits"></div>
+          </div>
+          <div class="current-bet-bubble-wrapper">
+            <button class="minus-bet bet-btns">
+
+            </button>
+            <div class="current-bet-bubble">
+
+            </div>
+            <button class="plus-bet bet-btns">
+
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
 </body>
 
 </html>

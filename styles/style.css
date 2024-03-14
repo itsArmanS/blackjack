@@ -4,15 +4,11 @@
   font-family: "Lato", sans-serif;
 }
 
-body {
-  display: flex;
-}
 
-.main-wrapper {
+
+.game-wrapper {
   flex: 1;
-  width: 100vw;
   height: 100vh;
-  min-width: 85rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -20,6 +16,8 @@ body {
   background-color: gray;
   gap: 1rem;
   position: relative;
+  overflow: hidden;
+  transition: width 1s ease-in-out;
 }
 
 .main-wrapper>img {
@@ -29,7 +27,7 @@ body {
 
 .table-border {
   flex: 1;
-  min-width: 70%;
+  min-width: 55rem;
   max-width: 70%;
   min-height: 35rem;
   max-height: 35rem;

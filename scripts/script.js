@@ -1,3 +1,5 @@
+
+
 const GAME_STATE_TYPES = {
   WIN: "WIN",
   DRAW: "DRAW",
@@ -24,6 +26,7 @@ function init() {
   let gameMessageBubble = document.querySelector(".game-message-bubble");
   let playerCreditsBubble = document.querySelector(".player-credits-bubble");
   let compScoreBubble = document.querySelector(".comp-score-bubble");
+  let logoutButton = document.getElementById("logout");
 
   let settingsModal = document.querySelector("#settings-dialog");
   let openSettingsModalButton = document.querySelector("#open-modal-button");
@@ -51,6 +54,7 @@ function init() {
   closeSettingsModalButton.addEventListener("click", closeSettingsMenu);
   openRulesModalButton.addEventListener("click", openRulesMenu);
   closeRulesModalButton.addEventListener("click", closeRulesMenu);
+  logoutButton.addEventListener("click", logout);
 
   test.addEventListener("click", testtest);
   function testtest() {
@@ -101,6 +105,21 @@ function init() {
     splitBet1: 0,
     splitBet2: 0,
   }
+
+  async function logout() {
+    let gameWrapper = document.querySelector(".game-wrapper")
+    let signupWrapper = document.querySelector(".signup-wrapper")
+
+    await Promise.all([
+      fadeOut(gameWrapper, 100), // Fade out the game wrapper
+      fadeIn(signupWrapper, 100) // Fade in the signup wrapper
+    ]);
+
+    gameWrapper.style.flex = "0";
+    signupWrapper.style.flex = "1";
+
+  }
+
 
   window.onload = () => {
     getDeckData();

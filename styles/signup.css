@@ -1,0 +1,75 @@
+.site-wrapper {
+    display: flex;
+}
+
+.signup-wrapper {
+    display: none;
+    background-color: blue;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.signup-wrapper,
+.game-wrapper {
+    overflow: hidden;
+    transition: flex 1s ease;
+}
+
+.signup-wrapper {
+    flex: 1;
+}
+
+.game-wrapper {
+    flex: 0;
+}
+
+/* ------------------------ */
+
+.signup-box {
+    width: 20rem;
+    height: 10rem;
+    border-radius: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid black;
+}
+
+#signin-form {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+#usernameSignin,
+#passwordSignin {
+    width: 60%;
+    border-radius: 1rem;
+    box-sizing: border-box;
+    padding-left: 5px;
+    outline: none;
+    box-shadow: 0.4rem 0.4rem;
+    transition: box-shadow 0.5s ease-in-out;
+}
+
+#signin {
+    width: 4rem;
+    height: 1rem;
+    border: none;
+    border-radius: 1rem;
+    font-size: 0.7rem;
+    box-shadow: 0.4rem 0.4rem;
+    transition: box-shadow 0.5s ease-in-out;
+    cursor: pointer;
+}
+
+#usernameSignin:hover,
+#passwordSignin:hover,
+#signin:hover {
+    box-shadow: 0.3rem 0.3rem;
+}
