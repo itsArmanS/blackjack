@@ -27,6 +27,7 @@ function init() {
   let playerCreditsBubble = document.querySelector(".player-credits-bubble");
   let compScoreBubble = document.querySelector(".comp-score-bubble");
   let logoutButton = document.getElementById("logout");
+  let signinButton = document.getElementById("signin");
 
   let settingsModal = document.querySelector("#settings-dialog");
   let openSettingsModalButton = document.querySelector("#open-modal-button");
