@@ -1510,7 +1510,7 @@ function init() {
   function openRulesMenu() {
     openRulesModalButton.onclick = () => {
       rulesModal.showModal();
-      rulesModal.style.top = 28 + "%";
+      rulesModal.style.top = 14 + "%";
       fadeIn(rulesModal, 50);
     }
   }
