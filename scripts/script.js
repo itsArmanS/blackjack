@@ -159,7 +159,7 @@ function init() {
 
   async function getDeckData() {
     try {
-      let response = await fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=3");
+      let response = await fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=10");
       let data = await response.json();
 
       gameData.deckID = data.deck_id;
@@ -239,7 +239,7 @@ function init() {
     if (gameData.finalDraw) {
       setGameState("player");
       setGameState("comp");
-      gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
+      gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.deckSplit);
       gameData.playerCredits += gameData.currentBet;
       gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
       displayCredits();
@@ -260,7 +260,7 @@ function init() {
     } else if (gameData.playerScore === 21) {
       setGameState("player")
       setGameState("comp")
-      gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
+      gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.deckSplit);
       gameData.playerCredits += gameData.currentBet;
       gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
       displayCredits();
@@ -323,21 +323,23 @@ function init() {
         gameData.over17Win = true;
         console.log("BUST")
       }
+
+      if (gameData.over17Bust || gameData.over17Draw || gameData.over17Win) {
+        console.log(gameData.currentBet, "cb out while")
+
+        gameData.finalDraw = true;
+        setGameState("player");
+        setGameState("comp");
+        console.log(gameData.playerGameState, gameData.compGameState, "PCGS");
+
+        gameData.playerCredits += gameData.currentBet;
+        displayCredits();
+        gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+        fadeIn(gameMessageBubble, 50);
+      }
     }
 
-    if (gameData.over17Bust || gameData.over17Draw || gameData.over17Win) {
-      console.log(gameData.currentBet, "cb out while")
 
-      gameData.finalDraw = true;
-      setGameState("player");
-      setGameState("comp");
-      console.log(gameData.playerGameState, gameData.compGameState, "PCGS");
-
-      gameData.playerCredits += gameData.currentBet;
-      displayCredits();
-      gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
-      fadeIn(gameMessageBubble, 50);
-    }
 
     if (gameData.playerGameState !== '' && gameData.compGameState !== '') {
       gameData.roundEnded = true;
@@ -424,6 +426,17 @@ function init() {
 
     await fadeOut(gameMessageBubble, 50);
     gameMessageBubble.innerHTML = '';
+
+    if (gameData.splitScore1 === 21) {
+      setGameState("player", 1, gameData.deckSplit);
+      setGameState("comp")
+      gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
+      gameData.playerCredits += gameData.splitBet1;
+      gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.splitState1);
+      displayCredits();
+      fadeIn(gameMessageBubble, 50);
+      pressSplitStandButton();
+    }
   }
 
   async function pressSplitHitButton() {
@@ -477,7 +490,6 @@ function init() {
         setGameState("player", 2, gameData.deckSplit);
         setGameState("comp");
 
-        gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
         gameData.playerCredits += gameData.splitBet2;
         gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState2, gameData.splitBet2, 2);
         fadeIn(gameMessageBubble, 50);
@@ -500,6 +512,9 @@ function init() {
     let innerScoreWrapper1 = document.querySelector(".inner-score-wrapper1");
     let innerScoreWrapper2 = document.querySelector(".inner-score-wrapper2");
 
+    setGameState("player", 1, gameData.deckSplit);
+    setGameState("player", 2, gameData.deckSplit);
+
     innerScoreWrapper1.classList.remove("active");
     innerScoreWrapper2.classList.add("active");
 
@@ -512,6 +527,8 @@ function init() {
         gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
         fadeIn(gameMessageBubble, 50);
         gameData.roundEnded = true;
+        await delay(1500);
+        newRoundTimer();
       } else {
         changeButtonFunction("off", "all");
         await handleSecondCard();
@@ -538,7 +555,6 @@ function init() {
             setGameState("comp");
             console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS IN")
 
-            gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
             gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
             console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS after")
 
@@ -554,9 +570,9 @@ function init() {
             setGameState("player", 2, gameData.deckSplit);
             setGameState("comp");
             console.log("over25")
-            gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
             gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
             console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS after")
+
 
             gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
             gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
@@ -573,7 +589,6 @@ function init() {
           console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS whileout")
           console.log(gameData.splitState2, gameData.splitState2, "SPLIT state whileout")
 
-          gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
           gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
           console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS after whileout")
 
@@ -824,6 +839,7 @@ function init() {
     let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${gameData.deckID}/draw/?count=1`);
     let drawData = await draw.json();
     let playerCards = drawData.cards;
+    console.log(drawData, "deck");
     console.log(gameData.playerHand)
     for (let card of playerCards) {
       if (card.value === "JACK") {
