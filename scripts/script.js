@@ -67,9 +67,9 @@ function init() {
     playerScoreArray: [],
     playerCardDist: 0,
     playerGameState: "",
-    playerBlackjack: false,
     over17Bust: false,
     over17Draw: false,
+    over17Win: false,
 
     compScore: 0,
     compHand: [],
@@ -145,6 +145,7 @@ function init() {
     } else if (state === "off" && group === "all") {
       hit.disabled = true;
       stand.disabled = true;
+      split.disabled = true;
       doubleDown.disabled = true;
       addBetButton.disabled = true;
       subtractBetButton.disabled = true;
@@ -173,25 +174,32 @@ function init() {
       displayScores("comp");
       displayScores("player");
       await printCompCards();
+      await delay(250);
       await printPlayerCards();
+      await delay(250);
       await printCompCards();
+      await delay(250);
       await printPlayerCards();
+      await delay(250);
       await startGameFlipCard();
       displayCurrentBet();
 
-
+      await delay(500);
       if (gameData.playerScore === 21) {
-        setGameState("player");
-        setGameState("comp");
-        gameData.roundEnded = true;
-        gameData.playerBlackjack = true;
         changeButtonFunction("off", "all");
+        setGameState("player");
+        gameData.roundEnded = true;
 
         gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
         gameData.playerCredits += gameData.currentBet;
-        gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+        gameMessageBubble.innerHTML = `BLACKJACK! YOU WON ${gameData.currentBet} CREDITS`
+        await fadeIn(gameMessageBubble);
+
         displayCredits();
+        await delay(2000);
+        newRoundTimer()
       }
+      changeButtonFunction("on", "player");
 
       if (gameData.playerHand[0].value === gameData.playerHand[1].value) {
         // changeButtonFunction("on", "split")
@@ -218,7 +226,6 @@ function init() {
       await startGame();
       await delay(100);
 
-      changeButtonFunction("on", "player");
       gameData.playerCredits -= gameData.currentBet;
       displayCredits();
 
@@ -243,18 +250,25 @@ function init() {
       gameData.roundEnded = true;
       setGameState("player");
       setGameState("comp");
+
       gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
       fadeIn(gameMessageBubble, 50);
-      // newRoundTimer();
+      changeButtonFunction("off", "all");
+      gameData.roundEnded = true;
+      await delay(2000);
+      newRoundTimer();
     } else if (gameData.playerScore === 21) {
       setGameState("player")
       setGameState("comp")
-      gameData.playerBlackjack = true;
       gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
       gameData.playerCredits += gameData.currentBet;
       gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
       displayCredits();
       fadeIn(gameMessageBubble, 50);
+      changeButtonFunction("off", "all");
+      gameData.roundEnded = true;
+      await delay(2000);
+      newRoundTimer();
     } else {
       changeButtonFunction("on", "player");
     }
@@ -277,31 +291,60 @@ function init() {
       setGameState("player");
       setGameState("comp");
 
-      if (gameData.compScore >= 17 && gameData.compScore > gameData.playerScore && gameData.compScore < 21) {
+      let lower16 = (gameData.compScore >= 16 && gameData.compScore >= gameData.playerScore && gameData.compScore <= 21)
+      let lower21 = (gameData.compScore >= 17 && gameData.compScore >= gameData.playerScore && gameData.compScore <= 21);
+      let higher21 = (gameData.compScore >= 17 && gameData.compScore > 21);
+      let lowerThanPlayer = (gameData.compScore >= 17 && gameData.compScore <= gameData.playerScore && gameData.compScore < 21);
+
+      if (lower21 || higher21 || lower16 || lowerThanPlayer) {
+        console.log(gameData.currentBet, "cb in while")
         gameData.finalDraw = true;
         setGameState("player");
         setGameState("comp");
+        console.log(gameData.playerGameState, gameData.compGameState, "small21");
 
+        gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.deckSplit);
+        gameData.playerCredits += gameData.currentBet;
+        displayCredits();
         gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
         fadeIn(gameMessageBubble, 50);
         break;
       }
     }
 
-    if (gameData.playerGameState !== '' && gameData.compGameState !== '') {
-      gameData.roundEnded = true;
+    if (gameData.compHand.length <= 2) {
+      if (gameData.compScore >= 17 && (gameData.compScore < gameData.playerScore) && gameData.compScore < 21) {
+        gameData.over17Bust = true;
+        console.log("BUST")
+      } else if (gameData.compScore >= 17 && (gameData.compScore === gameData.playerScore) && gameData.compScore <= 21) {
+        gameData.over17Draw = true;
+        console.log("BUST")
+      } else if (gameData.compScore >= 17 && (gameData.compScore > gameData.playerScore) && gameData.compScore <= 21) {
+        gameData.over17Win = true;
+        console.log("BUST")
+      }
     }
 
-    setGameState("player");
-    setGameState("comp");
+    if (gameData.over17Bust || gameData.over17Draw || gameData.over17Win) {
+      console.log(gameData.currentBet, "cb out while")
 
-    gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
-    fadeIn(gameMessageBubble, 50);
+      gameData.finalDraw = true;
+      setGameState("player");
+      setGameState("comp");
+      console.log(gameData.playerGameState, gameData.compGameState, "PCGS");
 
-    gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
-    gameData.playerCredits += +gameData.currentBet;
-    displayCredits();
-    // newRoundTimer();
+      gameData.playerCredits += gameData.currentBet;
+      displayCredits();
+      gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+      fadeIn(gameMessageBubble, 50);
+    }
+
+    if (gameData.playerGameState !== '' && gameData.compGameState !== '') {
+      gameData.roundEnded = true;
+      await delay(2000);
+      newRoundTimer();
+    }
+    newRoundTimer();
   }
 
   async function pressDoubleDownButton() {
@@ -310,10 +353,34 @@ function init() {
     setGameState("player");
     setGameState("comp");
 
-    gameData.currentBet *= 2;
-    gameData.playerCredits -= gameData.currentBet / 2;
-    displayCredits();
-    pressStandButton();
+    if (gameData.playerScore > 21) {
+      changeButtonFunction("off", "all");
+      gameData.roundEnded = true;
+      setGameState("player");
+      setGameState("comp");
+      gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+      fadeIn(gameMessageBubble, 50);
+      changeButtonFunction("off", "all");
+      gameData.roundEnded = true;
+      await delay(2000);
+      newRoundTimer();
+    } else if (gameData.playerScore === 21) {
+      setGameState("player")
+      setGameState("comp")
+      gameData.playerBlackjack = true;
+      gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
+      gameData.playerCredits += gameData.currentBet;
+      gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
+      displayCredits();
+      fadeIn(gameMessageBubble, 50);
+      changeButtonFunction("off", "all");
+      gameData.roundEnded = true;
+      await delay(2000);
+      newRoundTimer();
+    } else {
+      await delay(1000);
+      pressStandButton();
+    }
   }
 
   async function pressSplitButton() {
@@ -757,8 +824,11 @@ function init() {
     let draw = await fetch(`https://www.deckofcardsapi.com/api/deck/${gameData.deckID}/draw/?count=1`);
     let drawData = await draw.json();
     let playerCards = drawData.cards;
-
+    console.log(gameData.playerHand)
     for (let card of playerCards) {
+      if (card.value === "JACK") {
+        card.image = "images/jackofclubs.jpg"
+      }
       card.backImage = "https://deckofcardsapi.com/static/img/back.png";
       card.bjVal = getValueByCardType(card.value, "player");
 
@@ -820,7 +890,9 @@ function init() {
 
 
     for (let card of compCards) {
-
+      if (card.value === "JACK") {
+        card.image = "images/jackofclubs.jpg"
+      }
       card.backImage = "https://deckofcardsapi.com/static/img/back.png";
       card.bjVal = getValueByCardType(card.value, "comp");
 
@@ -1263,7 +1335,7 @@ function init() {
     } else {
       if (userState === GAME_STATE_TYPES.WIN) {
         return 2.5;
-      } else if (userState === GAME_STATE_TYPES.WIN && gameData.playerBlackjack === true) {
+      } else if (userState === GAME_STATE_TYPES.WIN) {
         return 2.9;
       } else if (userState === GAME_STATE_TYPES.DRAW) {
         return 1;
@@ -1288,6 +1360,9 @@ function init() {
     gameData.finalDraw = false;
     gameData.roundEnded = false;
     gameData.currentBet = 0;
+    over17Bust = false;
+    over17Draw = false;
+    over17Win = false;
 
     currentBetBubble.innerHTML = gameData.currentBet;
     playerScoreBubble.innerHTML = 0;
@@ -1436,12 +1511,14 @@ function init() {
   // }
 
   function printGameState(opponentState, userState) {
+    console.log(gameData.currentBet, "cb in printgamestate")
+
     if (userState === GAME_STATE_TYPES.WIN) {
-      return `YOU WON ${gameData.currentBet * 2.5} CREDITS`;
+      return `YOU WON ${gameData.currentBet} CREDITS`;
     } else if (opponentState === GAME_STATE_TYPES.DRAW) {
       return `DRAW: Returned ${gameData.currentBet} CREDITS`;
     } else if (opponentState === GAME_STATE_TYPES.BUST) {
-      return `YOU WON ${gameData.currentBet * 2.5} CREDITS`;
+      return `YOU WON ${gameData.currentBet} CREDITS`;
     }
     return `YOU LOST ${gameData.currentBet} CREDITS`
   }
