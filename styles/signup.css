@@ -48,6 +48,7 @@
     box-sizing: border-box;
     gap: 1rem;
     padding-bottom: 1rem;
+    padding-top: 1rem;
 }
 
 #signup-form {
@@ -60,6 +61,7 @@
     gap: 1rem;
     position: relative;
     padding-bottom: 1rem;
+    padding-top: 1rem;
 }
 
 #signup-form,
@@ -67,8 +69,6 @@
     overflow: hidden;
     transition: flex 1s ease;
 }
-
-
 
 #usernameSignin,
 #passwordSignin,

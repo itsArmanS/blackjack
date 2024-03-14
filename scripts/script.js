@@ -11,6 +11,10 @@ const SETTINGS_DATA = {
   music: true,
 }
 
+const USER_LOCAL_DATA = {
+
+}
+
 function init() {
   let hit = document.querySelector("#hit");
   let stand = document.querySelector("#stand");
@@ -29,7 +33,7 @@ function init() {
 
   let logoutButton = document.getElementById("logout");
   let signinButton = document.getElementById("signin");
-  let signupButton = document.getElementById("create-account")
+  let createAccount = document.getElementById("create-account")
 
   let settingsModal = document.querySelector("#settings-dialog");
   let openSettingsModalButton = document.querySelector("#open-modal-button");
@@ -58,7 +62,7 @@ function init() {
   closeRulesModalButton.addEventListener("click", closeRulesMenu);
 
   signinButton.addEventListener("click", signin);
-  signupButton.addEventListener("click", signup)
+  createAccount.addEventListener("click", signup)
   logoutButton.addEventListener("click", logout);
 
   test.addEventListener("click", testtest);
@@ -141,8 +145,14 @@ function init() {
     let signinForm = document.getElementById("signin-form");
     let signupForm = document.getElementById("signup-form");
     let backToSignin = document.getElementById("back-to-signin");
+    let usernameSignup = document.getElementById("usernameSignup");
+    let passwordSignup = document.getElementById("passwordSignup");
+    let signupButton = document.getElementById("signup");
+
+
 
     await Promise.all([
+      fadeOut(createAccount, 50),
       fadeOut(signinForm, 50),
       fadeIn(signupForm, 50)
     ]);
@@ -152,6 +162,7 @@ function init() {
 
     backToSignin.onclick = async function () {
       await Promise.all([
+        fadeIn(createAccount, 50),
         fadeIn(signinForm, 50),
         fadeOut(signupForm, 50),
       ]);
@@ -159,6 +170,18 @@ function init() {
       signinForm.style.flex = 1.5;
       signupForm.style.flex = 0;
     }
+
+    signupButton.onclick = async function () {
+      let newUsername = usernameSignup.value;
+      let newPassword = passwordSignup.value;
+
+
+      USER_LOCAL_DATA[newUsername] = newPassword;
+      console.log(USER_LOCAL_DATA);
+
+      localStorage.setItem(newUsername, newPassword);
+    }
+
 
   }
 
