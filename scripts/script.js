@@ -110,52 +110,52 @@ async function init() {
   function loginScreen() {
     USER_LOCAL_DATA = JSON.parse(localStorage.getItem(USER_LOCAL_DATA_KEY)) || {};
 
-    // function changeBubbleColors() {
-    //   let allBubbles = document.querySelectorAll(".blurred-bubble");
-    //   let redBubble = document.querySelector(".red-bubble");
-    //   let greenBubble = document.querySelector(".green-bubble");
-    //   let blueBubble = document.querySelector(".blue-bubble");
-    //   let purpleBubble = document.querySelector(".purple-bubble");
-    //   let yellowBubble = document.querySelector(".yellow-bubble");
-
-    //   redBubble.onclick = () => {
-    //     allBubbles.forEach(bubble => {
-    //       bubble.style.background = "#ff0000";
-    //     });
-    //   };
-
-    //   greenBubble.onclick = () => {
-    //     allBubbles.forEach(bubble => {
-    //       bubble.style.background = "#00ff00";
-    //     });
-    //   };
-
-    //   blueBubble.onclick = () => {
-    //     allBubbles.forEach(bubble => {
-    //       bubble.style.background = "#052254";
-    //     });
-    //   };
-
-    //   purpleBubble.onclick = () => {
-    //     allBubbles.forEach(bubble => {
-    //       bubble.style.background = "#8300C4";
-    //     });
-    //   };
-
-    //   yellowBubble.onclick = () => {
-    //     allBubbles.forEach(bubble => {
-    //       bubble.style.background = "#FFFF00";
-    //     });
-    //   };
-    // }
 
     let logoutButton = document.getElementById("logout");
     let signinButton = document.getElementById("signin");
+    let signupButton = document.getElementById("signup");
     let createAccount = document.getElementById("create-account");
+    let backToSignin = document.getElementById("back-to-signin");
 
     signinButton.addEventListener("click", signin);
-    createAccount.addEventListener("click", signup);
+    signupButton.addEventListener("click", signup);
+    createAccount.addEventListener("click", changeSignInUp);
+    backToSignin.addEventListener("click", returnToSignin);
+
     logoutButton.addEventListener("click", logout);
+
+    async function changeSignInUp() {
+      let signinForm = document.getElementById("signin-form");
+      let signupForm = document.getElementById("signup-form");
+
+      await Promise.all([
+        fadeOut(createAccount, 50),
+        fadeOut(signinForm, 50),
+        fadeIn(signupForm, 50)
+      ]);
+
+      signinForm.style.flex = 0;
+      signupForm.style.flex = 1.5;
+    }
+
+    async function returnToSignin() {
+      let signinForm = document.getElementById("signin-form");
+      let signupForm = document.getElementById("signup-form");
+      let usernameSignup = document.getElementById("usernameSignup");
+      let passwordSignup = document.getElementById("passwordSignup");
+
+      await Promise.all([
+        fadeIn(createAccount, 50),
+        fadeIn(signinForm, 50),
+        fadeOut(signupForm, 50),
+      ]);
+
+      signinForm.style.flex = 1.5;
+      signupForm.style.flex = 0;
+
+      usernameSignup.value = "";
+      passwordSignup.value = "";
+    }
 
     async function logout() {
       let gameWrapper = document.querySelector(".game-wrapper")
@@ -182,7 +182,7 @@ async function init() {
       let password = passwordSignin.value;
 
       if (username !== '' && password !== '') {
-        let userData = checkUserExistingData();
+        let userData = checkUserExistingData("in");
         if (userData) {
           if (USER_LOCAL_DATA.hasOwnProperty(username)) {
             let userData = USER_LOCAL_DATA[username];
@@ -191,7 +191,6 @@ async function init() {
               game();
               gameData = JSON.parse(userData.localGameData);
               userStats = JSON.parse(userData.localStats);
-              console.log(gameData)
 
               await Promise.all([
                 fadeIn(gameWrapper, 50),
@@ -204,140 +203,162 @@ async function init() {
               usernameSignin.value = "";
               passwordSignin.value = "";
             } else {
-              console.log("incorect password");
+              showErrorBox("Incorrect Password", "signin");
               passwordSignin.value = "";
             }
           }
         } else {
-          console.log("no such user");
+          showErrorBox("No such user!", "signin");
         }
       } else {
-        alert("Write something first");
+        showErrorBox("Fields cannot be empty!", "signin");
       }
     }
 
     async function signup() {
-      let signinForm = document.getElementById("signin-form");
-      let signupForm = document.getElementById("signup-form");
-      let backToSignin = document.getElementById("back-to-signin");
       let usernameSignup = document.getElementById("usernameSignup");
       let passwordSignup = document.getElementById("passwordSignup");
-      let signupButton = document.getElementById("signup");
 
-      await Promise.all([
-        fadeOut(createAccount, 50),
-        fadeOut(signinForm, 50),
-        fadeIn(signupForm, 50)
-      ]);
+      let newUsername = usernameSignup.value;
+      let newPassword = passwordSignup.value;
 
-      signinForm.style.flex = 0;
-      signupForm.style.flex = 1.5;
-
-      backToSignin.onclick = async function () {
-        await Promise.all([
-          fadeIn(createAccount, 50),
-          fadeIn(signinForm, 50),
-          fadeOut(signupForm, 50),
-        ]);
-
-        signinForm.style.flex = 1.5;
-        signupForm.style.flex = 0;
-      }
-
-      signupButton.onclick = async function () {
-        let newUsername = usernameSignup.value;
-        let newPassword = passwordSignup.value;
-
-        if (usernameSignup.value !== "" && passwordSignup.value !== "") {
-          let userData = checkUserExistingData();
-
-          if (userData) {
-            alert("user already exists");
-            usernameSignup.value = "";
-            passwordSignup.value = "";
-          } else {
-            let newUserGameData = {
-              playerCredits: 100000,
-              playerScore: 0,
-              playerHand: [],
-              playerScoreArray: [],
-              playerCardDist: 0,
-              playerGameState: "",
-              over17Bust: false,
-              over17Draw: false,
-              over17Win: false,
-
-              compScore: 0,
-              compHand: [],
-              compScoreArray: [],
-              compCardDist: 0,
-              compGameState: "",
-
-              deckID: "",
-              standClicked: false,
-              finalDraw: false,
-              roundEnded: false,
-              newRound: false,
-              currentBet: 0,
-              minimumBet: 500,
-              previousBet: 0,
-
-              deckSplit: false,
-              splitSwitch: false,
-              splitScore1: 0,
-              splitScore2: 0,
-              splitCardArray: [[], []],
-              splitScoreArray: [[], []],
-              splitCompState1: "",
-              splitCompState2: "",
-              splitState1: "",
-              splitState2: "",
-              splitCardDist1: 0,
-              splitCardDist2: 0,
-              splitBet1: 0,
-              splitBet2: 0,
-            }
-
-            let newUserStats = {
-              wins: 0,
-              busts: 0,
-              draws: 0,
-              blackjacks: 0,
-              over10kWins: 0,
-              over100kCredits: false,
-              over1mCredits: false,
-            }
-
-            USER_LOCAL_DATA[newUsername] = {
-              username: newUsername,
-              password: newPassword,
-              localGameData: JSON.stringify(newUserGameData),
-              localStats: JSON.stringify(newUserStats)
-            };
-
-            localStorage.setItem(USER_LOCAL_DATA_KEY, JSON.stringify(USER_LOCAL_DATA));
-
-            usernameSignup.value = "";
-            passwordSignup.value = "";
-            await delay(150);
-            backToSignin.click()
-          }
+      if (newUsername !== "" && newPassword !== "") {
+        let userExists = checkUserExistingData("up");
+        if (userExists === false) {
+          showErrorBox("Username already taken!", "signup");
         } else {
-          alert("Write something first");
+          usernameSignup.value = "";
+          passwordSignup.value = "";
+          await delay(150);
+          backToSignin.click();
+        }
+      } else {
+        showErrorBox("Fields cannot be empty!", "signup");
+      }
+    }
+
+    function checkUserExistingData(sign) {
+      let passwordSignup = document.getElementById("passwordSignup");
+      let newPassword = passwordSignup.value;
+
+      if (sign === "in") {
+        let username = document.getElementById("usernameSignin").value;
+
+        if (USER_LOCAL_DATA.hasOwnProperty(username)) {
+          return USER_LOCAL_DATA[username];
+        } else {
+          return null;
+        }
+      } else if (sign === "up") {
+        let username = document.getElementById("usernameSignup").value;
+
+        if (USER_LOCAL_DATA.hasOwnProperty(username)) {
+          return false; // User already exists
+        } else {
+
+          let newUserGameData = {
+            playerCredits: 100000,
+            playerScore: 0,
+            playerHand: [],
+            playerScoreArray: [],
+            playerCardDist: 0,
+            playerGameState: "",
+            over17Bust: false,
+            over17Draw: false,
+            over17Win: false,
+
+            compScore: 0,
+            compHand: [],
+            compScoreArray: [],
+            compCardDist: 0,
+            compGameState: "",
+
+            deckID: "",
+            standClicked: false,
+            finalDraw: false,
+            roundEnded: false,
+            newRound: false,
+            currentBet: 0,
+            minimumBet: 500,
+            previousBet: 0,
+
+            deckSplit: false,
+            splitSwitch: false,
+            splitScore1: 0,
+            splitScore2: 0,
+            splitCardArray: [[], []],
+            splitScoreArray: [[], []],
+            splitCompState1: "",
+            splitCompState2: "",
+            splitState1: "",
+            splitState2: "",
+            splitCardDist1: 0,
+            splitCardDist2: 0,
+            splitBet1: 0,
+            splitBet2: 0,
+          }
+
+          let newUserStats = {
+            wins: 0,
+            busts: 0,
+            draws: 0,
+            blackjacks: 0,
+            over10kWins: 0,
+            over100kCredits: false,
+            over1mCredits: false,
+          }
+
+          USER_LOCAL_DATA[username] = {
+            username: username,
+            password: newPassword,
+            localGameData: JSON.stringify(newUserGameData),
+            localStats: JSON.stringify(newUserStats)
+          };
+
+          localStorage.setItem(USER_LOCAL_DATA_KEY, JSON.stringify(USER_LOCAL_DATA));
+
+          return true;
         }
       }
     }
 
-    function checkUserExistingData() {
-      let username = document.getElementById("usernameSignin").value;
+    async function showErrorBox(message, box) {
+      if (box === "signin") {
+        let signinErrorBox = document.querySelector(".signin-error-message-box");
+        let timer = 2;
 
-      if (USER_LOCAL_DATA.hasOwnProperty(username)) {
-        return USER_LOCAL_DATA[username];
+        signinErrorBox.innerHTML = `${message}`
+        fadeIn(signinErrorBox, 50);
+
+        async function hideErrorBox() {
+          timer--;
+          if (timer === 0) {
+            clearInterval(countdownInterval);
+            fadeOut(signinErrorBox, 50);
+            await delay(500);
+            signinErrorBox.innerHTML = "";
+          }
+        }
+        let countdownInterval = setInterval(hideErrorBox, 2000);
       } else {
-        return null;
+        let signupErrorBox = document.querySelector(".signup-error-message-box");
+        let timer = 2;
+
+        signupErrorBox.innerHTML = `${message}`
+        fadeIn(signupErrorBox, 50);
+
+        async function hideErrorBox() {
+          timer--;
+          if (timer === 0) {
+            clearInterval(countdownInterval);
+            fadeOut(signupErrorBox, 50);
+            await delay(500);
+            signupErrorBox.innerHTML = "";
+          }
+        }
+        let countdownInterval = setInterval(hideErrorBox, 2000);
       }
     }
-
   }
   loginScreen();
 
@@ -396,6 +417,7 @@ async function init() {
     console.log(gameData, "init")
     changeColorSettings();
     changeButtonFunction("off", "player");
+    changeButtonFunction("off", "split");
     // changeButtonFunction("off", "split");
     displayStartingMessage("on");
     gameData.playerCardDist = (playerCardsContainer.clientWidth / 2) - (105 / 2);
@@ -505,7 +527,7 @@ async function init() {
         changeButtonFunction("on", "player");
 
         if (gameData.playerHand[0].value === gameData.playerHand[1].value) {
-          // changeButtonFunction("on", "split")
+          changeButtonFunction("on", "split")
         }
 
       } catch (error) {
@@ -617,6 +639,7 @@ async function init() {
           displayCredits();
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
           fadeIn(gameMessageBubble, 50);
+          updateUserStats(gameData.playerGameState);
           break;
         }
       }
@@ -641,12 +664,14 @@ async function init() {
           setGameState("comp");
           console.log(gameData.playerGameState, gameData.compGameState, "PCGS");
 
+          gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.deckSplit);
           gameData.playerCredits += gameData.currentBet;
           fadeIn(playerCreditsBubble, 50);
 
           displayCredits();
           gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
           fadeIn(gameMessageBubble, 50);
+          updateUserStats(gameData.playerGameState);
         }
       }
 
@@ -675,6 +700,7 @@ async function init() {
         fadeIn(gameMessageBubble, 50);
         changeButtonFunction("off", "all");
         gameData.roundEnded = true;
+        updateUserStats(gameData.playerGameState);
         await delay(2000);
         newRoundTimer();
       } else if (gameData.playerScore === 21) {
@@ -687,6 +713,8 @@ async function init() {
         displayCredits();
         fadeIn(gameMessageBubble, 50);
         changeButtonFunction("off", "all");
+        updateUserStats(gameData.playerGameState);
+        updateUserStats("blackjack");
         gameData.roundEnded = true;
         await delay(2000);
         newRoundTimer();
@@ -747,6 +775,8 @@ async function init() {
         displayCredits();
         fadeIn(gameMessageBubble, 50);
         pressSplitStandButton();
+        updateUserStats(gameData.playerGameState);
+        updateUserStats("blackjack");
       }
     }
 
@@ -767,6 +797,7 @@ async function init() {
           await delay(500);
           pressSplitStandButton();
           changeButtonFunction("on", "player");
+          updateUserStats(gameData.playerGameState);
 
         } else if (gameData.splitScore1 === 21) {
           gameData.playerBlackjack = true;
@@ -779,6 +810,8 @@ async function init() {
           changeButtonFunction("on", "player");
           gameData.playerBlackjack = false;
           pressSplitStandButton();
+          updateUserStats(gameData.playerGameState);
+          updateUserStats("blackjack");
 
         } else {
           changeButtonFunction("on", "player");
@@ -796,6 +829,7 @@ async function init() {
           fadeIn(gameMessageBubble, 50);
           pressSplitStandButton();
           changeButtonFunction("off", "all");
+          updateUserStats(gameData.playerGameState);
 
         } else if (gameData.splitScore2 === 21) {
           setGameState("player", 2, gameData.deckSplit);
@@ -807,6 +841,8 @@ async function init() {
           displayCredits();
           innerScoreWrapper2.classList.remove("active");
           gameData.playerBlackjack = false;
+          updateUserStats(gameData.playerGameState);
+          updateUserStats("blackjack");
           pressSplitStandButton();
 
         } else {
@@ -838,6 +874,9 @@ async function init() {
           gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
           fadeIn(gameMessageBubble, 50);
           gameData.roundEnded = true;
+          updateUserStats(gameData.splitState1);
+          updateUserStats(gameData.splitState2);
+          updateUserStats("blackjack");
           await delay(1500);
           newRoundTimer();
         } else {
@@ -872,6 +911,8 @@ async function init() {
               gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
               gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
               fadeIn(gameMessageBubble, 50);
+              updateUserStats(gameData.splitState1);
+              updateUserStats(gameData.splitState2);
               console.log(gameData.splitState1, gameData.splitState2, "SPLIT STATES")
               console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS OUT")
               break;
@@ -880,7 +921,6 @@ async function init() {
               setGameState("player", 1, gameData.deckSplit);
               setGameState("player", 2, gameData.deckSplit);
               setGameState("comp");
-              console.log("over25")
               gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
               console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS after")
 
@@ -888,6 +928,8 @@ async function init() {
               gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
               gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
               fadeIn(gameMessageBubble, 50);
+              updateUserStats(gameData.splitState1);
+              updateUserStats(gameData.splitState2);
               break
             }
           }
@@ -906,6 +948,8 @@ async function init() {
             gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
             gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
             fadeIn(gameMessageBubble, 50);
+            updateUserStats(gameData.splitState1);
+            updateUserStats(gameData.splitState2);
             console.log(gameData.splitState1, gameData.splitState2, "SPLIT STATES whileout")
             console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS OUT whileout")
           }
@@ -919,6 +963,8 @@ async function init() {
       setGameState("player", 1, gameData.deckSplit);
       setGameState("comp");
       displayCredits();
+      updateUserStats(gameData.splitState1);
+      updateUserStats(gameData.splitState2);
       gameData.splitSwitch = true;
     }
 
@@ -1695,6 +1741,8 @@ async function init() {
       let playerScoreBubbleWrapper = document.querySelector(".player-score-bubble-wrapper");
       let splitScore1 = document.querySelector(".split-cards-score1");
       let splitScore2 = document.querySelector(".split-cards-score2");
+
+      changeButtonFunction("off", "all")
       if (gameData.roundEnded) {
         let count = 3;
 
@@ -1729,7 +1777,6 @@ async function init() {
             playerCardsContainer.innerHTML = '';
             compContainer.innerHTML = '';
             changeButtonFunction("on", "bet");
-            changeButtonFunction("off", "player");
           }
         }
         let countdownInterval = setInterval(updateCountdown, 1000);
