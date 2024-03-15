@@ -15,7 +15,7 @@ async function init() {
   let currentUser = '';
 
   let gameData = {
-    playerCredits: 100000,
+    playerCredits: 50000,
     playerScore: 0,
     playerHand: [],
     playerScoreArray: [],
@@ -54,6 +54,16 @@ async function init() {
     splitCardDist2: 0,
     splitBet1: 0,
     splitBet2: 0,
+  }
+
+  let userStats = {
+    wins: 0,
+    busts: 0,
+    draws: 0,
+    blackjacks: 0,
+    over10kWins: 0,
+    over100kCredits: false,
+    over1mCredits: false,
   }
 
   async function getDeckData() {
@@ -100,45 +110,44 @@ async function init() {
   function loginScreen() {
     USER_LOCAL_DATA = JSON.parse(localStorage.getItem(USER_LOCAL_DATA_KEY)) || {};
 
-    function changeBubbleColors() {
-      let allBubbles = document.querySelectorAll(".blurred-bubble");
-      let redBubble = document.querySelector(".red-bubble");
-      let greenBubble = document.querySelector(".green-bubble");
-      let blueBubble = document.querySelector(".blue-bubble");
-      let purpleBubble = document.querySelector(".purple-bubble");
-      let yellowBubble = document.querySelector(".yellow-bubble");
+    // function changeBubbleColors() {
+    //   let allBubbles = document.querySelectorAll(".blurred-bubble");
+    //   let redBubble = document.querySelector(".red-bubble");
+    //   let greenBubble = document.querySelector(".green-bubble");
+    //   let blueBubble = document.querySelector(".blue-bubble");
+    //   let purpleBubble = document.querySelector(".purple-bubble");
+    //   let yellowBubble = document.querySelector(".yellow-bubble");
 
-      redBubble.onclick = () => {
-        allBubbles.forEach(bubble => {
-          bubble.style.background = "#ff0000";
-        });
-      };
+    //   redBubble.onclick = () => {
+    //     allBubbles.forEach(bubble => {
+    //       bubble.style.background = "#ff0000";
+    //     });
+    //   };
 
-      greenBubble.onclick = () => {
-        allBubbles.forEach(bubble => {
-          bubble.style.background = "#00ff00";
-        });
-      };
+    //   greenBubble.onclick = () => {
+    //     allBubbles.forEach(bubble => {
+    //       bubble.style.background = "#00ff00";
+    //     });
+    //   };
 
-      blueBubble.onclick = () => {
-        allBubbles.forEach(bubble => {
-          bubble.style.background = "#052254";
-        });
-      };
+    //   blueBubble.onclick = () => {
+    //     allBubbles.forEach(bubble => {
+    //       bubble.style.background = "#052254";
+    //     });
+    //   };
 
-      purpleBubble.onclick = () => {
-        allBubbles.forEach(bubble => {
-          bubble.style.background = "#8300C4";
-        });
-      };
+    //   purpleBubble.onclick = () => {
+    //     allBubbles.forEach(bubble => {
+    //       bubble.style.background = "#8300C4";
+    //     });
+    //   };
 
-      yellowBubble.onclick = () => {
-        allBubbles.forEach(bubble => {
-          bubble.style.background = "#FFFF00";
-        });
-      };
-    }
-    changeBubbleColors();
+    //   yellowBubble.onclick = () => {
+    //     allBubbles.forEach(bubble => {
+    //       bubble.style.background = "#FFFF00";
+    //     });
+    //   };
+    // }
 
     let logoutButton = document.getElementById("logout");
     let signinButton = document.getElementById("signin");
@@ -181,6 +190,7 @@ async function init() {
             if (password === userData.password) {
               game();
               gameData = JSON.parse(userData.localGameData);
+              userStats = JSON.parse(userData.localStats);
               console.log(gameData)
 
               await Promise.all([
@@ -193,7 +203,6 @@ async function init() {
               currentUser = username;
               usernameSignin.value = "";
               passwordSignin.value = "";
-
             } else {
               console.log("incorect password");
               passwordSignin.value = "";
@@ -289,11 +298,29 @@ async function init() {
               splitBet2: 0,
             }
 
-            USER_LOCAL_DATA[newUsername] = { username: newUsername, password: newPassword, localGameData: JSON.stringify(newUserGameData), };
+            let newUserStats = {
+              wins: 0,
+              busts: 0,
+              draws: 0,
+              blackjacks: 0,
+              over10kWins: 0,
+              over100kCredits: false,
+              over1mCredits: false,
+            }
+
+            USER_LOCAL_DATA[newUsername] = {
+              username: newUsername,
+              password: newPassword,
+              localGameData: JSON.stringify(newUserGameData),
+              localStats: JSON.stringify(newUserStats)
+            };
+
             localStorage.setItem(USER_LOCAL_DATA_KEY, JSON.stringify(USER_LOCAL_DATA));
 
             usernameSignup.value = "";
             passwordSignup.value = "";
+            await delay(150);
+            backToSignin.click()
           }
         } else {
           alert("Write something first");
@@ -424,6 +451,23 @@ async function init() {
       localStorage.setItem(USER_LOCAL_DATA_KEY, JSON.stringify(USER_LOCAL_DATA));
     }
 
+    function updateUserStatsInLocalStorage() {
+      USER_LOCAL_DATA[currentUser].localStats = JSON.stringify(userStats);
+      localStorage.setItem(USER_LOCAL_DATA_KEY, JSON.stringify(USER_LOCAL_DATA));
+    }
+
+    function updateUserStats(state) {
+      if (state === GAME_STATE_TYPES.WIN) {
+        userStats.wins += 1;
+      } else if (state === GAME_STATE_TYPES.BUST) {
+        userStats.busts += 1;
+      } else if (state === GAME_STATE_TYPES.DRAW) {
+        userStats.draws += 1;
+      } else if (state === "blackjack") {
+        userStats.blackjacks += 1;
+      }
+    }
+
     async function startGame() {
       try {
         displayScores("comp");
@@ -453,6 +497,8 @@ async function init() {
           await fadeIn(gameMessageBubble);
 
           displayCredits();
+          updateUserStats(gameData.playerGameState);
+          updateUserStats("blackjack");
           await delay(2000);
           newRoundTimer()
         }
@@ -500,6 +546,7 @@ async function init() {
         gameData.playerCredits += gameData.currentBet;
         gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
         displayCredits();
+        updateUserStats(gameData.playerGameState);
       }
 
       if (gameData.playerScore > 21) {
@@ -512,6 +559,7 @@ async function init() {
         fadeIn(gameMessageBubble, 50);
         changeButtonFunction("off", "all");
         gameData.roundEnded = true;
+        updateUserStats(gameData.playerGameState);
         await delay(2000);
         newRoundTimer();
       } else if (gameData.playerScore === 21) {
@@ -525,6 +573,8 @@ async function init() {
         fadeIn(playerCreditsBubble, 50);
         changeButtonFunction("off", "all");
         gameData.roundEnded = true;
+        updateUserStats(gameData.playerGameState);
+        updateUserStats("blackjack");
         await delay(2000);
         newRoundTimer();
       } else {
@@ -1578,7 +1628,7 @@ async function init() {
         } else if (userState === GAME_STATE_TYPES.DRAW) {
           return 1;
         } else if (userState === GAME_STATE_TYPES.BUST) {
-          return 1;
+          return 0;
         }
       } else {
         if (userState === GAME_STATE_TYPES.WIN) {
@@ -1588,7 +1638,7 @@ async function init() {
         } else if (userState === GAME_STATE_TYPES.DRAW) {
           return 1;
         } else if (userState === GAME_STATE_TYPES.BUST) {
-          return 1;
+          return 0;
         }
       }
     }
@@ -1675,6 +1725,7 @@ async function init() {
 
             resetGameData();
             updateGameDataInLocalStorage();
+            updateUserStatsInLocalStorage();
             playerCardsContainer.innerHTML = '';
             compContainer.innerHTML = '';
             changeButtonFunction("on", "bet");
