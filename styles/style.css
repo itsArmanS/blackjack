@@ -4,6 +4,9 @@
   font-family: "Lato", sans-serif;
 }
 
+body {
+  overflow: hidden;
+}
 
 
 .game-wrapper {
@@ -13,7 +16,6 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: gray;
   gap: 1rem;
   position: relative;
   overflow: hidden;

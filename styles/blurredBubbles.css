@@ -1,112 +1,150 @@
 section {
-    position: relative;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+  position: relative;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
-.blurred-buble-wrapper {
-    overflow: hidden;
+.blurred-bubble-wrapper {
+  overflow: hidden;
+}
+
+.bubbles-color-changer-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1rem;
+  width: 10rem;
+  height: 4rem;
+  position: absolute;
+  left: 1rem;
+}
+
+.bubble-color-button {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 1rem;
+  cursor: pointer;
+}
+
+.red-bubble {
+  background-color: red;
+}
+
+.green-bubble {
+  background-color: green;
+}
+
+.blue-bubble {
+  background-color: #052254;
+}
+
+.purple-bubble {
+  background-color: purple;
+}
+
+.yellow-bubble {
+  background-color: yellow;
 }
 
 .blurred-bubble {
-    position: absolute;
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    filter: blur(70px);
-    background: #052254;
-    /* background: #8300C4; */
-    will-change: filter, transform;
-    animation: bubble 15s infinite;
-    z-index: -1;
+  position: absolute;
+  transition: background-color 0.7s ease-in-out;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  filter: blur(70px);
+  background: #052254;
+  will-change: filter, transform;
+  animation: bubble 15s infinite;
+  z-index: -1;
 
-    &:nth-of-type(1) {
-        right: -5%;
-        top: 50%;
-        animation-delay: 3s;
-    }
+  &:nth-of-type(1) {
+    right: -5%;
+    top: 50%;
+    animation-delay: 3s;
+  }
 
-    &:nth-of-type(2) {
-        width: 300px;
-        height: 300px;
-        left: -150px;
-        filter: blur(150px);
-        top: 20%;
-        animation-delay: 2s;
-    }
+  &:nth-of-type(2) {
+    width: 300px;
+    height: 300px;
+    left: -150px;
+    filter: blur(150px);
+    top: 20%;
+    animation-delay: 2s;
+  }
 
-    &:nth-of-type(3) {
-        left: 50%;
-        bottom: -150px;
-        animation-delay: 6s;
-    }
+  &:nth-of-type(3) {
+    left: 50%;
+    bottom: -150px;
+    animation-delay: 6s;
+  }
 
-    &:nth-of-type(4) {
-        left: 50%;
-        top: 10%;
-        animation-delay: 1s;
-    }
+  &:nth-of-type(4) {
+    left: 50%;
+    top: 10%;
+    animation-delay: 1s;
+  }
 
-    &:nth-of-type(5) {
-        left: 30%;
-        top: 10%;
-        animation-delay: 2s;
-    }
+  &:nth-of-type(5) {
+    left: 30%;
+    top: 10%;
+    animation-delay: 2s;
+  }
 
-    &:nth-of-type(6) {
-        left: 30%;
-        top: 50%;
-        animation-delay: 4s;
-    }
+  &:nth-of-type(6) {
+    left: 30%;
+    top: 50%;
+    animation-delay: 4s;
+  }
 
-    &:nth-of-type(7) {
-        left: 80%;
-        top: 20px;
-        animation-delay: 6s;
-    }
+  &:nth-of-type(7) {
+    left: 80%;
+    top: 20px;
+    animation-delay: 6s;
+  }
 
-    &:nth-of-type(8) {
-        right: 20%;
-        top: 50%;
-        animation-delay: 6s;
-    }
+  &:nth-of-type(8) {
+    right: 20%;
+    top: 50%;
+    animation-delay: 6s;
+  }
 
-    &:nth-of-type(9) {
-        left: 10%;
-        top: 70%;
-        animation-delay: 8s;
-    }
+  &:nth-of-type(9) {
+    left: 10%;
+    top: 70%;
+    animation-delay: 8s;
+  }
 
-    &:nth-of-type(10) {
-        left: 70%;
-        top: 80%;
-        animation-delay: 9s;
-    }
+  &:nth-of-type(10) {
+    left: 70%;
+    top: 80%;
+    animation-delay: 9s;
+  }
 }
 
 @keyframes bubble {
-    0% {
-        opacity: 1;
-        transform: translate(0, 0) scale(1);
-    }
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
 
-    25% {
-        transform: translate(50px, -50px) scale(1.1);
-    }
+  25% {
+    transform: translate(50px, -50px) scale(1.1);
+  }
 
-    50% {
-        transform: translate(100px, 50px) scale(0.9);
-    }
+  50% {
+    transform: translate(100px, 50px) scale(0.9);
+  }
 
-    75% {
-        transform: translate(-50px, -100px) scale(1.2);
-    }
+  75% {
+    transform: translate(-50px, -100px) scale(1.2);
+  }
 
-    100% {
-        opacity: 1;
-        transform: translate(0, 0) scale(1);
-    }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
 }
