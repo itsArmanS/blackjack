@@ -11,9 +11,11 @@ const SETTINGS_DATA = {
   music: true,
 }
 
-const USER_LOCAL_DATA = {
+let USER_LOCAL_DATA = {
 
 }
+const USER_LOCAL_DATA_KEY = "userLocalData";
+let currentUser = '';
 
 function init() {
   let hit = document.querySelector("#hit");
@@ -129,16 +131,47 @@ function init() {
   }
 
   async function signin() {
-    let gameWrapper = document.querySelector(".game-wrapper")
-    let signupWrapper = document.querySelector(".signup-wrapper")
+    let gameWrapper = document.querySelector(".game-wrapper");
+    let signupWrapper = document.querySelector(".signup-wrapper");
+    let usernameSignin = document.getElementById("usernameSignin");
+    let passwordSignin = document.getElementById("passwordSignin");
+    let signinButton = document.getElementById("signin");
 
-    await Promise.all([
-      fadeIn(gameWrapper, 50),
-      fadeOut(signupWrapper, 50)
-    ]);
 
-    gameWrapper.style.flex = "1";
-    signupWrapper.style.flex = "0";
+
+    signinButton.onclick = async function () {
+      let username = usernameSignin.value;
+      let password = passwordSignin.value;
+
+      if (username.value !== '' && password !== '') {
+        let userExists = checkUserExistingData("signin");
+
+        if (userExists) {
+          if (USER_LOCAL_DATA.hasOwnProperty(username)) {
+            let userData = USER_LOCAL_DATA[username];
+
+            if (password === userData.password) {
+              await Promise.all([
+                fadeIn(gameWrapper, 50),
+                fadeOut(signupWrapper, 50)
+              ]);
+              gameWrapper.style.flex = "1";
+              signupWrapper.style.flex = "0";
+
+              usernameSignin.value = "";
+              passwordSignin.value = "";
+            } else {
+              console.log("incorect password");
+              passwordSignin.value = "";
+            }
+          }
+        } else {
+          console.log("no such user");
+        }
+      } else {
+        alert("Write something first");
+      }
+    }
   }
 
   async function signup() {
@@ -148,8 +181,6 @@ function init() {
     let usernameSignup = document.getElementById("usernameSignup");
     let passwordSignup = document.getElementById("passwordSignup");
     let signupButton = document.getElementById("signup");
-
-
 
     await Promise.all([
       fadeOut(createAccount, 50),
@@ -175,14 +206,48 @@ function init() {
       let newUsername = usernameSignup.value;
       let newPassword = passwordSignup.value;
 
+      if (usernameSignup.value !== "" && passwordSignup.value !== "") {
+        let userExists = checkUserExistingData("signup");
 
-      USER_LOCAL_DATA[newUsername] = newPassword;
-      console.log(USER_LOCAL_DATA);
+        if (userExists) {
+          alert("user already exists");
+          usernameSignup.value = "";
+          passwordSignup.value = "";
+        } else {
+          USER_LOCAL_DATA[newUsername] = { username: newUsername, password: newPassword, localGameData: JSON.stringify(gameData), };
+          localStorage.setItem(USER_LOCAL_DATA_KEY, JSON.stringify(USER_LOCAL_DATA));
 
-      localStorage.setItem(newUsername, newPassword);
+          usernameSignup.value = "";
+          passwordSignup.value = "";
+        }
+      } else {
+        alert("Write something first");
+      }
     }
+  }
 
+  function checkUserExistingData(state) {
+    let usernameSignin = document.getElementById("usernameSignin");
 
+    if (state === "signin") {
+      for (let key of Object.keys(USER_LOCAL_DATA)) {
+        if (usernameSignin.value === key) {
+          return true;
+        } else if (usernameSignin.value !== key) {
+          return false;
+        }
+      }
+    } else {
+      let usernameSignup = document.getElementById("usernameSignup");
+
+      for (let key of Object.keys(USER_LOCAL_DATA)) {
+        if (usernameSignup.value === key) {
+          return true;
+        } else if (usernameSignup.value !== key) {
+          return false;
+        }
+      }
+    }
   }
 
   window.onload = () => {
@@ -194,12 +259,13 @@ function init() {
     displayStartingMessage("on");
     gameData.playerCardDist = (playerCardsContainer.clientWidth / 2) - (105 / 2);
     gameData.compCardDist = (compContainer.clientWidth / 2) - (105 / 2);
+
+    USER_LOCAL_DATA = JSON.parse(localStorage.getItem(USER_LOCAL_DATA_KEY)) || {};
   };
 
   test.onclick = () => {
 
   }
-
 
   function changeButtonFunction(state, group) {
     if (state === "on" && group === "player") {

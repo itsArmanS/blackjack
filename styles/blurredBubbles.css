@@ -16,8 +16,9 @@ section {
     width: 200px;
     height: 200px;
     border-radius: 50%;
-    filter: blur(100px);
+    filter: blur(70px);
     background: #052254;
+    /* background: #8300C4; */
     will-change: filter, transform;
     animation: bubble 15s infinite;
     z-index: -1;
