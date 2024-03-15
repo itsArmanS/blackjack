@@ -1,5 +1,6 @@
 .site-wrapper {
     display: flex;
+    overflow: hidden;
 }
 
 .signup-wrapper {

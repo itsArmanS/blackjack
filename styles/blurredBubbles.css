@@ -7,8 +7,8 @@ section {
     overflow: hidden;
 }
 
-#intro {
-    background: #222;
+.blurred-buble-wrapper {
+    overflow: hidden;
 }
 
 .blurred-bubble {

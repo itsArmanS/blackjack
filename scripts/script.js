@@ -1,4 +1,5 @@
-
+window.onload = () => {
+};
 
 const GAME_STATE_TYPES = {
   WIN: "WIN",
@@ -11,116 +12,107 @@ const SETTINGS_DATA = {
   music: true,
 }
 
-let USER_LOCAL_DATA = {
-
-}
+let USER_LOCAL_DATA;
 const USER_LOCAL_DATA_KEY = "userLocalData";
 let currentUser = '';
 
-function init() {
-  let hit = document.querySelector("#hit");
-  let stand = document.querySelector("#stand");
-  let split = document.querySelector("#split");
-  let doubleDown = document.querySelector("#DD");
-  let placeBet = document.querySelector("#place-bet");
-  let playerCardsContainer = document.querySelector(".player-cards-container");
-  let compContainer = document.querySelector(".comp-container");
-  let subtractBetButton = document.querySelector(".minus-bet");
-  let addBetButton = document.querySelector(".plus-bet");
-  let playerScoreBubble = document.querySelector(".player-score-bubble");
-  let currentBetBubble = document.querySelector(".current-bet-bubble");
-  let gameMessageBubble = document.querySelector(".game-message-bubble");
-  let playerCreditsBubble = document.querySelector(".player-credits-bubble");
-  let compScoreBubble = document.querySelector(".comp-score-bubble");
+let gameData = {
+  playerCredits: 100000,
+  playerScore: 0,
+  playerHand: [],
+  playerScoreArray: [],
+  playerCardDist: 0,
+  playerGameState: "",
+  over17Bust: false,
+  over17Draw: false,
+  over17Win: false,
+
+  compScore: 0,
+  compHand: [],
+  compScoreArray: [],
+  compCardDist: 0,
+  compGameState: "",
+
+  deckID: "",
+  standClicked: false,
+  finalDraw: false,
+  roundEnded: false,
+  newRound: false,
+  currentBet: 0,
+  minimumBet: 500,
+  previousBet: 0,
+
+  deckSplit: false,
+  splitSwitch: false,
+  splitScore1: 0,
+  splitScore2: 0,
+  splitCardArray: [[], []],
+  splitScoreArray: [[], []],
+  splitCompState1: "",
+  splitCompState2: "",
+  splitState1: "",
+  splitState2: "",
+  splitCardDist1: 0,
+  splitCardDist2: 0,
+  splitBet1: 0,
+  splitBet2: 0,
+}
+
+async function getDeckData() {
+  try {
+    let response = await fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=10");
+    let data = await response.json();
+
+    gameData.deckID = data.deck_id;
+    console.log(gameData.deckID)
+  } catch (error) {
+    console.log("Error shuffling:", error);
+  }
+}
+
+async function fadeIn(element, ms) {
+  element.style.opacity = 0;
+  let opacity = 0;
+  let timer = setInterval(function () {
+    if (opacity >= 1) {
+      clearInterval(timer);
+    }
+    element.style.opacity = opacity;
+    opacity += 0.1;
+  }, ms);
+}
+
+async function fadeOut(element, ms, callback) {
+  element.style.opacity = 1;
+  let opacity = 1;
+  let timer = setInterval(function () {
+    if (opacity <= 0) {
+      clearInterval(timer);
+      if (callback) callback();
+    }
+    element.style.opacity = opacity;
+    opacity -= 0.1;
+  }, ms);
+}
+
+
+
+function loginScreen() {
+  USER_LOCAL_DATA = JSON.parse(localStorage.getItem(USER_LOCAL_DATA_KEY)) || {};
 
   let logoutButton = document.getElementById("logout");
   let signinButton = document.getElementById("signin");
-  let createAccount = document.getElementById("create-account")
-
-  let settingsModal = document.querySelector("#settings-dialog");
-  let openSettingsModalButton = document.querySelector("#open-modal-button");
-  let closeSettingsModalButton = document.querySelector("#close-modal-button");
-
-  let rulesModal = document.getElementById("game-rules");
-  let openRulesModalButton = document.getElementById("open-rules-button");
-  let closeRulesModalButton = document.getElementById("close-rules-button");
-
-  let soundButton = document.getElementById("sound-button");
-  let allButtons = document.querySelectorAll("button");
-  const CLICK_SOUND = document.getElementById("click-sound");
-
-  let test = document.getElementById("test");
-
-  placeBet.addEventListener("click", pressPlaceBetButton);
-  stand.addEventListener("click", pressStandButton);
-  hit.addEventListener("click", pressHitButton);
-  doubleDown.addEventListener("click", pressDoubleDownButton);
-  split.addEventListener("click", pressSplitButton);
-  addBetButton.addEventListener("click", addBet);
-  subtractBetButton.addEventListener("click", subtractBet);
-  openSettingsModalButton.addEventListener("click", openSettingsMenu);
-  closeSettingsModalButton.addEventListener("click", closeSettingsMenu);
-  openRulesModalButton.addEventListener("click", openRulesMenu);
-  closeRulesModalButton.addEventListener("click", closeRulesMenu);
+  let createAccount = document.getElementById("create-account");
 
   signinButton.addEventListener("click", signin);
-  createAccount.addEventListener("click", signup)
+  createAccount.addEventListener("click", signup);
   logoutButton.addEventListener("click", logout);
-
-  test.addEventListener("click", testtest);
-  function testtest() {
-    console.log(gameData.roundEnded, 'roundEnded');
-    console.log('roundEnded');
-
-    newRoundTimer();
-  }
-
-  let gameData = {
-    playerCredits: 10000,
-    playerScore: 0,
-    playerHand: [],
-    playerScoreArray: [],
-    playerCardDist: 0,
-    playerGameState: "",
-    over17Bust: false,
-    over17Draw: false,
-    over17Win: false,
-
-    compScore: 0,
-    compHand: [],
-    compScoreArray: [],
-    compCardDist: 0,
-    compGameState: "",
-
-    deckID: "",
-    standClicked: false,
-    finalDraw: false,
-    roundEnded: false,
-    newRound: false,
-    currentBet: 0,
-    minimumBet: 500,
-    previousBet: 0,
-
-    deckSplit: false,
-    splitSwitch: false,
-    splitScore1: 0,
-    splitScore2: 0,
-    splitCardArray: [[], []],
-    splitScoreArray: [[], []],
-    splitCompState1: "",
-    splitCompState2: "",
-    splitState1: "",
-    splitState2: "",
-    splitCardDist1: 0,
-    splitCardDist2: 0,
-    splitBet1: 0,
-    splitBet2: 0,
-  }
 
   async function logout() {
     let gameWrapper = document.querySelector(".game-wrapper")
     let signupWrapper = document.querySelector(".signup-wrapper")
 
+    currentUser = '';
     await Promise.all([
       fadeOut(gameWrapper, 50),
       fadeIn(signupWrapper, 50)
@@ -135,42 +127,41 @@ function init() {
     let signupWrapper = document.querySelector(".signup-wrapper");
     let usernameSignin = document.getElementById("usernameSignin");
     let passwordSignin = document.getElementById("passwordSignin");
-    let signinButton = document.getElementById("signin");
+    let username = usernameSignin.value;
+    let password = passwordSignin.value;
 
+    if (username !== '' && password !== '') {
+      let userData = checkUserExistingData();
+      if (userData) {
+        if (USER_LOCAL_DATA.hasOwnProperty(username)) {
+          let userData = USER_LOCAL_DATA[username];
 
+          if (password === userData.password) {
+            init();
+            gameData = JSON.parse(userData.localGameData);
+            console.log(gameData)
 
-    signinButton.onclick = async function () {
-      let username = usernameSignin.value;
-      let password = passwordSignin.value;
+            await Promise.all([
+              fadeIn(gameWrapper, 50),
+              fadeOut(signupWrapper, 50)
+            ]);
+            gameWrapper.style.flex = "1";
+            signupWrapper.style.flex = "0";
 
-      if (username.value !== '' && password !== '') {
-        let userExists = checkUserExistingData("signin");
+            currentUser = username;
+            usernameSignin.value = "";
+            passwordSignin.value = "";
 
-        if (userExists) {
-          if (USER_LOCAL_DATA.hasOwnProperty(username)) {
-            let userData = USER_LOCAL_DATA[username];
-
-            if (password === userData.password) {
-              await Promise.all([
-                fadeIn(gameWrapper, 50),
-                fadeOut(signupWrapper, 50)
-              ]);
-              gameWrapper.style.flex = "1";
-              signupWrapper.style.flex = "0";
-
-              usernameSignin.value = "";
-              passwordSignin.value = "";
-            } else {
-              console.log("incorect password");
-              passwordSignin.value = "";
-            }
+          } else {
+            console.log("incorect password");
+            passwordSignin.value = "";
           }
-        } else {
-          console.log("no such user");
         }
       } else {
-        alert("Write something first");
+        console.log("no such user");
       }
+    } else {
+      alert("Write something first");
     }
   }
 
@@ -207,14 +198,56 @@ function init() {
       let newPassword = passwordSignup.value;
 
       if (usernameSignup.value !== "" && passwordSignup.value !== "") {
-        let userExists = checkUserExistingData("signup");
+        let userData = checkUserExistingData();
 
-        if (userExists) {
+        if (userData) {
           alert("user already exists");
           usernameSignup.value = "";
           passwordSignup.value = "";
         } else {
-          USER_LOCAL_DATA[newUsername] = { username: newUsername, password: newPassword, localGameData: JSON.stringify(gameData), };
+          let newUserGameData = {
+            playerCredits: 100000,
+            playerScore: 0,
+            playerHand: [],
+            playerScoreArray: [],
+            playerCardDist: 0,
+            playerGameState: "",
+            over17Bust: false,
+            over17Draw: false,
+            over17Win: false,
+
+            compScore: 0,
+            compHand: [],
+            compScoreArray: [],
+            compCardDist: 0,
+            compGameState: "",
+
+            deckID: "",
+            standClicked: false,
+            finalDraw: false,
+            roundEnded: false,
+            newRound: false,
+            currentBet: 0,
+            minimumBet: 500,
+            previousBet: 0,
+
+            deckSplit: false,
+            splitSwitch: false,
+            splitScore1: 0,
+            splitScore2: 0,
+            splitCardArray: [[], []],
+            splitScoreArray: [[], []],
+            splitCompState1: "",
+            splitCompState2: "",
+            splitState1: "",
+            splitState2: "",
+            splitCardDist1: 0,
+            splitCardDist2: 0,
+            splitBet1: 0,
+            splitBet2: 0,
+          }
+
+          USER_LOCAL_DATA[newUsername] = { username: newUsername, password: newPassword, localGameData: JSON.stringify(newUserGameData), };
           localStorage.setItem(USER_LOCAL_DATA_KEY, JSON.stringify(USER_LOCAL_DATA));
 
           usernameSignup.value = "";
@@ -226,42 +259,84 @@ function init() {
     }
   }
 
-  function checkUserExistingData(state) {
-    let usernameSignin = document.getElementById("usernameSignin");
+  function checkUserExistingData() {
+    let username = document.getElementById("usernameSignin").value;
 
-    if (state === "signin") {
-      for (let key of Object.keys(USER_LOCAL_DATA)) {
-        if (usernameSignin.value === key) {
-          return true;
-        } else if (usernameSignin.value !== key) {
-          return false;
-        }
-      }
+    if (USER_LOCAL_DATA.hasOwnProperty(username)) {
+      return USER_LOCAL_DATA[username];
     } else {
-      let usernameSignup = document.getElementById("usernameSignup");
-
-      for (let key of Object.keys(USER_LOCAL_DATA)) {
-        if (usernameSignup.value === key) {
-          return true;
-        } else if (usernameSignup.value !== key) {
-          return false;
-        }
-      }
+      return null;
     }
   }
 
-  window.onload = () => {
-    getDeckData();
-    displayCredits();
-    changeColorSettings();
-    changeButtonFunction("off", "player");
-    // changeButtonFunction("off", "split");
-    displayStartingMessage("on");
-    gameData.playerCardDist = (playerCardsContainer.clientWidth / 2) - (105 / 2);
-    gameData.compCardDist = (compContainer.clientWidth / 2) - (105 / 2);
+}
+loginScreen();
 
-    USER_LOCAL_DATA = JSON.parse(localStorage.getItem(USER_LOCAL_DATA_KEY)) || {};
-  };
+async function init() {
+
+
+  let hit = document.querySelector("#hit");
+  let stand = document.querySelector("#stand");
+  let split = document.querySelector("#split");
+  let doubleDown = document.querySelector("#DD");
+  let placeBet = document.querySelector("#place-bet");
+  let playerCardsContainer = document.querySelector(".player-cards-container");
+  let compContainer = document.querySelector(".comp-container");
+  let subtractBetButton = document.querySelector(".minus-bet");
+  let addBetButton = document.querySelector(".plus-bet");
+  let playerScoreBubble = document.querySelector(".player-score-bubble");
+  let currentBetBubble = document.querySelector(".current-bet-bubble");
+  let gameMessageBubble = document.querySelector(".game-message-bubble");
+  let playerCreditsBubble = document.querySelector(".player-credits-bubble");
+  let compScoreBubble = document.querySelector(".comp-score-bubble");
+
+
+
+  let settingsModal = document.querySelector("#settings-dialog");
+  let openSettingsModalButton = document.querySelector("#open-modal-button");
+  let closeSettingsModalButton = document.querySelector("#close-modal-button");
+
+  let rulesModal = document.getElementById("game-rules");
+  let openRulesModalButton = document.getElementById("open-rules-button");
+  let closeRulesModalButton = document.getElementById("close-rules-button");
+
+  let soundButton = document.getElementById("sound-button");
+  let allButtons = document.querySelectorAll("button");
+  const CLICK_SOUND = document.getElementById("click-sound");
+
+  let test = document.getElementById("test");
+
+  placeBet.addEventListener("click", pressPlaceBetButton);
+  stand.addEventListener("click", pressStandButton);
+  hit.addEventListener("click", pressHitButton);
+  doubleDown.addEventListener("click", pressDoubleDownButton);
+  split.addEventListener("click", pressSplitButton);
+  addBetButton.addEventListener("click", addBet);
+  subtractBetButton.addEventListener("click", subtractBet);
+  openSettingsModalButton.addEventListener("click", openSettingsMenu);
+  closeSettingsModalButton.addEventListener("click", closeSettingsMenu);
+  openRulesModalButton.addEventListener("click", openRulesMenu);
+  closeRulesModalButton.addEventListener("click", closeRulesMenu);
+
+  test.addEventListener("click", testtest);
+  function testtest() {
+    console.log(gameData.roundEnded, 'roundEnded');
+    console.log('roundEnded');
+
+    newRoundTimer();
+  }
+
+  await getDeckData();
+  displayCredits();
+  console.log(gameData, "init")
+  changeColorSettings();
+  changeButtonFunction("off", "player");
+  // changeButtonFunction("off", "split");
+  displayStartingMessage("on");
+  gameData.playerCardDist = (playerCardsContainer.clientWidth / 2) - (105 / 2);
+  gameData.compCardDist = (compContainer.clientWidth / 2) - (105 / 2);
+
+  USER_LOCAL_DATA = JSON.parse(localStorage.getItem(USER_LOCAL_DATA_KEY)) || {};
 
   test.onclick = () => {
 
@@ -306,17 +381,7 @@ function init() {
     }
   }
 
-  async function getDeckData() {
-    try {
-      let response = await fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=10");
-      let data = await response.json();
 
-      gameData.deckID = data.deck_id;
-      console.log(gameData.deckID)
-    } catch (error) {
-      console.log("Error shuffling:", error);
-    }
-  }
 
   async function startGame() {
     try {
@@ -341,6 +406,8 @@ function init() {
 
         gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
         gameData.playerCredits += gameData.currentBet;
+        fadeIn(gameMessageBubble, 50);
+
         gameMessageBubble.innerHTML = `BLACKJACK! YOU WON ${gameData.currentBet} CREDITS`
         await fadeIn(gameMessageBubble);
 
@@ -1371,31 +1438,6 @@ function init() {
     }
   }
 
-  async function fadeIn(element, ms) {
-    element.style.opacity = 0;
-    let opacity = 0;
-    let timer = setInterval(function () {
-      if (opacity >= 1) {
-        clearInterval(timer);
-      }
-      element.style.opacity = opacity;
-      opacity += 0.1;
-    }, ms);
-  }
-
-  async function fadeOut(element, ms, callback) {
-    element.style.opacity = 1;
-    let opacity = 1;
-    let timer = setInterval(function () {
-      if (opacity <= 0) {
-        clearInterval(timer);
-        if (callback) callback();
-      }
-      element.style.opacity = opacity;
-      opacity -= 0.1;
-    }, ms);
-  }
-
   function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -1829,4 +1871,3 @@ function init() {
 
 }
 
-init()
