@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="styles/settingsModal.css">
   <link rel="stylesheet" href="styles/gameRules.css">
   <link rel="stylesheet" href="styles/signup.css">
+  <link rel="stylesheet" href="styles/stats.css">
   <link rel="stylesheet" href="styles/blurredBubbles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -132,10 +133,22 @@
         </div>
       </dialog>
 
+      <dialog id="stats-menu">
+        <div class="stats-wrapper">
+          <div class="stats-title">USER STATS</div>
+
+          <button id="close-stats-button"></button>
+        </div>
+      </dialog>
+
       <audio id="click-sound">
         <!-- <source src="audio/clickSound.wav" type="audio/mpeg">Your browser does not support the audio element. -->
       </audio>
 
+      <div id="stats">
+        <button id="open-stats-button"></button>
+        <span>STATS</span>
+      </div>
       <div id="rules">
         <button id="open-rules-button"></button>
         <span>RULES</span>

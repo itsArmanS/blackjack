@@ -1,79 +1,61 @@
-#rules {
+#stats {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     position: absolute;
     top: 0;
-    right: 5rem;
+    right: 9.5rem;
     width: 4rem;
     height: 4rem;
 }
 
-#rules>span {
+#stats>span {
     width: 4rem;
     height: 1rem;
     font-size: 0.8rem;
     text-align: center;
 }
 
-#open-rules-button {
+#open-stats-button {
     width: 2rem;
     height: 2rem;
-    background-image: url(../images/rulebook.svg);
+    background-image: url(../images/stats.svg);
     background-color: transparent;
     border: none;
     cursor: pointer;
 }
 
-#close-rules-button {
+#close-stats-button {
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 1.5rem;
-    background-image: url(/images/close-circle.svg);
+    background-image: url();
     background-color: transparent;
     cursor: pointer;
 }
 
-#game-rules {
-    position: fixed;
-    top: -100%;
-    left: 40%;
-    min-width: 70rem;
-    min-height: 40rem;
+#stats-menu {
+    top: 25%;
+    left: 110%;
+    min-width: 30rem;
+    min-height: 25rem;
     transform: translateY(5%);
     display: flex;
     flex-direction: column;
     border-radius: 5px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.5s ease-in-out, top 0.5s ease-in-out;
+    transition: transform 0.5s ease-in-out, left 0.5s ease-in-out;
     background-color: #0C588A;
     font-weight: bold;
 }
 
-.rules-wrapper {
-    min-width: 50rem;
-    min-height: 40rem;
+.stats-wrapper {
+    min-width: 30rem;
+    min-height: 25rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 1.5rem;
-}
-
-.rules-wrapper>ol {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    line-height: 3rem;
-    font-weight: bold;
-    font-size: 10rem;
-    color: white;
-}
-
-.rules-title {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 3rem;
 }

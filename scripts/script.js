@@ -372,7 +372,6 @@ async function init() {
     let subtractBetButton = document.querySelector(".minus-bet");
     let addBetButton = document.querySelector(".plus-bet");
     let playerScoreBubble = document.querySelector(".player-score-bubble");
-    let currentBetBubble = document.querySelector(".current-bet-bubble");
     let gameMessageBubble = document.querySelector(".game-message-bubble");
     let playerCreditsBubble = document.querySelector(".player-credits-bubble");
     let compScoreBubble = document.querySelector(".comp-score-bubble");
@@ -384,6 +383,10 @@ async function init() {
     let rulesModal = document.getElementById("game-rules");
     let openRulesModalButton = document.getElementById("open-rules-button");
     let closeRulesModalButton = document.getElementById("close-rules-button");
+
+    let statsModal = document.querySelector("#stats-menu");
+    let openStatsModalButton = document.querySelector("#open-stats-button");
+    let closeStatsModalButton = document.querySelector("#close-stats-button");
 
     let soundButton = document.getElementById("sound-button");
     let allButtons = document.querySelectorAll("button");
@@ -402,6 +405,8 @@ async function init() {
     closeSettingsModalButton.addEventListener("click", closeSettingsMenu);
     openRulesModalButton.addEventListener("click", openRulesMenu);
     closeRulesModalButton.addEventListener("click", closeRulesMenu);
+    openStatsModalButton.addEventListener("click", openStatsMenu);
+    closeStatsModalButton.addEventListener("click", closeStatsMenu);
 
     test.addEventListener("click", testtest);
     function testtest() {
@@ -1957,6 +1962,23 @@ async function init() {
         });
       }
 
+    }
+
+    function openStatsMenu() {
+      statsModal.showModal();
+      statsModal.style.left = 33 + "%";
+      fadeIn(statsModal, 50);
+    }
+
+    function closeStatsMenu() {
+      let defaultY = 110;
+      statsModal.onclick = () => {
+        statsModal.style.left = -100 + "%";
+        fadeOut(statsModal, 50, () => {
+          statsModal.close();
+          statsModal.style.left = defaultY + "%";
+        });
+      }
     }
 
     function updateSoundEventListeners() {
