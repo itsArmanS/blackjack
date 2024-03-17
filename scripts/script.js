@@ -1,7 +1,4 @@
 async function init() {
-  window.onload = () => {
-  }
-
   let USER_LOCAL_DATA;
   const USER_LOCAL_DATA_KEY = "userLocalData";
   let currentUser = '';
@@ -171,8 +168,6 @@ async function init() {
 
       gameWrapper.style.flex = "0";
       signupWrapper.style.flex = "1";
-      USER_LOCAL_DATA[currentUser].loggedIn = false;
-      localStorage.setItem(USER_LOCAL_DATA_KEY, JSON.stringify(USER_LOCAL_DATA));
       await delay(1000);
       location.reload();
     }
@@ -193,8 +188,6 @@ async function init() {
 
             if (password === userData.password) {
               game();
-              userData.loggedIn = true;
-              localStorage.setItem(USER_LOCAL_DATA_KEY, JSON.stringify(USER_LOCAL_DATA));
               gameData = JSON.parse(userData.localGameData);
               userStats = JSON.parse(userData.localStats);
 
@@ -259,7 +252,7 @@ async function init() {
         let username = document.getElementById("usernameSignup").value;
 
         if (USER_LOCAL_DATA.hasOwnProperty(username)) {
-          return false; // User already exists
+          return false;
         } else {
 
           let newUserGameData = {
@@ -317,7 +310,6 @@ async function init() {
           USER_LOCAL_DATA[username] = {
             username: username,
             password: newPassword,
-            loggedIn: false,
             localGameData: JSON.stringify(newUserGameData),
             localStats: JSON.stringify(newUserStats)
           };
@@ -364,14 +356,6 @@ async function init() {
           }
         }
         let countdownInterval = setInterval(hideErrorBox, 2000);
-      }
-    }
-
-    function checkSignedIn() {
-      if (USER_LOCAL_DATA[currentUser].loggedIn) {
-        game();
-      } else {
-        loginScreen();
       }
     }
   }
@@ -551,14 +535,14 @@ async function init() {
 
     async function pressPlaceBetButton() {
       if (gameData.currentBet === 0) {
-        // alert("Place a bet first!");
+        gameMessageBubble.innerHTML = `Place a bet first!`;
+        fadeIn(gameMessageBubble, 50);
       } else {
-        // changeButtonFunction("off", "bet");
+        changeButtonFunction("off", "bet");
         displayStartingMessage("off");
         if (gameData.newRound === true) {
           await endGameFadeOut("off");
         }
-
         gameData.previousBet = gameData.currentBet;
         console.log(gameData.currentBet, "current bet")
 
@@ -566,8 +550,9 @@ async function init() {
         await delay(100);
 
         gameData.playerCredits -= gameData.currentBet;
+        updateGameDataInLocalStorage();
         displayCredits();
-        fadeIn(playerCreditsBubble, 50)
+        fadeIn(playerCreditsBubble, 50);
       }
     }
 
@@ -678,7 +663,7 @@ async function init() {
           setGameState("comp");
           console.log(gameData.playerGameState, gameData.compGameState, "PCGS");
 
-          gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.deckSplit);
+          gameData.previousBet *= decideBetReturn(gameData.playerGameState, gameData.deckSplit);
           gameData.playerCredits += gameData.currentBet;
           fadeIn(playerCreditsBubble, 50);
 
@@ -1371,7 +1356,6 @@ async function init() {
         counter2 += gameData.minimumBet;
         gameData.splitBet2 += counter2;
         console.log(gameData.splitBet1, gameData.splitBet2, counter2, "splitonclick in add")
-
         splitBet2.innerHTML = `$${gameData.splitBet2}`;
         fadeIn(splitBet2, 50);
 
@@ -1399,12 +1383,15 @@ async function init() {
 
         fadeIn(splitBet2, 50);
       } else {
+        let currentBetDisplay = document.querySelector(".bet-display-current-bet");
+
         if (gameData.currentBet <= 0) {
           gameData.currentBet = 0;
           gameMessageBubble.innerHTML = `You do not have enough credits`;
         } else {
           gameData.currentBet -= gameData.minimumBet;
-          currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
+          currentBetDisplay.innerHTML = `$${gameData.currentBet}`;
+          fadeIn(currentBetDisplay, 50);
         }
       }
     }
@@ -1725,7 +1712,6 @@ async function init() {
       over17Draw = false;
       over17Win = false;
 
-      currentBetBubble.innerHTML = gameData.currentBet;
       playerScoreBubble.innerHTML = 0;
       compScoreBubble.innerHTML = 0;
 
@@ -1789,12 +1775,15 @@ async function init() {
             }
 
             resetGameData();
+            console.log(gameData, "after clear");
             updateGameDataInLocalStorage();
             updateUserStatsInLocalStorage();
             playerCardsContainer.innerHTML = '';
             compContainer.innerHTML = '';
-            changeButtonFunction("off", "all");
+            changeButtonFunction("off", "player");
             changeButtonFunction("on", "bet");
+            displayCurrentBet(gameData.deckSplit);
+            fadeIn(playerCardsContainer, 50);
           }
         }
         let countdownInterval = setInterval(updateCountdown, 1000);

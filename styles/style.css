@@ -359,6 +359,8 @@ body {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  align-items: center;
+  margin-left: 10rem;
 }
 
 .player-data-wrapper {
@@ -377,16 +379,18 @@ body {
 .player-credits-bubble>div {
   width: 8rem;
   font-size: 15px;
-  color: rgb(0, 255, 21);
+  color: black;
+  text-align: center;
 }
 
 .current-bet-bubble-wrapper {
   flex: 1;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  gap: 0.2rem;
 }
 
 .current-bet-bubble {
