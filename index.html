@@ -82,7 +82,7 @@
 
     </div>
     <div class="game-wrapper">
-      <button id="logout">Logout</button>
+      <button type="button" id="logout">Logout</button>
       <dialog id="settings-dialog">
         <div class="settings-title">SETTINGS</div>
         <div class="settings-dialog-wrapper">
@@ -98,12 +98,12 @@
           <div class="color-controls">
             <div class="color-control-title">TABLE COLOR</div>
             <div class="color-change-buttons">
-              <button id="red"></button>
-              <button id="green"></button>
-              <button id="blue"></button>
+              <button type="button" id="red"></button>
+              <button type="button" id="green"></button>
+              <button type="button" id="blue"></button>
             </div>
           </div>
-          <button id="close-modal-button"></button>
+          <button type="button" id="close-modal-button"></button>
         </div>
       </dialog>
 
@@ -136,7 +136,18 @@
       <dialog id="stats-menu">
         <div class="stats-wrapper">
           <div class="stats-title">USER STATS</div>
+          <div class="win-stats stat">
 
+          </div>
+          <div class="bust-stats stat">
+
+          </div>
+          <div class="draw-stats stat">
+
+          </div>
+          <div class="blackjack-stats stat">
+
+          </div>
           <button id="close-stats-button"></button>
         </div>
       </dialog>
@@ -145,18 +156,29 @@
         <!-- <source src="audio/clickSound.wav" type="audio/mpeg">Your browser does not support the audio element. -->
       </audio>
 
-      <div id="stats">
-        <button id="open-stats-button"></button>
-        <span>STATS</span>
+      <div id="game-options-corner">
+        <div class="menu-option-buttons">
+          <div id="stats">
+            <button id="open-stats-button"></button>
+            <span>STATS</span>
+          </div>
+          <div id="rules">
+            <button id="open-rules-button"></button>
+            <span>RULES</span>
+          </div>
+          <div id="settings">
+            <button id="open-modal-button"></button>
+            <span>SETTINGS</span>
+          </div>
+        </div>
+        <div class="player-data-wrapper">
+          <div class="player-credits-bubble">
+            <span>Credits: </span>
+            <span class="credits"></span>
+          </div>
+        </div>
       </div>
-      <div id="rules">
-        <button id="open-rules-button"></button>
-        <span>RULES</span>
-      </div>
-      <div id="settings">
-        <button id="open-modal-button"></button>
-        <span>SETTINGS</span>
-      </div>
+
 
 
 
@@ -205,13 +227,9 @@
 
           </button>
         </div>
-        <div class="player-data-wrapper">
-          <div class="player-credits-bubble">
-            <div class="credits"></div>
-          </div>
-        </div>
       </div>
     </div>
+  </div>
   </div>
 
 </body>

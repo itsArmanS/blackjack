@@ -3,7 +3,6 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  position: absolute;
   top: 0;
   right: 0.5rem;
   width: 4rem;
@@ -66,6 +65,7 @@
   height: 2.5rem;
   background-image: url(../images/close-circle.svg);
   background-color: transparent;
+  border: none;
   cursor: pointer;
 }
 
@@ -146,4 +146,37 @@
 
 #blue {
   background-color: blue;
+}
+
+#game-options-corner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 12rem;
+  height: 6rem;
+  border-radius: 0 0 0 1rem;
+  border: 4px solid #A07047;
+  background-color: #1B5432;
+  font-weight: bold;
+}
+
+.menu-option-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center
+}
+
+.player-data-wrapper {
+  width: 80%;
+  height: 1rem;
+  display: flex;
+  justify-content: center;
+  border: 2px solid #A07047;
+  border-radius: 2rem;
+  color: rgb(255, 255, 255);
+  font-weight: bolder;
 }

@@ -3,7 +3,6 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    position: absolute;
     top: 0;
     right: 9.5rem;
     width: 4rem;
@@ -36,10 +35,10 @@
 }
 
 #stats-menu {
-    top: 25%;
+    top: 30%;
     left: 110%;
-    min-width: 30rem;
-    min-height: 25rem;
+    min-width: 20rem;
+    min-height: 10rem;
     transform: translateY(5%);
     display: flex;
     flex-direction: column;
@@ -51,11 +50,21 @@
 }
 
 .stats-wrapper {
-    min-width: 30rem;
-    min-height: 25rem;
+    min-width: 20rem;
+    min-height: 10rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 1.5rem;
+}
+
+.stat {
+    width: 50%;
+    height: 1.5rem;
+    background-color: blue;
+    border-radius: 2rem;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: bold;
 }

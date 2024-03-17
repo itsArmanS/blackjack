@@ -394,6 +394,10 @@ async function init() {
 
     let test = document.getElementById("test");
 
+    window.addEventListener("beforeunload", function () {
+      resetGameData();
+      updateGameDataInLocalStorage();
+    });
     placeBet.addEventListener("click", pressPlaceBetButton);
     stand.addEventListener("click", pressStandButton);
     hit.addEventListener("click", pressHitButton);
@@ -410,14 +414,12 @@ async function init() {
 
     test.addEventListener("click", testtest);
     function testtest() {
-      console.log(gameData.roundEnded, 'roundEnded');
-      console.log('roundEnded');
-
-      newRoundTimer();
+      updateStatsData()
     }
 
     await getDeckData();
     displayCredits();
+    updateStatsData();
     displayCurrentBet(gameData.deckSplit);
     changeColorSettings();
     changeButtonFunction("off", "player");
@@ -427,10 +429,6 @@ async function init() {
     gameData.compCardDist = (compContainer.clientWidth / 2) - (105 / 2);
 
     USER_LOCAL_DATA = JSON.parse(localStorage.getItem(USER_LOCAL_DATA_KEY)) || {};
-
-    test.onclick = () => {
-
-    }
 
     function changeButtonFunction(state, group) {
       if (state === "on" && group === "player") {
@@ -557,7 +555,6 @@ async function init() {
         gameData.playerCredits -= gameData.currentBet;
         updateGameDataInLocalStorage();
         displayCredits();
-        fadeIn(playerCreditsBubble, 50);
       }
     }
 
@@ -669,7 +666,11 @@ async function init() {
           console.log(gameData.playerGameState, gameData.compGameState, "PCGS");
 
           gameData.previousBet *= decideBetReturn(gameData.playerGameState, gameData.deckSplit);
-          gameData.playerCredits += gameData.currentBet;
+          if (gameData.playerGameState === GAME_STATE_TYPES.BUST) {
+            gameData.playerCredits -= gameData.currentBet;
+          } else {
+            gameData.playerCredits += gameData.currentBet;
+          }
           fadeIn(playerCreditsBubble, 50);
 
           displayCredits();
@@ -683,6 +684,7 @@ async function init() {
 
       if (gameData.playerGameState !== '' && gameData.compGameState !== '') {
         gameData.roundEnded = true;
+        updateStatsData();
         await delay(2000);
         newRoundTimer();
       }
@@ -961,6 +963,7 @@ async function init() {
 
         if (gameData.splitState1 !== '' && gameData.splitState2 !== '') {
           gameData.roundEnded = true;
+          updateStatsData();
         }
       }
 
@@ -1486,8 +1489,9 @@ async function init() {
     }
 
     function displayCredits() {
-      let innerDiv = playerCreditsBubble.firstElementChild;
-      innerDiv.innerHTML = `Total Credits: ${gameData.playerCredits}`;
+      let innerDiv = document.querySelector(".credits");
+      innerDiv.innerHTML = ` $${gameData.playerCredits}`;
+      fadeIn(innerDiv, 50);
     }
 
     async function hideUserScore(user) {
@@ -1683,7 +1687,7 @@ async function init() {
         } else if (userState === GAME_STATE_TYPES.DRAW) {
           return 1;
         } else if (userState === GAME_STATE_TYPES.BUST) {
-          return 0;
+          return 1;
         }
       } else {
         if (userState === GAME_STATE_TYPES.WIN) {
@@ -1693,7 +1697,7 @@ async function init() {
         } else if (userState === GAME_STATE_TYPES.DRAW) {
           return 1;
         } else if (userState === GAME_STATE_TYPES.BUST) {
-          return 0;
+          return 1;
         }
       }
     }
@@ -1783,6 +1787,7 @@ async function init() {
             console.log(gameData, "after clear");
             updateGameDataInLocalStorage();
             updateUserStatsInLocalStorage();
+            updateStatsData();
             playerCardsContainer.innerHTML = '';
             compContainer.innerHTML = '';
             changeButtonFunction("off", "player");
@@ -1966,7 +1971,7 @@ async function init() {
 
     function openStatsMenu() {
       statsModal.showModal();
-      statsModal.style.left = 33 + "%";
+      statsModal.style.left = 39 + "%";
       fadeIn(statsModal, 50);
     }
 
@@ -1979,6 +1984,21 @@ async function init() {
           statsModal.style.left = defaultY + "%";
         });
       }
+    }
+
+    function updateStatsData() {
+      let stats = JSON.parse(USER_LOCAL_DATA[currentUser].localStats);
+      console.log(stats);
+
+      let winStats = document.querySelector(".win-stats");
+      let bustStats = document.querySelector(".bust-stats");
+      let drawStats = document.querySelector(".draw-stats");
+      let blackjackStats = document.querySelector(".blackjack-stats");
+
+      winStats.innerHTML = `WINS: ${stats.wins}`;
+      bustStats.innerHTML = `BUSTS: ${stats.busts}`;
+      drawStats.innerHTML = `DRAWS: ${stats.draws}`;
+      blackjackStats.innerHTML = `BLACKJACKS: ${stats.blackjacks}`;
     }
 
     function updateSoundEventListeners() {
