@@ -354,13 +354,16 @@ body {
   height: 20rem;
 }
 
-.player-buttons-wrapper {
+.player-location-wrapper {
   max-height: 3.5rem;
   display: flex;
   gap: 1rem;
   justify-content: center;
   align-items: center;
-  margin-left: 10rem;
+  box-sizing: border-box;
+  border-radius: 2rem;
+  padding: 1rem;
+  background-color: rgba(122, 122, 122, 0.485);
 }
 
 .player-data-wrapper {
