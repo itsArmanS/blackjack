@@ -1,4 +1,11 @@
 async function init() {
+  window.onload = () => {
+  }
+
+  let USER_LOCAL_DATA;
+  const USER_LOCAL_DATA_KEY = "userLocalData";
+  let currentUser = '';
+
   const GAME_STATE_TYPES = {
     WIN: "WIN",
     DRAW: "DRAW",
@@ -9,10 +16,6 @@ async function init() {
     sound: true,
     music: true,
   }
-
-  let USER_LOCAL_DATA;
-  const USER_LOCAL_DATA_KEY = "userLocalData";
-  let currentUser = '';
 
   let gameData = {
     playerCredits: 50000,
@@ -158,10 +161,9 @@ async function init() {
     }
 
     async function logout() {
-      let gameWrapper = document.querySelector(".game-wrapper")
-      let signupWrapper = document.querySelector(".signup-wrapper")
+      let gameWrapper = document.querySelector(".game-wrapper");
+      let signupWrapper = document.querySelector(".signup-wrapper");
 
-      currentUser = '';
       await Promise.all([
         fadeOut(gameWrapper, 50),
         fadeIn(signupWrapper, 50)
@@ -169,6 +171,8 @@ async function init() {
 
       gameWrapper.style.flex = "0";
       signupWrapper.style.flex = "1";
+      USER_LOCAL_DATA[currentUser].loggedIn = false;
+      localStorage.setItem(USER_LOCAL_DATA_KEY, JSON.stringify(USER_LOCAL_DATA));
       await delay(1000);
       location.reload();
     }
@@ -189,6 +193,8 @@ async function init() {
 
             if (password === userData.password) {
               game();
+              userData.loggedIn = true;
+              localStorage.setItem(USER_LOCAL_DATA_KEY, JSON.stringify(USER_LOCAL_DATA));
               gameData = JSON.parse(userData.localGameData);
               userStats = JSON.parse(userData.localStats);
 
@@ -311,6 +317,7 @@ async function init() {
           USER_LOCAL_DATA[username] = {
             username: username,
             password: newPassword,
+            loggedIn: false,
             localGameData: JSON.stringify(newUserGameData),
             localStats: JSON.stringify(newUserStats)
           };
@@ -357,6 +364,14 @@ async function init() {
           }
         }
         let countdownInterval = setInterval(hideErrorBox, 2000);
+      }
+    }
+
+    function checkSignedIn() {
+      if (USER_LOCAL_DATA[currentUser].loggedIn) {
+        game();
+      } else {
+        loginScreen();
       }
     }
   }
@@ -414,11 +429,10 @@ async function init() {
 
     await getDeckData();
     displayCredits();
-    console.log(gameData, "init")
+    displayCurrentBet(gameData.deckSplit);
     changeColorSettings();
     changeButtonFunction("off", "player");
     changeButtonFunction("off", "split");
-    // changeButtonFunction("off", "split");
     displayStartingMessage("on");
     gameData.playerCardDist = (playerCardsContainer.clientWidth / 2) - (105 / 2);
     gameData.compCardDist = (compContainer.clientWidth / 2) - (105 / 2);
@@ -1362,12 +1376,15 @@ async function init() {
         fadeIn(splitBet2, 50);
 
       } else {
+        let currentBetDisplay = document.querySelector(".bet-display-current-bet");
+
         if (gameData.currentBet === gameData.playerCredits) {
           gameData.currentBet = gameData.playerCredits;
           gameMessageBubble.innerHTML = `You do not have enough credits`;
         } else {
           gameData.currentBet += gameData.minimumBet;
-          currentBetBubble.innerHTML = `Bet: ${gameData.currentBet}`;
+          currentBetDisplay.innerHTML = `$${gameData.currentBet}`
+          fadeIn(currentBetDisplay, 50);
         }
       }
     }
@@ -1581,8 +1598,8 @@ async function init() {
 
     async function startGameFlipCard() {
       compFirstCard = compContainer.querySelector(".card-holder:nth-child(1)");
-      playerFirstCard = playerCardsContainer.querySelector(".card-holder:nth-child(1)");
-      playerSecondCard = playerCardsContainer.querySelector(".card-holder:nth-child(2)");
+      playerFirstCard = playerCardsContainer.querySelector(".card-holder:nth-child(2)");
+      playerSecondCard = playerCardsContainer.querySelector(".card-holder:nth-child(3)");
 
       compFirstCard.querySelector(".card-face").classList.toggle("card-face-flipped");
       await delay(150);
@@ -1776,6 +1793,7 @@ async function init() {
             updateUserStatsInLocalStorage();
             playerCardsContainer.innerHTML = '';
             compContainer.innerHTML = '';
+            changeButtonFunction("off", "all");
             changeButtonFunction("on", "bet");
           }
         }

@@ -91,6 +91,13 @@
     border: none;
 }
 
+#usernameSignin::placeholder,
+#passwordSignin::placeholder,
+#usernameSignup::placeholder,
+#passwordSignup::placeholder {
+    color: black;
+}
+
 #signin,
 #signup {
     width: 4rem;
