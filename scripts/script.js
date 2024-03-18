@@ -392,8 +392,6 @@ async function init() {
     let allButtons = document.querySelectorAll("button");
     const CLICK_SOUND = document.getElementById("click-sound");
 
-    let test = document.getElementById("test");
-
     window.addEventListener("beforeunload", function () {
       resetGameData();
       updateGameDataInLocalStorage();
@@ -411,11 +409,6 @@ async function init() {
     closeRulesModalButton.addEventListener("click", closeRulesMenu);
     openStatsModalButton.addEventListener("click", openStatsMenu);
     closeStatsModalButton.addEventListener("click", closeStatsMenu);
-
-    test.addEventListener("click", testtest);
-    function testtest() {
-      updateStatsData()
-    }
 
     await getDeckData();
     displayCredits();
@@ -614,6 +607,7 @@ async function init() {
 
     async function pressStandButton() {
       await handleSecondCard()
+      changeButtonFunction("off", "all");
 
       while (gameData.compScore <= 16 && gameData.compScore <= gameData.playerScore) {
 
@@ -692,6 +686,7 @@ async function init() {
     }
 
     async function pressDoubleDownButton() {
+      let creditsDiv = document.querySelector(".bet-display-current-bet");
       await printPlayerCards();
 
       setGameState("player");
@@ -702,6 +697,9 @@ async function init() {
         gameData.roundEnded = true;
         setGameState("player");
         setGameState("comp");
+        gameData.currentBet *= 2;
+        creditsDiv.textContent = `$${gameData.currentBet}`;
+        fadeIn(creditsDiv, 50);
         gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
         fadeIn(gameMessageBubble, 50);
         changeButtonFunction("off", "all");
@@ -713,19 +711,24 @@ async function init() {
         setGameState("player")
         setGameState("comp")
         gameData.playerBlackjack = true;
-        gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState);
+        gameData.currentBet *= decideBetReturn(gameData.playerGameState, gameData.compGameState) * 2;
         gameData.playerCredits += gameData.currentBet;
+        creditsDiv.textContent = `$${gameData.currentBet}`;
+        fadeIn(creditsDiv, 50);
         gameMessageBubble.innerHTML = printGameState(gameData.compGameState, gameData.playerGameState);
-        displayCredits();
         fadeIn(gameMessageBubble, 50);
         changeButtonFunction("off", "all");
+        displayCurrentBet();
         updateUserStats(gameData.playerGameState);
         updateUserStats("blackjack");
         gameData.roundEnded = true;
         await delay(2000);
         newRoundTimer();
       } else {
-        await delay(1000);
+        gameData.currentBet *= 2;
+        creditsDiv.textContent = `$${gameData.currentBet}`;
+        fadeIn(creditsDiv, 50);
+        await delay(1500);
         pressStandButton();
       }
     }
@@ -766,7 +769,7 @@ async function init() {
       changeButtonFunction("off", "split")
       changeButtonFunction("off", "bet");
       changeButtonFunction("on", "player");
-      gameData.playerCredits -= splitBet1;
+      gameData.playerCredits -= gameData.splitBet1;
       displayCredits();
 
       await fadeOut(gameMessageBubble, 50);
@@ -810,7 +813,6 @@ async function init() {
           changeButtonFunction("off", "all");
           setGameState("player", 1, gameData.deckSplit);
           setGameState("comp");
-          gameData.playerCredits += gameData.splitBet1;
           displayCredits();
           await delay(1000);
           changeButtonFunction("on", "player");
@@ -836,12 +838,9 @@ async function init() {
           pressSplitStandButton();
           changeButtonFunction("off", "all");
           updateUserStats(gameData.playerGameState);
-
         } else if (gameData.splitScore2 === 21) {
           setGameState("player", 2, gameData.deckSplit);
           setGameState("comp");
-
-          gameData.playerCredits += gameData.splitBet2;
           gameMessageBubble.innerHTML = printSplitGameMessage(gameData.splitState2, gameData.splitBet2, 2);
           fadeIn(gameMessageBubble, 50);
           displayCredits();
@@ -879,23 +878,17 @@ async function init() {
           innerScoreWrapper2.classList.remove("active");
           gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
           fadeIn(gameMessageBubble, 50);
-          gameData.roundEnded = true;
           updateUserStats(gameData.splitState1);
           updateUserStats(gameData.splitState2);
+          gameData.roundEnded = true;
           updateUserStats("blackjack");
-          await delay(1500);
+          await delay(2000);
           newRoundTimer();
         } else {
           changeButtonFunction("off", "all");
           await handleSecondCard();
 
           innerScoreWrapper2.classList.remove("active");
-
-          if (gameData.compScore >= 17 && (gameData.compScore < gameData.splitScore1 || gameData.compScore < gameData.splitScore2) && gameData.compScore <= 21) {
-            gameData.over17Bust = true;
-          } else if (gameData.compScore >= 17 && (gameData.compScore <= gameData.splitScore1 || gameData.compScore <= gameData.splitScore2) && gameData.compScore <= 21) {
-            gameData.over17Draw = true;
-          }
 
           while (gameData.compScore <= 16) {
             await delay(500);
@@ -911,14 +904,15 @@ async function init() {
               setGameState("comp");
               console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS IN")
 
+              gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
               gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
-              console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS after");
-
               gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
               gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
               fadeIn(gameMessageBubble, 50);
               updateUserStats(gameData.splitState1);
               updateUserStats(gameData.splitState2);
+              await delay(2000);
+              newRoundTimer();
               console.log(gameData.splitState1, gameData.splitState2, "SPLIT STATES")
               console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS OUT")
               break;
@@ -927,43 +921,61 @@ async function init() {
               setGameState("player", 1, gameData.deckSplit);
               setGameState("player", 2, gameData.deckSplit);
               setGameState("comp");
+              console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS over21")
+
+              gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
               gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
-              console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS after")
-
-
               gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
+              console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS addition");
+
               gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
               fadeIn(gameMessageBubble, 50);
               updateUserStats(gameData.splitState1);
               updateUserStats(gameData.splitState2);
+              await delay(2000);
+              newRoundTimer();
               break
             }
           }
 
-          if (gameData.over17Bust || gameData.over17Draw) {
-            gameData.finalDraw = true;
-            setGameState("player", 1, gameData.deckSplit);
-            setGameState("player", 2, gameData.deckSplit);
-            setGameState("comp");
-            console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS whileout")
-            console.log(gameData.splitState2, gameData.splitState2, "SPLIT state whileout")
+          if (gameData.compHand.length <= 2) {
+            if (gameData.compScore >= 17 && (gameData.compScore < gameData.splitScore1 || gameData.compScore < gameData.splitScore2) && gameData.compScore <= 21) {
+              gameData.over17Bust = true;
+            } else if (gameData.compScore >= 17 && (gameData.compScore <= gameData.splitScore1 || gameData.compScore <= gameData.splitScore2) && gameData.compScore <= 21) {
+              gameData.over17Draw = true;
+            } else if (gameData.compScore >= 17 && (gameData.compScore > gameData.playerScore) && gameData.compScore <= 21) {
+              gameData.over17Win = true;
+            }
 
-            gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
-            console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS after whileout")
+            if (gameData.over17Bust || gameData.over17Draw || gameData.over17Win) {
+              gameData.finalDraw = true;
+              setGameState("player", 1, gameData.deckSplit);
+              setGameState("player", 2, gameData.deckSplit);
+              setGameState("comp");
 
-            gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
-            gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
-            fadeIn(gameMessageBubble, 50);
-            updateUserStats(gameData.splitState1);
-            updateUserStats(gameData.splitState2);
-            console.log(gameData.splitState1, gameData.splitState2, "SPLIT STATES whileout")
-            console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS OUT whileout")
+              console.log(gameData.playerCredits, "credits before");
+              gameData.splitBet1 *= decideBetReturn(gameData.splitState1, gameData.deckSplit);
+              gameData.splitBet2 *= decideBetReturn(gameData.splitState2, gameData.deckSplit);
+              gameData.playerCredits += gameData.splitBet1 + gameData.splitBet2;
+              console.log(gameData.playerCredits, "credits after");
+
+              console.log(gameData.splitBet1, gameData.splitBet2, "SPLIT BETS oror");
+
+              gameMessageBubble.innerHTML = printSplitFinalMessage(gameData.splitState1, gameData.splitBet1, gameData.splitState2, gameData.splitBet2);
+              fadeIn(gameMessageBubble, 50);
+              updateUserStats(gameData.splitState1);
+              updateUserStats(gameData.splitState2);
+              await delay(2000);
+              newRoundTimer();
+            }
           }
+
         }
 
         if (gameData.splitState1 !== '' && gameData.splitState2 !== '') {
           gameData.roundEnded = true;
           updateStatsData();
+          newRoundTimer();
         }
       }
 
@@ -1544,53 +1556,76 @@ async function init() {
       if (split) {
         if (deckNumber === 1) {
           let splitContainer1 = document.querySelector(".split-cards-container1");
-          let splitBet1 = document.createElement("div");
-          splitBet1.classList.add("split-bet1");
-          let splitBetRight1 = (splitContainer1.clientWidth / 2) - 110;
-          splitBet1.style.right = splitBetRight1 + "px";
-          splitBet1.innerHTML = `Deck 1: $${gameData.splitBet1}`;
-          splitContainer1.appendChild(splitBet1);
-          fadeIn(splitBet1, 50);
+          let existingSplitBet1 = document.querySelector(".split-bet1");
+
+          if (existingSplitBet1) {
+            existingSplitBet1.textContent = `Deck 1: $${gameData.splitBet1}`;
+            fadeIn(existingSplitBet1, 50);
+          } else {
+            let splitBet1 = document.createElement("div");
+            splitBet1.classList.add("split-bet1");
+            let splitBetRight1 = (splitContainer1.clientWidth / 2) - 110;
+            splitBet1.style.right = splitBetRight1 + "px";
+            splitBet1.textContent = `Deck 1: $${gameData.splitBet1}`;
+            splitContainer1.appendChild(splitBet1);
+            fadeIn(splitBet1, 50);
+          }
         } else {
           let splitContainer2 = document.querySelector(".split-cards-container2");
-          let splitBet2Wrapper = document.createElement("div");
-          splitBet2Wrapper.classList.add("split-bet2-wrapper");
-          let splitBetRight2 = (splitContainer2.clientWidth / 2) - 110;
-          splitBet2Wrapper.style.right = splitBetRight2 + "px";
-          splitBet2Wrapper.innerHTML =
-            `
-            <div class="split-bet2-text">
-              Deck 2: 
-            </div>
-            <div class="split-bet2">
-              $${gameData.splitBet2}
-            </div>
-          `
+          let existingSplitBet2Wrapper = document.querySelector(".split-bet2-wrapper");
 
-          splitContainer2.appendChild(splitBet2Wrapper);
+          if (existingSplitBet2Wrapper) {
+            let existingSplitBet2 = existingSplitBet2Wrapper.querySelector(".split-bet2");
+            existingSplitBet2.textContent = `$${gameData.splitBet2}`;
+            fadeIn(existingSplitBet2Wrapper, 50);
+          } else {
+            let splitBet2Wrapper = document.createElement("div");
+            splitBet2Wrapper.classList.add("split-bet2-wrapper");
+            let splitBetRight2 = (splitContainer2.clientWidth / 2) - 110;
+            splitBet2Wrapper.style.right = splitBetRight2 + "px";
+            splitBet2Wrapper.innerHTML =
+              `
+              <div class="split-bet2-text">
+                Deck 2: 
+              </div>
+              <div class="split-bet2">
+                $${gameData.splitBet2}
+              </div>
+            `;
+            splitContainer2.appendChild(splitBet2Wrapper);
+            fadeIn(splitBet2Wrapper, 50);
+          }
         }
-
       } else {
-        let betDisplayElem = document.createElement("div");
-        betDisplayElem.classList.add("bet-display");
+        let currentBetDisplay = document.querySelector(".bet-display-current-bet");
 
-        let betDisplayRight = (playerCardsContainer.clientWidth / 2) - 145;
-        betDisplayElem.style.right = betDisplayRight + "px";
+        if (currentBetDisplay) {
+          currentBetDisplay.textContent = `$${gameData.currentBet}`;
+          fadeIn(currentBetDisplay, 50);
+        } else {
+          let playerCardsContainer = document.querySelector(".player-cards-container"); // Assuming this is defined somewhere
+          let betDisplayElem = document.createElement("div");
+          betDisplayElem.classList.add("bet-display");
 
-        betDisplayElem.innerHTML =
-          `
-        <div class="bet-display-text">
-        Current Bet: 
-        </div>
-        <div class="bet-display-current-bet">
-        $${gameData.currentBet}
-        </div>
-        `;
+          let betDisplayRight = (playerCardsContainer.clientWidth / 2) - 145;
+          betDisplayElem.style.right = betDisplayRight + "px";
 
-        playerCardsContainer.appendChild(betDisplayElem);
-        fadeIn(betDisplayElem, 50);
+          betDisplayElem.innerHTML =
+            `
+          <div class="bet-display-text">
+          Current Bet: 
+          </div>
+          <div class="bet-display-current-bet">
+          $${gameData.currentBet}
+          </div>
+          `;
+
+          playerCardsContainer.appendChild(betDisplayElem);
+          fadeIn(betDisplayElem, 50);
+        }
       }
     }
+
 
     async function startGameFlipCard() {
       compFirstCard = compContainer.querySelector(".card-holder:nth-child(1)");
@@ -1687,7 +1722,7 @@ async function init() {
         } else if (userState === GAME_STATE_TYPES.DRAW) {
           return 1;
         } else if (userState === GAME_STATE_TYPES.BUST) {
-          return 1;
+          return -1;
         }
       } else {
         if (userState === GAME_STATE_TYPES.WIN) {
@@ -1895,7 +1930,7 @@ async function init() {
       } else if ((deckState === GAME_STATE_TYPES.BUST && deckState2 === GAME_STATE_TYPES.WIN) || (deckState === GAME_STATE_TYPES.DRAW && deckState2 === GAME_STATE_TYPES.WIN)) {
         return `YOU WON ${deckBet2} CREDITS`;
       } else if (deckState === GAME_STATE_TYPES.BUST && deckState2 === GAME_STATE_TYPES.BUST) {
-        return `YOU LOST ${deckBet + deckBet2} CREDITS`;
+        return `YOU LOST ${-(deckBet + deckBet2)} CREDITS`;
       } else if (deckState === GAME_STATE_TYPES.BUST && deckState2 === GAME_STATE_TYPES.DRAW) {
         return `RETURNED ${deckBet2} CREDITS`;
       } else if (deckState === GAME_STATE_TYPES.DRAW && deckState2 === GAME_STATE_TYPES.BUST) {
@@ -1939,8 +1974,8 @@ async function init() {
     async function closeSettingsMenu() {
       let defaultY = -50;
       closeSettingsModalButton.onclick = () => {
-        settingsModal.style.left = 150 + "%";
         fadeOut(settingsModal, 50, () => {
+          settingsModal.style.left = 150 + "%";
           settingsModal.close();
           settingsModal.style.left = defaultY + "%";
         });
@@ -2036,28 +2071,25 @@ async function init() {
       let blueButton = document.getElementById("blue");
 
 
-      redButton.onclick = () => {
+      redButton.addEventListener("click", function () {
         topHalf.style.background = "#630f0f";
         bottomHalf.style.background = "#630f0f";
         middleHalf.style.background = "#630f0f";
         tableBorder.style.borderColor = "#000000";
-      }
-
-      greenButton.onclick = () => {
+      })
+      greenButton.addEventListener("click", function () {
         topHalf.style.background = "#1B5432";
         bottomHalf.style.background = "#1B5432";
         middleHalf.style.background = "#1B5432";
         tableBorder.style.borderColor = "#A07047";
-      }
-
-      blueButton.onclick = () => {
+      })
+      blueButton.addEventListener("click", function () {
         topHalf.style.background = "#0C588A";
         bottomHalf.style.background = "#0C588A";
         middleHalf.style.background = "#0C588A";
         tableBorder.style.borderColor = "#D7CFC5";
-      }
+      })
     }
-
   }
 
 }

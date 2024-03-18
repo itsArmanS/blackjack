@@ -31,7 +31,9 @@
     border-radius: 1.5rem;
     background-image: url();
     background-color: transparent;
+    border: none;
     cursor: pointer;
+    background-image: url(../images/close-circle.svg);
 }
 
 #stats-menu {
@@ -62,9 +64,13 @@
 .stat {
     width: 50%;
     height: 1.5rem;
-    background-color: blue;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #D7CFC5;
+    color: black;
     border-radius: 2rem;
-    text-align: center;
     font-size: 1rem;
     font-weight: bold;
+    box-shadow: 3px 3px black;
 }
