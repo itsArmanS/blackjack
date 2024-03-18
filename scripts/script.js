@@ -520,8 +520,8 @@ async function init() {
         }
         changeButtonFunction("on", "player");
 
+        changeButtonFunction("on", "split")
         if (gameData.playerHand[0].value === gameData.playerHand[1].value) {
-          changeButtonFunction("on", "split")
         }
 
       } catch (error) {
@@ -736,11 +736,14 @@ async function init() {
     async function pressSplitButton() {
       gameData.deckSplit = true
       gameData.splitBet1 = gameData.currentBet;
+      changeButtonFunction("off", "all");
 
       hit.removeEventListener("click", pressHitButton);
       hit.addEventListener("click", pressSplitHitButton);
       stand.removeEventListener("click", pressStandButton);
       stand.addEventListener("click", pressSplitStandButton);
+      doubleDown.removeEventListener("click", pressDoubleDownButton);
+      doubleDown.addEventListener("click", pressSplitDoubleDownButton);
       placeBet.removeEventListener("click", pressPlaceBetButton);
       placeBet.addEventListener("click", pressSplitPlaceBetButton);
 
@@ -869,6 +872,8 @@ async function init() {
 
       innerScoreWrapper1.classList.remove("active");
       innerScoreWrapper2.classList.add("active");
+      changeButtonFunction("on", "player");
+
 
       await fadeOut(gameMessageBubble, 50);
       gameMessageBubble.innerHTML = "";
@@ -932,6 +937,7 @@ async function init() {
               fadeIn(gameMessageBubble, 50);
               updateUserStats(gameData.splitState1);
               updateUserStats(gameData.splitState2);
+              changeButtonFunction("off", "all");
               await delay(2000);
               newRoundTimer();
               break
@@ -965,6 +971,7 @@ async function init() {
               fadeIn(gameMessageBubble, 50);
               updateUserStats(gameData.splitState1);
               updateUserStats(gameData.splitState2);
+              changeButtonFunction("off", "all");
               await delay(2000);
               newRoundTimer();
             }
@@ -975,6 +982,7 @@ async function init() {
         if (gameData.splitState1 !== '' && gameData.splitState2 !== '') {
           gameData.roundEnded = true;
           updateStatsData();
+          changeButtonFunction("off", "all");
           newRoundTimer();
         }
       }
@@ -986,6 +994,37 @@ async function init() {
       updateUserStats(gameData.splitState2);
       gameData.splitSwitch = true;
     }
+
+    async function pressSplitDoubleDownButton() {
+      let splitBetBubble1 = document.querySelector(".split-bet1");
+      let splitBetBubble2 = document.querySelector(".split-bet2");
+      changeButtonFunction("off", "all")
+
+      if (gameData.splitSwitch) {
+        await printSplitCards(2);
+
+        setGameState("player", 2, gameData.deckSplit);
+        setGameState("comp");
+
+        gameData.splitBet2 *= 2;
+        splitBetBubble2.textContent = `$${gameData.splitBet2}`;
+        fadeIn(splitBetBubble2, 50);
+        await delay(1000);
+        pressSplitStandButton();
+      } else {
+        await printSplitCards(1);
+
+        setGameState("player", 1, gameData.deckSplit);
+        setGameState("comp");
+
+        gameData.splitBet1 *= 2;
+        splitBetBubble1.textContent = `Deck 1: $${gameData.splitBet1}`;
+        fadeIn(splitBetBubble1, 50);
+        await delay(1000);
+        pressSplitStandButton();
+      }
+    }
+
 
     async function printFirstSplitCards() {
       let splitContainer1 = document.querySelector(".split-cards-container1");
@@ -1789,7 +1828,7 @@ async function init() {
       let splitScore1 = document.querySelector(".split-cards-score1");
       let splitScore2 = document.querySelector(".split-cards-score2");
 
-      changeButtonFunction("off", "all")
+      changeButtonFunction("off", "all");
       if (gameData.roundEnded) {
         let count = 3;
 
